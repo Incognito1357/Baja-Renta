@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Términos y Condiciones — Baja Renta</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', sans-serif; background: #0a0f1e; color: #cbd5e1; line-height: 1.7; min-height: 100vh; }
+
+    .header { background: linear-gradient(135deg, #0d1f3c, #0a0f1e); border-bottom: 1px solid rgba(59,130,246,0.2); padding: 28px 24px 24px; text-align: center; position: sticky; top: 0; z-index: 10; backdrop-filter: blur(12px); }
+    .logo-wrap { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 6px; }
+    .logo-name { font-family: 'Dancing Script', cursive; font-size: 26px; color: white; text-shadow: 0 0 20px rgba(59,130,246,0.5); }
+    .header-title { color: white; font-size: 16px; font-weight: 700; margin-top: 4px; }
+    .header-sub { color: #64748b; font-size: 12px; margin-top: 2px; }
+    .back-btn { display: inline-flex; align-items: center; gap: 6px; color: #3b82f6; font-size: 13px; font-weight: 600; text-decoration: none; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.25); border-radius: 99px; padding: 5px 14px; margin-bottom: 12px; transition: all .2s; }
+    .back-btn:hover { background: rgba(59,130,246,0.2); }
+
+    .container { max-width: 700px; margin: 0 auto; padding: 36px 24px 80px; }
+
+    .meta { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); border-radius: 14px; padding: 14px 18px; margin-bottom: 32px; font-size: 13px; color: #64748b; }
+    .meta strong { color: #93c5fd; }
+
+    .section { margin-bottom: 28px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 22px; }
+    .art-num { display: inline-block; background: linear-gradient(135deg, #3b82f6, #6366f1); color: white; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 99px; margin-bottom: 10px; letter-spacing: 0.5px; }
+    .section h2 { color: white; font-size: 15px; font-weight: 700; margin-bottom: 12px; }
+    .section h3 { color: #93c5fd; font-size: 13px; font-weight: 700; margin: 14px 0 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .section p { font-size: 14px; color: #94a3b8; margin-bottom: 8px; }
+    .section p:last-child { margin-bottom: 0; }
+
+    ul { list-style: none; padding: 0; margin: 0; }
+    li { font-size: 14px; color: #94a3b8; padding: 5px 0 5px 20px; position: relative; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    li:last-child { border-bottom: none; }
+    li::before { content: "›"; position: absolute; left: 5px; color: #3b82f6; font-weight: 700; }
+
+    .box-green { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); border-radius: 10px; padding: 12px 16px; margin: 10px 0; }
+    .box-green li { color: #6ee7b7; } .box-green li::before { color: #10b981; }
+    .box-red { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 12px 16px; margin: 10px 0; }
+    .box-red li { color: #fca5a5; } .box-red li::before { color: #ef4444; }
+    .box-amber { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); border-radius: 10px; padding: 12px 16px; margin: 10px 0; }
+    .box-amber p { color: #fcd34d; font-size: 13px; margin: 0; }
+
+    .contact-card { background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(99,102,241,0.1)); border: 1px solid rgba(99,102,241,0.25); border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 32px; }
+    .contact-card h2 { color: white; font-size: 16px; font-weight: 700; margin-bottom: 14px; }
+    .contact-item { color: #93c5fd; font-size: 14px; margin-bottom: 6px; }
+    .contact-item a { color: #3b82f6; text-decoration: none; font-weight: 600; }
+
+    .rec-section { background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.2); border-radius: 16px; padding: 22px; margin-bottom: 28px; }
+    .rec-section h2 { color: #fcd34d; font-size: 15px; font-weight: 700; margin-bottom: 14px; }
+    .rec-section li { color: #fbbf24; } .rec-section li::before { color: #f59e0b; }
+
+    .footer { text-align: center; padding: 20px; color: #334155; font-size: 12px; border-top: 1px solid rgba(255,255,255,0.06); }
+    .footer strong { color: #475569; }
+    .tag { display: inline-block; background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.3); border-radius: 6px; padding: 2px 8px; font-size: 11px; color: #a5b4fc; margin: 2px; }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <a href="index.html" class="back-btn">← Regresar</a>
+  <div class="logo-wrap">
+    <svg width="32" height="21" viewBox="0 0 110 72" fill="none">
+      <path d="M10 18 C22 6,38 6,50 18 C62 30,78 30,100 18" stroke="#3b82f6" stroke-width="9" stroke-linecap="round" fill="none"/>
+      <path d="M10 36 C22 24,38 24,50 36 C62 48,78 48,100 36" stroke="#3b82f6" stroke-width="9" stroke-linecap="round" fill="none"/>
+      <path d="M10 54 C22 42,38 42,50 54 C62 66,78 66,100 54" stroke="#3b82f6" stroke-width="9" stroke-linecap="round" fill="none"/>
+    </svg>
+    <span class="logo-name">Baja Renta</span>
+  </div>
+  <div class="header-title">Términos y Condiciones de Uso</div>
+  <div class="header-sub">Arrendamiento Habitacional · Baja California · Mayo 2026</div>
+</header>
+
+<div class="container">
+
+  <div class="meta">
+    <strong>Plataforma de Renta de Casas, Departamentos y Estudios en Baja California</strong><br>
+    Arrendamiento Habitacional de Largo Plazo – 12 Meses · Última actualización: Mayo 2026<br><br>
+    Al acceder y utilizar esta plataforma web y/o aplicación móvil, el usuario acepta los presentes Términos y Condiciones, el Aviso de Privacidad y las políticas complementarias aplicables. La plataforma está destinada exclusivamente a la promoción y contratación de arrendamientos habitacionales de largo plazo, generalmente con duración mínima de <strong>12 meses</strong>, dentro del Estado de Baja California, México.
+  </div>
+
+  <!-- 1 -->
+  <div class="section">
+    <span class="art-num">ART. 1</span>
+    <h2>Definiciones</h2>
+    <ul>
+      <li><strong style="color:white">Plataforma:</strong> Sitio web y/o aplicación que conecta arrendadores y personas interesadas en rentar propiedades habitacionales.</li>
+      <li><strong style="color:white">Arrendador:</strong> Persona física o moral que publica un inmueble.</li>
+      <li><strong style="color:white">Arrendatario:</strong> Persona que solicita o celebra un contrato de arrendamiento.</li>
+      <li><strong style="color:white">Inmueble:</strong> Casa, departamento, estudio o propiedad destinada exclusivamente a uso habitacional.</li>
+      <li><strong style="color:white">Contrato de Arrendamiento:</strong> Acuerdo legal celebrado entre arrendador y arrendatario.</li>
+    </ul>
+  </div>
+
+  <!-- 2 -->
+  <div class="section">
+    <span class="art-num">ART. 2</span>
+    <h2>Objeto de la Plataforma</h2>
+    <p>La plataforma actúa únicamente como intermediario digital para:</p>
+    <div class="box-green">
+      <ul>
+        <li>Publicar propiedades</li>
+        <li>Facilitar contacto entre usuarios</li>
+        <li>Gestionar solicitudes de renta</li>
+        <li>Procesar pagos relacionados con membresías o servicios digitales</li>
+        <li>Facilitar herramientas de administración de arrendamientos</li>
+      </ul>
+    </div>
+    <p style="margin-top:10px">La plataforma <strong style="color:#f87171">NO:</strong></p>
+    <div class="box-red">
+      <ul>
+        <li>Es propietaria de los inmuebles publicados</li>
+        <li>Participa como parte del contrato de arrendamiento</li>
+        <li>Garantiza el cumplimiento contractual entre usuarios</li>
+        <li>Administra propiedades salvo contratación expresa de servicios adicionales</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="section">
+    <span class="art-num">ART. 3</span>
+    <h2>Uso Exclusivo para Arrendamiento Habitacional</h2>
+    <p>La plataforma está destinada únicamente para rentas habitacionales de largo plazo con contratos generalmente iguales o mayores a 12 meses.</p>
+    <p>Queda <strong style="color:#f87171">prohibido:</strong></p>
+    <div class="box-red">
+      <ul>
+        <li>Publicar propiedades para hospedaje temporal</li>
+        <li>Publicar inmuebles tipo hotel, motel o Airbnb</li>
+        <li>Utilizar propiedades para actividades comerciales ilícitas</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 4 -->
+  <div class="section">
+    <span class="art-num">ART. 4</span>
+    <h2>Registro de Usuarios</h2>
+    <p>Para utilizar la plataforma el usuario deberá:</p>
+    <div class="box-green"><ul>
+      <li>Ser mayor de 18 años</li>
+      <li>Tener capacidad legal para contratar</li>
+      <li>Proporcionar información verídica y actualizada</li>
+      <li>Aceptar verificaciones de identidad cuando sean requeridas</li>
+    </ul></div>
+    <p style="margin-top:10px">La plataforma podrá suspender cuentas por:</p>
+    <div class="box-red"><ul>
+      <li>Fraude</li>
+      <li>Suplantación de identidad</li>
+      <li>Información falsa</li>
+      <li>Incumplimiento de estos términos</li>
+    </ul></div>
+  </div>
+
+  <!-- 5 -->
+  <div class="section">
+    <span class="art-num">ART. 5</span>
+    <h2>Publicación de Inmuebles</h2>
+    <p>El arrendador declara:</p>
+    <div class="box-green"><ul>
+      <li>Ser propietario o tener autorización legal para rentar el inmueble</li>
+      <li>Que la propiedad es apta para uso habitacional</li>
+      <li>Que la información publicada es verdadera</li>
+    </ul></div>
+    <p style="margin-top:10px">Las publicaciones deberán incluir:</p>
+    <ul>
+      <li>Fotografías reales</li>
+      <li>Precio mensual actualizado</li>
+      <li>Depósito requerido</li>
+      <li>Condiciones básicas del contrato</li>
+    </ul>
+    <p style="margin-top:10px">La plataforma podrá eliminar publicaciones engañosas o fraudulentas.</p>
+  </div>
+
+  <!-- 6 -->
+  <div class="section">
+    <span class="art-num">ART. 6</span>
+    <h2>Pagos y Comisiones</h2>
+    <p>La plataforma podrá cobrar:</p>
+    <ul>
+      <li>Membresías</li>
+      <li>Publicaciones destacadas</li>
+      <li>Comisiones de intermediación</li>
+      <li>Servicios administrativos o legales</li>
+    </ul>
+    <div class="box-amber" style="margin-top:12px"><p>⚠️ Todos los cargos serán informados antes de efectuarse el pago. Los pagos podrán procesarse mediante terceros autorizados.</p></div>
+  </div>
+
+  <!-- 7 -->
+  <div class="section">
+    <span class="art-num">ART. 7</span>
+    <h2>Depósitos y Garantías</h2>
+
+    <h3>Régimen General</h3>
+    <p>En el esquema de autogestión, los depósitos en garantía acordados entre arrendador y arrendatario:</p>
+    <ul>
+      <li>No pertenecen a la plataforma</li>
+      <li>Son responsabilidad exclusiva de las partes contratantes</li>
+      <li>Deben ser pactados directamente entre propietario e inquilino</li>
+    </ul>
+    <p style="margin-top:10px">Bajo este régimen, la plataforma no será responsable por retención de depósitos, daños reclamados ni incumplimientos contractuales.</p>
+
+    <h3>Depósito en Garantía bajo Esquema de Gestión Integral</h3>
+    <div class="box-amber">
+      <p>Cuando el arrendador contrate el <strong>Servicio de Gestión Integral de Arrendamiento</strong> con BAJA RENTA, la plataforma podrá actuar como administradora temporal del depósito en garantía, bajo las siguientes condiciones:</p>
+    </div>
+    <ul>
+      <li>La administración del depósito en garantía por parte de BAJA RENTA requerirá la firma de un <strong>Contrato de Administración de Depósito en Garantía</strong> independiente, suscrito entre BAJA RENTA y el arrendador.</li>
+      <li>Dicho contrato establecerá los términos, plazos, condiciones de resguardo, devolución y retención del depósito, así como los mecanismos de resolución de controversias.</li>
+      <li>BAJA RENTA resguardará el depósito en una cuenta separada e identificada, sin mezclarlo con recursos propios de la empresa.</li>
+      <li>La devolución del depósito al arrendatario o su retención en favor del arrendador se realizará conforme a lo pactado en el contrato de arrendamiento y en el Contrato de Administración de Depósito en Garantía.</li>
+      <li>BAJA RENTA no podrá utilizar el depósito para fines distintos al resguardo y administración expresamente autorizados por las partes.</li>
+      <li>El monto del depósito administrado, las condiciones de su liberación y cualquier penalización aplicable serán determinados en la documentación adicional firmada por el propietario.</li>
+    </ul>
+    <div class="box-green">
+      <p><strong>Protección del arrendatario:</strong> En todo momento, el arrendatario tendrá derecho a solicitar información sobre el estado y resguardo de su depósito a través de los canales oficiales de BAJA RENTA: <a href="mailto:servicio@bajarenta.com" style="color:#10b981;">servicio@bajarenta.com</a></p>
+    </div>
+    <p style="margin-top:12px;font-size:13px;color:#64748b;">La administración del depósito en garantía por parte de BAJA RENTA únicamente procederá cuando exista un Contrato de Administración de Depósito en Garantía debidamente firmado por ambas partes. Sin dicha documentación, aplicará el Régimen General descrito anteriormente.</p>
+  </div>
+
+  <!-- 8 -->
+  <div class="section">
+    <span class="art-num">ART. 8</span>
+    <h2>Obligaciones del Arrendatario</h2>
+    <ul>
+      <li>Pagar renta puntualmente</li>
+      <li>Usar el inmueble exclusivamente para vivienda</li>
+      <li>Mantener el inmueble en condiciones adecuadas</li>
+      <li>Cumplir reglamentos de condominio o comunidad</li>
+      <li>No subarrendar sin autorización escrita</li>
+    </ul>
+  </div>
+
+  <!-- 9 -->
+  <div class="section">
+    <span class="art-num">ART. 9</span>
+    <h2>Obligaciones del Arrendador</h2>
+    <ul>
+      <li>Entregar el inmueble en condiciones habitables</li>
+      <li>Garantizar el uso pacífico del inmueble</li>
+      <li>Respetar el plazo contractual</li>
+      <li>Cumplir legislación aplicable en Baja California</li>
+    </ul>
+  </div>
+
+  <!-- 10 -->
+  <div class="section">
+    <span class="art-num">ART. 10</span>
+    <h2>Impuestos y Cargos Aplicables en Baja California</h2>
+
+    <h3>A) ISR — Impuesto Sobre la Renta</h3>
+    <p>Los ingresos obtenidos por arrendamiento deberán declararse ante el SAT conforme a la legislación fiscal mexicana. Cada arrendador será responsable de declarar ingresos, emitir facturas cuando corresponda y cumplir obligaciones fiscales aplicables.</p>
+
+    <h3>B) IVA — Impuesto al Valor Agregado</h3>
+    <p>El arrendamiento habitacional <strong style="color:#6ee7b7">SIN amueblar</strong> generalmente se encuentra exento de IVA cuando el inmueble se destina exclusivamente a casa habitación.</p>
+    <p>En arrendamientos <strong style="color:#fcd34d">amueblados</strong>, el SAT puede considerar aplicable IVA si incluye mobiliario significativo o servicios adicionales. Se recomienda asesoría fiscal profesional.</p>
+
+    <h3>C) Impuesto Sobre Hospedaje (ISH)</h3>
+    <p>Debido a que la plataforma NO opera hospedaje temporal ni servicios turísticos, normalmente <strong style="color:#6ee7b7">NO aplica</strong> el Impuesto Sobre Hospedaje del Estado de Baja California.</p>
+
+    <h3>D) Impuesto Predial</h3>
+    <p>El impuesto predial corresponde exclusivamente al propietario del inmueble y no será responsabilidad de la plataforma ni del arrendatario, salvo pacto contractual distinto.</p>
+  </div>
+
+  <!-- 11 -->
+  <div class="section">
+    <span class="art-num">ART. 11</span>
+    <h2>Contratos Digitales</h2>
+    <p>La plataforma podrá ofrecer firma electrónica, contratos digitales y validación documental. El usuario reconoce la validez jurídica de medios electrónicos conforme a legislación mexicana aplicable.</p>
+  </div>
+
+  <!-- 12 -->
+  <div class="section">
+    <span class="art-num">ART. 12</span>
+    <h2>Verificación de Identidad y Antifraude</h2>
+    <p>La plataforma podrá solicitar: INE/Pasaporte, comprobante de domicilio, RFC y comprobantes de ingresos. La información será tratada conforme al Aviso de Privacidad.</p>
+  </div>
+
+  <!-- 13 -->
+  <div class="section">
+    <span class="art-num">ART. 13</span>
+    <h2>Responsabilidad Limitada</h2>
+    <p>La plataforma no será responsable por incumplimientos de pago, daños al inmueble, problemas legales entre usuarios, información falsa proporcionada por terceros, ni decisiones tomadas por usuarios basadas en publicaciones.</p>
+  </div>
+
+  <!-- 14 -->
+  <div class="section">
+    <span class="art-num">ART. 14</span>
+    <h2>Propiedad Intelectual</h2>
+    <p>Todo el contenido de la plataforma — diseño, marca, código, base de datos, logotipos y software — está protegido por leyes mexicanas e internacionales de propiedad intelectual.</p>
+    <div style="margin-top:10px">
+      <span class="tag">Diseño</span><span class="tag">Marca</span><span class="tag">Código</span><span class="tag">Base de datos</span><span class="tag">Logotipos</span><span class="tag">Software</span>
+    </div>
+  </div>
+
+  <!-- 15 -->
+  <div class="section">
+    <span class="art-num">ART. 15</span>
+    <h2>Privacidad y Datos Personales</h2>
+    <p>El tratamiento de datos personales se realizará conforme a la Ley Federal de Protección de Datos Personales en Posesión de los Particulares y el Aviso de Privacidad de la plataforma.</p>
+  </div>
+
+  <!-- 15-A -->
+  <div class="section">
+    <span class="art-num">ART. 15-A</span>
+    <h2>Cancelación y Eliminación de Perfil</h2>
+
+    <h3>Solicitud de Eliminación de Cuenta</h3>
+    <p>Todo usuario registrado en la plataforma tiene derecho a solicitar la cancelación y eliminación de su cuenta y perfil en cualquier momento, sin necesidad de expresar causa.</p>
+
+    <div class="box-blue">
+      <p>Para ejercer este derecho, el usuario deberá enviar un correo electrónico a <strong><a href="mailto:servicio@bajarenta.com" style="color:#93c5fd;">servicio@bajarenta.com</a></strong> con el asunto <strong>"Solicitud de eliminación de cuenta"</strong>, indicando:</p>
+      <ul style="margin-top:8px">
+        <li>Nombre completo registrado en la plataforma.</li>
+        <li>Correo electrónico asociado a la cuenta.</li>
+        <li>Confirmación expresa de la solicitud de eliminación.</li>
+      </ul>
+    </div>
+
+    <h3>Plazo de Atención</h3>
+    <p>BAJA RENTA procesará y ejecutará la eliminación del perfil dentro de un plazo máximo de <strong>15 días hábiles</strong> contados a partir de la recepción de la solicitud debidamente completada.</p>
+
+    <h3>Efectos de la Eliminación</h3>
+    <div class="box-amber">
+      <ul>
+        <li>Se eliminarán los datos del perfil del usuario de la plataforma.</li>
+        <li>Las publicaciones de propiedades activas serán dadas de baja.</li>
+        <li>Las solicitudes de renta en proceso podrán verse afectadas.</li>
+        <li>Los datos podrán conservarse durante el plazo legalmente requerido para el cumplimiento de obligaciones fiscales, contractuales o legales pendientes.</li>
+      </ul>
+    </div>
+
+    <h3>Restricciones</h3>
+    <p>La eliminación de cuenta no procederá cuando:</p>
+    <ul>
+      <li>Exista un contrato de arrendamiento vigente que involucre al usuario.</li>
+      <li>Haya obligaciones económicas pendientes con BAJA RENTA o con la contraparte.</li>
+      <li>La cuenta esté sujeta a un proceso de investigación por fraude u otra irregularidad.</li>
+    </ul>
+    <p style="margin-top:10px;font-size:13px;color:#64748b;">En estos casos, BAJA RENTA notificará al usuario los motivos por los cuales no es posible proceder con la eliminación y el plazo estimado para su resolución.</p>
+  </div>
+
+  <!-- 16 -->
+  <div class="section">
+    <span class="art-num">ART. 16</span>
+    <h2>Modificaciones</h2>
+    <p>La plataforma podrá modificar estos términos en cualquier momento. Las modificaciones entrarán en vigor al publicarse en el sitio web.</p>
+  </div>
+
+  <!-- 17 -->
+  <div class="section">
+    <span class="art-num">ART. 17</span>
+    <h2>Legislación y Jurisdicción</h2>
+    <p>Los presentes Términos y Condiciones se regirán e interpretarán conforme a las leyes vigentes de los <strong>Estados Unidos Mexicanos</strong>, incluyendo de manera enunciativa mas no limitativa:</p>
+    <ul>
+      <li>El Código Civil Federal y el Código Civil del Estado de Baja California, en materia de arrendamiento habitacional.</li>
+      <li>La Ley Federal de Protección al Consumidor (PROFECO), en lo que resulte aplicable a la relación entre la plataforma y sus usuarios.</li>
+      <li>La Ley Federal de Protección de Datos Personales en Posesión de Particulares (LFPDPPP), en materia de privacidad y tratamiento de datos.</li>
+      <li>El Código de Comercio y la Ley de Firma Electrónica Avanzada, en lo relativo a la validez de actos jurídicos celebrados por medios digitales.</li>
+      <li>Demás disposiciones federales y estatales que resulten aplicables en función de la naturaleza, lugar de ejecución y partes involucradas en cada operación.</li>
+    </ul>
+    <p style="margin-top:12px">Para la resolución de cualquier controversia derivada del uso de la plataforma o de las operaciones realizadas a través de ella, las partes acuerdan someterse a la jurisdicción y competencia de los <strong>tribunales competentes que resulten aplicables conforme a la naturaleza de la controversia y al domicilio de las partes</strong>, en los siguientes términos:</p>
+    <div class="box-blue">
+      <ul>
+        <li><strong>Controversias entre usuarios y la plataforma:</strong> se someterán preferentemente a los tribunales competentes del Estado de Baja California, sin perjuicio de la jurisdicción federal cuando así lo determine la naturaleza del asunto.</li>
+        <li><strong>Controversias entre arrendador y arrendatario:</strong> se resolverán ante los tribunales del lugar en que se encuentre ubicado el inmueble objeto del arrendamiento, conforme al Código Civil aplicable.</li>
+        <li><strong>Controversias en materia de protección al consumidor:</strong> podrán ventilarse ante la Procuraduría Federal del Consumidor (PROFECO) o ante los tribunales federales competentes.</li>
+        <li><strong>Controversias en materia de datos personales:</strong> se someterán al Instituto Nacional de Transparencia, Acceso a la Información y Protección de Datos Personales (INAI) o a los tribunales competentes en la materia.</li>
+      </ul>
+    </div>
+    <p style="margin-top:12px;font-size:13px;color:#94a3b8;">Las partes renuncian expresamente a cualquier otro fuero o jurisdicción que pudiera corresponderles en razón de sus domicilios presentes o futuros, salvo en los casos en que la ley expresamente determine la competencia de un tribunal específico o cuando las partes acuerden por escrito someterse a una jurisdicción distinta.</p>
+  </div>
+
+  <!-- Servicio de Gestión Integral -->
+  <div class="section">
+    <span class="art-num">SERVICIO OPCIONAL</span>
+    <h2>Servicio de Gestión Integral de Arrendamiento</h2>
+    <h3>Servicio Opcional para Arrendadores</h3>
+    <p>BAJA RENTA podrá ofrecer, a solicitud expresa del arrendador, un servicio integral de administración y gestión de inmuebles destinados a arrendamiento habitacional de largo plazo.</p>
+    <p>Dicho servicio podrá incluir, entre otros:</p>
+    <div class="box-green">
+      <ul>
+        <li>Publicación y promoción del inmueble.</li>
+        <li>Atención de prospectos.</li>
+        <li>Programación de visitas.</li>
+        <li>Validación de identidad de interesados.</li>
+        <li>Revisión de documentación.</li>
+        <li>Verificación de referencias.</li>
+        <li>Elaboración de contratos de arrendamiento.</li>
+        <li>Coordinación de firma de documentos.</li>
+        <li>Entrega y recepción del inmueble.</li>
+        <li>Seguimiento administrativo durante la vigencia del contrato.</li>
+        <li>Gestión de cobranza de rentas cuando así se acuerde.</li>
+      </ul>
+    </div>
+
+    <h3>Honorarios por Gestión Integral</h3>
+    <p>Como contraprestación por los servicios prestados, BAJA RENTA cobrará al arrendador honorarios equivalentes a una (1) mensualidad de renta del inmueble administrado.</p>
+    <p>Dichos honorarios serán considerados una comisión de intermediación y gestión inmobiliaria independiente de cualquier depósito en garantía, renta mensual o pago realizado por el arrendatario.</p>
+    <p>Los honorarios serán exigibles una vez que:</p>
+    <div class="box-amber">
+      <p>a) El arrendador acepte formalmente a un candidato presentado por BAJA RENTA; y</p>
+      <p style="margin-top:6px">b) Se celebre un contrato de arrendamiento derivado de la gestión realizada por BAJA RENTA.</p>
+    </div>
+    <p>Salvo pacto distinto por escrito, los honorarios deberán cubrirse dentro de los cinco (5) días hábiles siguientes a la firma del contrato de arrendamiento.</p>
+
+    <h3>Contrato Exclusivo de Gestión</h3>
+    <p>La contratación del servicio integral de administración requerirá la firma de un Contrato de Gestión Inmobiliaria Exclusiva independiente de los presentes Términos y Condiciones.</p>
+    <p>Mediante dicho contrato, el arrendador podrá otorgar a BAJA RENTA facultades limitadas para promover, comercializar y gestionar el inmueble durante el plazo de vigencia acordado.</p>
+    <p>Las obligaciones, alcances, exclusividad, duración, terminación anticipada, penalizaciones y responsabilidades de las partes serán reguladas específicamente en dicho contrato.</p>
+
+    <h3>Exclusividad</h3>
+    <p>Cuando el arrendador contrate el servicio bajo modalidad exclusiva, se compromete a no promover, comercializar ni arrendar el inmueble por cuenta propia o mediante terceros durante el plazo de exclusividad establecido en el contrato correspondiente.</p>
+    <p>En caso de incumplimiento, BAJA RENTA podrá exigir el pago de los honorarios pactados y las penalizaciones previstas en el Contrato de Gestión Inmobiliaria Exclusiva.</p>
+
+    <h3>Naturaleza del Servicio</h3>
+    <p>BAJA RENTA actúa exclusivamente como prestador de servicios de intermediación y administración inmobiliaria, sin adquirir derechos de propiedad, posesión o usufructo sobre los inmuebles administrados.</p>
+  </div>
+
+  <!-- Cláusula de Protección de Comisión -->
+  <div class="section">
+    <span class="art-num">PROTECCIÓN DE CARTERA</span>
+    <h2>Cláusula de Protección de Comisión y Protección de Cartera</h2>
+    <p>El arrendador reconoce que todos los prospectos, candidatos, arrendatarios potenciales o contactos presentados por BAJA RENTA son resultado de las actividades de promoción, publicidad, captación, filtrado, validación y gestión realizadas por la plataforma.</p>
+    <p>En consecuencia, si el arrendador celebra directa o indirectamente un contrato de arrendamiento, promesa de arrendamiento, convenio de ocupación, cesión de derechos de uso o cualquier acuerdo equivalente con un prospecto presentado por BAJA RENTA, dentro de los doce (12) meses posteriores a la fecha de presentación del prospecto, los honorarios de intermediación y gestión establecidos en el presente instrumento serán plenamente exigibles.</p>
+    <p>Lo anterior será aplicable aun cuando:</p>
+    <div class="box-red">
+      <ul>
+        <li>La operación se formalice fuera de la plataforma.</li>
+        <li>La negociación se lleve a cabo directamente entre las partes.</li>
+        <li>El arrendador retire la publicación del inmueble.</li>
+        <li>La operación se formalice mediante un tercero relacionado con el arrendador o con el prospecto originalmente presentado.</li>
+        <li>El contrato sea firmado después de haber concluido la vigencia de la publicación o del servicio contratado.</li>
+      </ul>
+    </div>
+    <p>Para efectos probatorios, BAJA RENTA podrá acreditar la presentación del prospecto mediante registros electrónicos, mensajes, correos electrónicos, solicitudes generadas en la plataforma, historial de visitas, comunicaciones realizadas a través del sistema o cualquier otro medio digital razonablemente verificable.</p>
+    <h3>Penalizaciones por Incumplimiento</h3>
+    <p>En caso de incumplimiento de esta cláusula, el arrendador deberá pagar inmediatamente a BAJA RENTA:</p>
+    <div class="box-amber">
+      <p>1. Los honorarios equivalentes a una (1) mensualidad de renta pactada.</p>
+      <p style="margin-top:6px">2. Una penalización convencional equivalente al cincuenta por ciento (50%) adicional de dichos honorarios.</p>
+      <p style="margin-top:6px">3. Los gastos razonables de cobranza judicial o extrajudicial que resulten necesarios para la recuperación de las cantidades adeudadas.</p>
+    </div>
+    <p>La presente cláusula tiene por finalidad proteger la inversión comercial, publicitaria y operativa realizada por BAJA RENTA para la captación y colocación de arrendatarios, sin constituir una restricción indebida a la libertad contractual de las partes.</p>
+  </div>
+
+  <!-- 18 Contacto -->
+  <div class="contact-card">
+    <h2>📬 ART. 18 — Contacto</h2>
+    <div class="contact-item">Correo: <a href="mailto:servicio@bajarenta.com">servicio@bajarenta.com</a></div>
+    <div class="contact-item">Sitio web: <a href="http://www.bajarenta.com" target="_blank">www.bajarenta.com</a></div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <strong>Baja Renta</strong> · Términos y Condiciones · Mayo 2026<br>
+  Plataforma de Arrendamiento Habitacional · Baja California, México
+</footer>
+
+</body>
+</html>

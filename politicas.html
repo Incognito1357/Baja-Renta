@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Políticas Complementarias — Baja Renta</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: "DM Sans", sans-serif; background: #0a0f1e; color: #cbd5e1; line-height: 1.7; min-height: 100vh; }
+
+    .header { background: linear-gradient(135deg, #0d1f3c, #0a0f1e); border-bottom: 1px solid rgba(59,130,246,0.2); padding: 28px 24px 24px; text-align: center; position: sticky; top: 0; z-index: 10; backdrop-filter: blur(12px); }
+    .logo-wrap { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 6px; }
+    .logo-name { font-family: "Dancing Script", cursive; font-size: 26px; color: white; text-shadow: 0 0 20px rgba(59,130,246,0.5); }
+    .header-title { color: white; font-size: 16px; font-weight: 700; margin-top: 4px; }
+    .header-sub { color: #64748b; font-size: 12px; margin-top: 2px; }
+    .back-btn { display: inline-flex; align-items: center; gap: 6px; color: #3b82f6; font-size: 13px; font-weight: 600; text-decoration: none; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.25); border-radius: 99px; padding: 5px 14px; margin-bottom: 12px; transition: all .2s; }
+    .back-btn:hover { background: rgba(59,130,246,0.2); }
+
+    .container { max-width: 700px; margin: 0 auto; padding: 36px 24px 80px; }
+
+    .meta { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); border-radius: 14px; padding: 14px 18px; margin-bottom: 32px; font-size: 13px; color: #64748b; }
+    .meta strong { color: #93c5fd; }
+
+    .toc { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px 24px; margin-bottom: 32px; }
+    .toc h3 { color: white; font-size: 13px; font-weight: 700; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+    .toc a { display: block; color: #3b82f6; font-size: 13px; text-decoration: none; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.04); transition: color .2s; }
+    .toc a:last-child { border-bottom: none; }
+    .toc a:hover { color: #93c5fd; }
+
+    .section { margin-bottom: 28px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 22px; scroll-margin-top: 100px; }
+    .art-num { display: inline-block; background: linear-gradient(135deg, #3b82f6, #6366f1); color: white; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 99px; margin-bottom: 10px; letter-spacing: 0.5px; }
+    .section h2 { color: white; font-size: 15px; font-weight: 700; margin-bottom: 12px; }
+    .section h3 { color: #93c5fd; font-size: 13px; font-weight: 700; margin: 14px 0 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .section p { font-size: 14px; color: #94a3b8; margin-bottom: 8px; }
+    .section p:last-child { margin-bottom: 0; }
+
+    ul { list-style: none; padding: 0; margin: 0; }
+    li { font-size: 14px; color: #94a3b8; padding: 5px 0 5px 20px; position: relative; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    li:last-child { border-bottom: none; }
+    li::before { content: "›"; position: absolute; left: 5px; color: #3b82f6; font-weight: 700; }
+
+    .box-green { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); border-radius: 10px; padding: 12px 16px; margin: 10px 0; }
+    .box-green li { color: #6ee7b7; } .box-green li::before { color: #10b981; }
+    .box-red { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 12px 16px; margin: 10px 0; }
+    .box-red li { color: #fca5a5; } .box-red li::before { color: #ef4444; }
+    .box-amber { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); border-radius: 10px; padding: 12px 16px; margin: 10px 0; }
+    .box-amber p, .box-amber li { color: #fcd34d; font-size: 13px; margin: 0; }
+    .box-amber li::before { color: #f59e0b; }
+    .box-blue { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); border-radius: 10px; padding: 12px 16px; margin: 10px 0; }
+    .box-blue li { color: #93c5fd; } .box-blue li::before { color: #3b82f6; }
+
+    .contact-card { background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(99,102,241,0.1)); border: 1px solid rgba(99,102,241,0.25); border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 32px; }
+    .contact-card h2 { color: white; font-size: 16px; font-weight: 700; margin-bottom: 14px; }
+    .contact-item { color: #93c5fd; font-size: 14px; margin-bottom: 6px; }
+    .contact-item a { color: #3b82f6; text-decoration: none; font-weight: 600; }
+
+    .footer { text-align: center; padding: 28px 24px; border-top: 1px solid rgba(255,255,255,0.06); color: #334155; font-size: 12px; margin-top: 20px; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <a href="index.html" class="back-btn">← Regresar a Baja Renta</a>
+  <div class="logo-wrap">
+    <svg width="28" height="18" viewBox="0 0 110 72" fill="none"><path d="M10 18 C22 6,38 6,50 18 C62 30,78 30,100 18" stroke="#3b82f6" stroke-width="9" stroke-linecap="round"/><path d="M10 36 C22 24,38 24,50 36 C62 48,78 48,100 36" stroke="#3b82f6" stroke-width="9" stroke-linecap="round"/><path d="M10 54 C22 42,38 42,50 54 C62 66,78 66,100 54" stroke="#3b82f6" stroke-width="9" stroke-linecap="round"/></svg>
+    <span class="logo-name">Baja Renta</span>
+  </div>
+  <div class="header-title">Políticas Complementarias</div>
+  <div class="header-sub">Vigentes a partir de junio 2026</div>
+</div>
+
+<div class="container">
+
+  <div class="meta">
+    <strong>Aviso:</strong> Las siguientes políticas forman parte integral de los Términos y Condiciones y del Aviso de Privacidad de Baja Renta. Al utilizar la plataforma, el usuario declara haberlas leído, comprendido y aceptado.
+  </div>
+
+  <!-- Índice -->
+  <div class="toc">
+    <h3>📋 Contenido</h3>
+    <a href="#cookies">1. Política de Cookies</a>
+    <a href="#antifraude">2. Política Antifraude</a>
+    <a href="#contrato">3. Contrato Digital de Arrendamiento</a>
+    <a href="#verificacion">4. Política de Verificación de Usuarios</a>
+    <a href="#reembolsos">5. Política de Reembolsos</a>
+    <a href="#firma">6. Consentimiento de Firma Electrónica</a>
+    <a href="#identidad">7. Sistema de Validación de Identidad</a>
+    <a href="#lavado">8. Política de Prevención de Lavado de Dinero</a>
+    <a href="#limitacion">9. Limitación de Responsabilidad por Validación</a>
+    <a href="#deposito">10-A. Administración de Depósito en Garantía</a>
+    <a href="#aceptacion">10. Aceptación de las Políticas</a>
+  </div>
+
+  <!-- 1. Cookies -->
+  <div class="section" id="cookies">
+    <span class="art-num">POLÍTICA 1</span>
+    <h2>🍪 Política de Cookies</h2>
+    <p>Las cookies son archivos que se almacenan en el dispositivo del usuario para mejorar la experiencia de navegación y el funcionamiento de la plataforma.</p>
+
+    <h3>Cookies Esenciales</h3>
+    <div class="box-green">
+      <ul>
+        <li>Inicio de sesión.</li>
+        <li>Seguridad de la cuenta.</li>
+        <li>Funcionamiento básico del sitio.</li>
+      </ul>
+    </div>
+
+    <h3>Cookies Analíticas</h3>
+    <div class="box-blue">
+      <ul>
+        <li>Medir tráfico.</li>
+        <li>Analizar comportamiento de navegación.</li>
+        <li>Mejorar funcionalidades.</li>
+      </ul>
+    </div>
+
+    <h3>Cookies de Personalización</h3>
+    <div class="box-blue">
+      <ul>
+        <li>Guardar preferencias.</li>
+        <li>Mostrar contenido relevante.</li>
+      </ul>
+    </div>
+
+    <h3>Cookies Publicitarias</h3>
+    <p>Pueden utilizarse para mostrar promociones relacionadas con servicios inmobiliarios.</p>
+    <div class="box-amber">
+      <p>El usuario puede configurar o desactivar cookies desde su navegador en cualquier momento.</p>
+    </div>
+  </div>
+
+  <!-- 2. Antifraude -->
+  <div class="section" id="antifraude">
+    <span class="art-num">POLÍTICA 2</span>
+    <h2>🚫 Política Antifraude</h2>
+    <p>BAJA RENTA mantiene una política de tolerancia cero contra:</p>
+    <div class="box-red">
+      <ul>
+        <li>Robo de identidad.</li>
+        <li>Documentación falsa.</li>
+        <li>Suplantación de propietarios.</li>
+        <li>Publicaciones engañosas.</li>
+        <li>Manipulación de pagos.</li>
+        <li>Lavado de dinero.</li>
+        <li>Fraudes inmobiliarios.</li>
+      </ul>
+    </div>
+    <h3>Facultades de la Plataforma</h3>
+    <p>La plataforma podrá:</p>
+    <div class="box-amber">
+      <ul>
+        <li>Solicitar documentación adicional.</li>
+        <li>Suspender publicaciones.</li>
+        <li>Bloquear cuentas.</li>
+        <li>Retener temporalmente operaciones sospechosas.</li>
+        <li>Reportar actividades ilícitas a autoridades competentes.</li>
+      </ul>
+    </div>
+    <p>Toda actividad sospechosa podrá ser investigada sin previo aviso.</p>
+  </div>
+
+  <!-- 3. Contrato Digital -->
+  <div class="section" id="contrato">
+    <span class="art-num">POLÍTICA 3</span>
+    <h2>📝 Contrato Digital de Arrendamiento</h2>
+    <p>BAJA RENTA podrá ofrecer un sistema de generación de contratos digitales.</p>
+    <h3>Los Usuarios Aceptan Que</h3>
+    <div class="box-green">
+      <ul>
+        <li>Los contratos generados electrónicamente tienen validez legal.</li>
+        <li>La información capturada será considerada declaración bajo protesta de decir verdad.</li>
+        <li>La firma electrónica tendrá efectos legales equivalentes a una firma autógrafa cuando la legislación mexicana lo permita.</li>
+      </ul>
+    </div>
+    <p>La plataforma actúa únicamente como proveedor tecnológico y no como parte contractual del arrendamiento.</p>
+  </div>
+
+  <!-- 4. Verificación -->
+  <div class="section" id="verificacion">
+    <span class="art-num">POLÍTICA 4</span>
+    <h2>✅ Política de Verificación de Usuarios</h2>
+    <p>Para proteger a la comunidad, BAJA RENTA podrá verificar:</p>
+    <h3>Arrendadores</h3>
+    <div class="box-blue">
+      <ul>
+        <li>Identificación oficial.</li>
+        <li>Comprobante de domicilio.</li>
+        <li>Documentos de propiedad.</li>
+        <li>Poderes legales cuando aplique.</li>
+      </ul>
+    </div>
+    <h3>Arrendatarios</h3>
+    <div class="box-blue">
+      <ul>
+        <li>Identificación oficial.</li>
+        <li>Comprobantes de ingresos.</li>
+        <li>Referencias personales o laborales.</li>
+        <li>Historial de renta cuando sea aplicable.</li>
+      </ul>
+    </div>
+    <div class="box-amber">
+      <p>La verificación no constituye garantía absoluta sobre la identidad o solvencia de los usuarios.</p>
+    </div>
+  </div>
+
+  <!-- 5. Reembolsos -->
+  <div class="section" id="reembolsos">
+    <span class="art-num">POLÍTICA 5</span>
+    <h2>💳 Política de Reembolsos</h2>
+    <p>Los pagos realizados por servicios digitales podrán ser reembolsados únicamente cuando:</p>
+    <div class="box-green">
+      <ul>
+        <li>Exista un cobro duplicado.</li>
+        <li>Se detecte un error atribuible a la plataforma.</li>
+        <li>El servicio contratado no haya sido prestado.</li>
+      </ul>
+    </div>
+    <h3>No Serán Reembolsables</h3>
+    <div class="box-red">
+      <ul>
+        <li>Publicaciones ya activadas.</li>
+        <li>Servicios promocionales ya ejecutados.</li>
+        <li>Comisiones procesadas por terceros.</li>
+        <li>Membresías parcialmente utilizadas.</li>
+      </ul>
+    </div>
+    <p>Toda solicitud deberá presentarse dentro de los <strong style="color:white">15 días naturales</strong> posteriores al pago. BAJA RENTA podrá resolver cada caso individualmente.</p>
+  </div>
+
+  <!-- 6. Firma Electrónica -->
+  <div class="section" id="firma">
+    <span class="art-num">POLÍTICA 6</span>
+    <h2>✍️ Consentimiento de Firma Electrónica</h2>
+    <p>Al utilizar BAJA RENTA, el usuario acepta:</p>
+    <div class="box-green">
+      <ul>
+        <li>El uso de medios electrónicos.</li>
+        <li>La celebración de actos jurídicos digitales.</li>
+        <li>La utilización de firmas electrónicas.</li>
+        <li>La conservación electrónica de documentos.</li>
+      </ul>
+    </div>
+    <h3>Mecanismos de Autenticación</h3>
+    <p>El usuario reconoce que los siguientes elementos podrán utilizarse como mecanismos de autenticación electrónica:</p>
+    <div class="box-blue">
+      <ul>
+        <li>Su correo electrónico registrado.</li>
+        <li>Su cuenta en la plataforma.</li>
+        <li>Su autenticación mediante contraseña.</li>
+        <li>Códigos de verificación enviados por SMS o correo.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 7. Validación de Identidad -->
+  <div class="section" id="identidad">
+    <span class="art-num">POLÍTICA 7</span>
+    <h2>🪪 Sistema de Validación de Identidad</h2>
+    <p>Con el fin de proteger a propietarios y arrendatarios, BAJA RENTA podrá implementar procesos de validación que incluyan:</p>
+    <div class="box-blue">
+      <ul>
+        <li>Validación de documentos oficiales de identidad.</li>
+        <li>Validación de identificación oficial.</li>
+        <li>Confirmación de correo electrónico.</li>
+        <li>Confirmación telefónica.</li>
+        <li>Verificación documental.</li>
+        <li>Cruces de información pública legalmente permitidos.</li>
+      </ul>
+    </div>
+    <div class="box-amber">
+      <p>La negativa a completar procesos de validación podrá limitar el acceso a determinadas funciones de la plataforma.</p>
+    </div>
+  </div>
+
+  <!-- 8. Lavado de Dinero -->
+  <div class="section" id="lavado">
+    <span class="art-num">POLÍTICA 8</span>
+    <h2>🔒 Política de Prevención de Lavado de Dinero</h2>
+    <p>BAJA RENTA prohíbe el uso de la plataforma para actividades relacionadas con:</p>
+    <div class="box-red">
+      <ul>
+        <li>Lavado de dinero.</li>
+        <li>Financiamiento al terrorismo.</li>
+        <li>Operaciones con recursos de procedencia ilícita.</li>
+        <li>Fraude financiero.</li>
+      </ul>
+    </div>
+    <h3>Declaraciones del Usuario</h3>
+    <div class="box-green">
+      <ul>
+        <li>Los recursos utilizados provienen de actividades lícitas.</li>
+        <li>La información proporcionada es verdadera.</li>
+        <li>No actúan en nombre de terceros no identificados.</li>
+      </ul>
+    </div>
+    <h3>Facultades de la Plataforma</h3>
+    <div class="box-amber">
+      <ul>
+        <li>Solicitar información adicional sobre el origen de recursos.</li>
+        <li>Requerir documentación complementaria.</li>
+        <li>Suspender operaciones sospechosas.</li>
+        <li>Cancelar cuentas.</li>
+        <li>Colaborar con autoridades competentes cuando exista obligación legal.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 9. Limitación de Responsabilidad -->
+  <div class="section" id="limitacion">
+    <span class="art-num">POLÍTICA 9</span>
+    <h2>⚖️ Limitación de Responsabilidad por Validación</h2>
+    <p>La verificación de identidad realizada por BAJA RENTA:</p>
+    <div class="box-red">
+      <ul>
+        <li>No constituye una certificación oficial.</li>
+        <li>No garantiza solvencia económica.</li>
+        <li>No garantiza cumplimiento contractual.</li>
+        <li>No sustituye la debida diligencia que cada usuario debe realizar antes de celebrar un contrato.</li>
+      </ul>
+    </div>
+    <p>Cada usuario es responsable de evaluar los riesgos inherentes a cualquier operación de arrendamiento.</p>
+  </div>
+
+  <!-- 10-A. Administración de Depósito -->
+  <div class="section" id="deposito">
+    <span class="art-num">POLÍTICA 10-A</span>
+    <h2>🏦 Administración de Depósito en Garantía</h2>
+    <p>Bajo el esquema de <strong>Gestión Integral de Arrendamiento</strong>, BAJA RENTA podrá administrar el depósito en garantía del arrendatario, exclusivamente cuando exista documentación adicional firmada para tal efecto.</p>
+
+    <h3>Condiciones de Aplicación</h3>
+    <div class="box-blue">
+      <ul>
+        <li>Requiere la firma de un <strong>Contrato de Administración de Depósito en Garantía</strong> entre BAJA RENTA y el arrendador.</li>
+        <li>Solo aplica bajo el esquema de Gestión Integral — no en autogestión.</li>
+        <li>El monto, plazo y condiciones de devolución serán pactados en dicho contrato.</li>
+      </ul>
+    </div>
+
+    <h3>Obligaciones de BAJA RENTA como Administradora</h3>
+    <div class="box-green">
+      <ul>
+        <li>Resguardar el depósito en cuenta separada e identificada.</li>
+        <li>No mezclar el depósito con recursos propios de la empresa.</li>
+        <li>No utilizar el depósito para fines distintos al resguardo autorizado.</li>
+        <li>Proporcionar información sobre el estado del depósito a las partes cuando sea solicitado.</li>
+        <li>Liberar o retener el depósito conforme a lo pactado contractualmente.</li>
+      </ul>
+    </div>
+
+    <h3>Derechos del Arrendatario</h3>
+    <p>El arrendatario podrá en todo momento:</p>
+    <div class="box-amber">
+      <ul>
+        <li>Solicitar comprobante de resguardo del depósito.</li>
+        <li>Conocer las condiciones de devolución aplicables.</li>
+        <li>Presentar reclamaciones ante BAJA RENTA en caso de controversia.</li>
+      </ul>
+    </div>
+    <p style="margin-top:10px">Contacto para consultas sobre depósitos: <a href="mailto:servicio@bajarenta.com" style="color:#3b82f6;font-weight:700;">servicio@bajarenta.com</a></p>
+  </div>
+
+  <!-- 10. Aceptación -->
+  <div class="section" id="aceptacion">
+    <span class="art-num">POLÍTICA 10</span>
+    <h2>📋 Aceptación de las Políticas</h2>
+    <p>Al registrarse, navegar o utilizar la plataforma, el usuario declara haber leído, comprendido y aceptado:</p>
+    <div class="box-green">
+      <ul>
+        <li>Términos y Condiciones.</li>
+        <li>Aviso de Privacidad.</li>
+        <li>Política de Cookies.</li>
+        <li>Política Antifraude.</li>
+        <li>Política de Verificación.</li>
+        <li>Política de Reembolsos.</li>
+        <li>Consentimiento de Firma Electrónica.</li>
+        <li>Política de Prevención de Lavado de Dinero.</li>
+      </ul>
+    </div>
+    <div class="box-amber">
+      <p>Estas políticas constituyen un acuerdo legal vinculante entre el usuario y Baja Renta.</p>
+    </div>
+  </div>
+
+  <!-- Contacto -->
+  <div class="contact-card">
+    <h2>📬 Contacto</h2>
+    <div class="contact-item">Correo: <a href="mailto:servicio@bajarenta.com">servicio@bajarenta.com</a></div>
+    <div class="contact-item">Sitio web: <a href="http://www.bajarenta.com" target="_blank">www.bajarenta.com</a></div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <strong>Baja Renta</strong> · Políticas Complementarias · Junio 2026<br>
+  Plataforma de Arrendamiento Habitacional · Baja California, México
+</footer>
+
+</body>
+</html>

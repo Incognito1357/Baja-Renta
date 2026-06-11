@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aviso de Privacidad — Baja Renta</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', sans-serif; background: #0a0f1e; color: #cbd5e1; line-height: 1.7; min-height: 100vh; }
+
+    .header { background: linear-gradient(135deg, #0d1f3c, #0a0f1e); border-bottom: 1px solid rgba(16,185,129,0.2); padding: 28px 24px 24px; text-align: center; position: sticky; top: 0; z-index: 10; backdrop-filter: blur(12px); }
+    .logo-wrap { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 6px; }
+    .logo-name { font-family: 'Dancing Script', cursive; font-size: 26px; color: white; text-shadow: 0 0 20px rgba(16,185,129,0.5); }
+    .header-title { color: white; font-size: 16px; font-weight: 700; margin-top: 4px; }
+    .header-sub { color: #64748b; font-size: 12px; margin-top: 2px; }
+    .back-btn { display: inline-flex; align-items: center; gap: 6px; color: #10b981; font-size: 13px; font-weight: 600; text-decoration: none; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.25); border-radius: 99px; padding: 5px 14px; margin-bottom: 12px; transition: all .2s; }
+    .back-btn:hover { background: rgba(16,185,129,0.2); }
+
+    .container { max-width: 700px; margin: 0 auto; padding: 36px 24px 80px; }
+
+    .meta { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); border-radius: 14px; padding: 14px 18px; margin-bottom: 32px; font-size: 13px; color: #64748b; }
+    .meta strong { color: #6ee7b7; }
+
+    .section { margin-bottom: 28px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 22px; }
+    .art-num { display: inline-block; background: linear-gradient(135deg, #10b981, #059669); color: white; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 99px; margin-bottom: 10px; letter-spacing: 0.5px; }
+    .section h2 { color: white; font-size: 15px; font-weight: 700; margin-bottom: 12px; }
+    .section h3 { color: #6ee7b7; font-size: 13px; font-weight: 700; margin: 14px 0 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .section p { font-size: 14px; color: #94a3b8; margin-bottom: 8px; }
+    .section p:last-child { margin-bottom: 0; }
+
+    ul { list-style: none; padding: 0; margin: 0; }
+    li { font-size: 14px; color: #94a3b8; padding: 5px 0 5px 20px; position: relative; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    li:last-child { border-bottom: none; }
+    li::before { content: "›"; position: absolute; left: 5px; color: #10b981; font-weight: 700; }
+
+    .box-green { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); border-radius: 10px; padding: 12px 16px; margin: 10px 0; }
+    .box-green li { color: #6ee7b7; } .box-green li::before { color: #10b981; }
+    .box-red { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 12px 16px; margin: 10px 0; }
+    .box-red li { color: #fca5a5; } .box-red li::before { color: #ef4444; }
+    .box-amber { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); border-radius: 10px; padding: 12px 16px; margin: 10px 0; }
+    .box-amber p { color: #fcd34d; font-size: 13px; margin: 0; }
+    .box-blue { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); border-radius: 10px; padding: 12px 16px; margin: 10px 0; }
+    .box-blue li { color: #93c5fd; } .box-blue li::before { color: #3b82f6; }
+
+    .arco-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0; }
+    .arco-card { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); border-radius: 12px; padding: 14px; text-align: center; }
+    .arco-icon { font-size: 22px; margin-bottom: 6px; }
+    .arco-label { color: #6ee7b7; font-size: 13px; font-weight: 700; }
+    .arco-desc { color: #64748b; font-size: 11px; margin-top: 2px; }
+
+    .contact-card { background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(5,150,105,0.1)); border: 1px solid rgba(16,185,129,0.25); border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 28px; }
+    .contact-card h2 { color: white; font-size: 15px; font-weight: 700; margin-bottom: 14px; }
+    .contact-item { color: #6ee7b7; font-size: 14px; margin-bottom: 6px; }
+    .contact-item a { color: #10b981; text-decoration: none; font-weight: 600; }
+    .contact-item a:hover { text-decoration: underline; }
+
+    .tag { display: inline-block; background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); border-radius: 6px; padding: 2px 8px; font-size: 11px; color: #6ee7b7; margin: 2px; }
+
+    .footer { text-align: center; padding: 20px; color: #334155; font-size: 12px; border-top: 1px solid rgba(255,255,255,0.06); }
+    .footer strong { color: #475569; }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <a href="index.html" class="back-btn">← Regresar</a>
+  <div class="logo-wrap">
+    <svg width="32" height="21" viewBox="0 0 110 72" fill="none">
+      <path d="M10 18 C22 6,38 6,50 18 C62 30,78 30,100 18" stroke="#10b981" stroke-width="9" stroke-linecap="round" fill="none"/>
+      <path d="M10 36 C22 24,38 24,50 36 C62 48,78 48,100 36" stroke="#10b981" stroke-width="9" stroke-linecap="round" fill="none"/>
+      <path d="M10 54 C22 42,38 42,50 54 C62 66,78 66,100 54" stroke="#10b981" stroke-width="9" stroke-linecap="round" fill="none"/>
+    </svg>
+    <span class="logo-name">Baja Renta</span>
+  </div>
+  <div class="header-title">Aviso de Privacidad</div>
+  <div class="header-sub">Protección de Datos Personales · Mayo 2026</div>
+</header>
+
+<div class="container">
+
+  <div class="meta">
+    <strong>BAJA RENTA</strong> · Última actualización: Mayo 2026<br><br>
+    En cumplimiento con la Ley Federal de Protección de Datos Personales en Posesión de los Particulares, ponemos a disposición el presente Aviso de Privacidad de la plataforma Baja Renta, dedicada a la promoción y gestión digital de arrendamientos habitacionales de largo plazo en Baja California, México.
+  </div>
+
+  <!-- 1. Responsable -->
+  <div class="section">
+    <span class="art-num">ART. 1</span>
+    <h2>Responsable del Tratamiento de Datos</h2>
+    <p>BAJA RENTA es responsable del uso, protección y tratamiento de los datos personales proporcionados por los usuarios.</p>
+    <div class="contact-card" style="margin-bottom:0; margin-top:14px;">
+      <h2>📬 Contacto de Privacidad</h2>
+      <div class="contact-item">Correo: <a href="mailto:servicio@bajarenta.com">servicio@bajarenta.com</a></div>
+      <div class="contact-item">Sitio web: <a href="https://www.bajarenta.com" target="_blank">www.bajarenta.com</a></div>
+    </div>
+  </div>
+
+  <!-- 2. Datos recopilados -->
+  <div class="section">
+    <span class="art-num">ART. 2</span>
+    <h2>Datos Personales Recopilados</h2>
+
+    <h3>A) Datos de Identificación</h3>
+    <div class="box-blue"><ul>
+      <li>Nombre completo</li>
+      <li>Fecha de nacimiento</li>
+      <li>Fotografía de perfil</li>
+      <li>INE o pasaporte</li>
+      <li>CURP</li>
+      <li>RFC</li>
+    </ul></div>
+
+    <h3>B) Datos de Contacto</h3>
+    <div class="box-blue"><ul>
+      <li>Correo electrónico</li>
+      <li>Número telefónico</li>
+      <li>Domicilio</li>
+    </ul></div>
+
+    <h3>C) Datos Financieros</h3>
+    <div class="box-blue"><ul>
+      <li>Comprobantes de ingresos</li>
+      <li>Información bancaria</li>
+      <li>Historial de pagos</li>
+      <li>Referencias personales o laborales</li>
+    </ul></div>
+
+    <h3>D) Datos Técnicos</h3>
+    <div class="box-blue"><ul>
+      <li>Dirección IP</li>
+      <li>Tipo de dispositivo</li>
+      <li>Navegador</li>
+      <li>Cookies</li>
+      <li>Geolocalización aproximada</li>
+    </ul></div>
+  </div>
+
+  <!-- 3. Finalidades -->
+  <div class="section">
+    <span class="art-num">ART. 3</span>
+    <h2>Finalidades del Tratamiento</h2>
+
+    <h3>Finalidades Principales</h3>
+    <div class="box-green"><ul>
+      <li>Crear cuentas de usuario</li>
+      <li>Publicar inmuebles</li>
+      <li>Gestionar solicitudes de renta</li>
+      <li>Validar identidad de usuarios</li>
+      <li>Facilitar comunicación entre arrendadores y arrendatarios</li>
+      <li>Generar contratos digitales</li>
+      <li>Procesar pagos y facturación</li>
+      <li>Prevenir fraude y actividades ilícitas</li>
+      <li>Cumplir obligaciones legales y fiscales</li>
+    </ul></div>
+
+    <h3>Finalidades Secundarias</h3>
+    <div class="box-amber"><p>⚠️ El usuario podrá solicitar en cualquier momento que sus datos no sean utilizados para finalidades secundarias.</p></div>
+    <ul>
+      <li>Marketing y promociones</li>
+      <li>Estadísticas internas</li>
+      <li>Mejorar experiencia del usuario</li>
+      <li>Envío de novedades y publicidad</li>
+    </ul>
+  </div>
+
+  <!-- 4. Datos sensibles -->
+  <div class="section">
+    <span class="art-num">ART. 4</span>
+    <h2>Datos Sensibles</h2>
+    <p>BAJA RENTA no solicita datos personales sensibles salvo cuando sea estrictamente necesario para validación legal o prevención de fraude.</p>
+    <p>En caso de recopilar información sensible:</p>
+    <div class="box-green"><ul>
+      <li>Se solicitará consentimiento expreso</li>
+      <li>Se aplicarán medidas de seguridad reforzadas</li>
+    </ul></div>
+  </div>
+
+  <!-- 5. Transferencia -->
+  <div class="section">
+    <span class="art-num">ART. 5</span>
+    <h2>Transferencia de Datos</h2>
+    <p>BAJA RENTA podrá compartir datos personales con:</p>
+    <ul>
+      <li>Procesadores de pago</li>
+      <li>Autoridades competentes cuando exista obligación legal</li>
+      <li>Proveedores tecnológicos que soporten la operación de la plataforma</li>
+      <li>Despachos legales o contables para cumplimiento de obligaciones fiscales y contractuales</li>
+      <li>El propietario del inmueble de interés, exclusivamente la información necesaria para evaluar una solicitud de arrendamiento</li>
+    </ul>
+    <p style="margin-top:10px">La transferencia se realizará únicamente cuando:</p>
+    <div class="box-green"><ul>
+      <li>Sea necesaria para prestar el servicio</li>
+      <li>Exista obligación legal</li>
+      <li>El usuario haya otorgado consentimiento</li>
+    </ul></div>
+    <div class="box-red" style="margin-top:10px"><ul>
+      <li>BAJA RENTA <strong>NO vende</strong> información personal a terceros</li>
+      <li>Los documentos de identidad son revisados exclusivamente por personal autorizado de BAJA RENTA y por el propietario del inmueble correspondiente</li>
+    </ul></div>
+  </div>
+
+  <!-- 6. Cookies -->
+  <div class="section">
+    <span class="art-num">ART. 6</span>
+    <h2>Uso de Cookies y Tecnologías de Rastreo</h2>
+    <p>La plataforma utiliza cookies y tecnologías similares para:</p>
+    <ul>
+      <li>Recordar preferencias</li>
+      <li>Mantener sesiones activas</li>
+      <li>Analizar tráfico y rendimiento</li>
+      <li>Personalizar contenido</li>
+    </ul>
+    <div class="box-amber" style="margin-top:12px"><p>⚠️ El usuario puede deshabilitar cookies desde su navegador, aunque ciertas funciones podrían verse limitadas.</p></div>
+  </div>
+
+  <!-- 7. Seguridad -->
+  <div class="section">
+    <span class="art-num">ART. 7</span>
+    <h2>Medidas de Seguridad</h2>
+    <p>BAJA RENTA implementa medidas administrativas, físicas y tecnológicas razonables para proteger la información personal contra:</p>
+    <div class="box-red"><ul>
+      <li>Acceso no autorizado</li>
+      <li>Pérdida o alteración</li>
+      <li>Uso indebido</li>
+      <li>Divulgación no autorizada</li>
+    </ul></div>
+    <p>No obstante, ningún sistema es completamente seguro en internet.</p>
+  </div>
+
+  <!-- 8. Derechos ARCO -->
+  <div class="section">
+    <span class="art-num">ART. 8</span>
+    <h2>Derechos ARCO</h2>
+    <div class="arco-grid">
+      <div class="arco-card">
+        <div class="arco-icon">👁️</div>
+        <div class="arco-label">Acceso</div>
+        <div class="arco-desc">Conoce tus datos</div>
+      </div>
+      <div class="arco-card">
+        <div class="arco-icon">✏️</div>
+        <div class="arco-label">Rectificación</div>
+        <div class="arco-desc">Corrige información</div>
+      </div>
+      <div class="arco-card">
+        <div class="arco-icon">🗑️</div>
+        <div class="arco-label">Cancelación</div>
+        <div class="arco-desc">Elimina tus datos</div>
+      </div>
+      <div class="arco-card">
+        <div class="arco-icon">🚫</div>
+        <div class="arco-label">Oposición</div>
+        <div class="arco-desc">Limita el tratamiento</div>
+      </div>
+    </div>
+    <p>Asimismo podrás revocar consentimiento, limitar uso de datos y solicitar eliminación de cuenta.</p>
+    <h3>Cómo ejercer tus derechos</h3>
+    <p>Envía tu solicitud a <a href="mailto:servicio@bajarenta.com" style="color:#10b981;font-weight:600">servicio@bajarenta.com</a> incluyendo:</p>
+    <div class="box-blue"><ul>
+      <li>Nombre completo</li>
+      <li>Medio de contacto</li>
+      <li>Descripción clara de la petición</li>
+      <li>Identificación oficial</li>
+    </ul></div>
+  </div>
+
+  <!-- 9. Conservación -->
+  <div class="section">
+    <span class="art-num">ART. 9</span>
+    <h2>Conservación de Datos</h2>
+    <p>Los datos serán conservados:</p>
+    <ul>
+      <li>Mientras exista relación jurídica o comercial</li>
+      <li>Durante los plazos legales y fiscales aplicables</li>
+      <li>Hasta que el usuario solicite su eliminación cuando legalmente proceda</li>
+    </ul>
+  </div>
+
+  <!-- 10. Menores -->
+  <div class="section">
+    <span class="art-num">ART. 10</span>
+    <h2>Menores de Edad</h2>
+    <p>Los servicios de BAJA RENTA están dirigidos únicamente a personas <strong style="color:white">mayores de 18 años</strong>.</p>
+    <div class="box-red"><ul>
+      <li>No recopilamos intencionalmente información de menores de edad</li>
+    </ul></div>
+  </div>
+
+  <!-- 11. Cambios -->
+  <div class="section">
+    <span class="art-num">ART. 11</span>
+    <h2>Cambios al Aviso de Privacidad</h2>
+    <p>BAJA RENTA podrá modificar el presente Aviso de Privacidad en cualquier momento. Las modificaciones serán publicadas en el sitio oficial.</p>
+    <div class="box-amber"><p>⚠️ El uso continuo de la plataforma implica aceptación de los cambios.</p></div>
+  </div>
+
+  <!-- 12. Consentimiento -->
+  <div class="section">
+    <span class="art-num">ART. 12</span>
+    <h2>Consentimiento</h2>
+    <p>Al utilizar la plataforma, crear una cuenta o proporcionar información personal, el usuario acepta el presente Aviso de Privacidad y autoriza el tratamiento de sus datos conforme a lo aquí establecido.</p>
+  </div>
+
+  <!-- 13. Legislación -->
+  <div class="section">
+    <span class="art-num">ART. 13</span>
+    <h2>Legislación Aplicable</h2>
+    <p>Este Aviso de Privacidad se rige conforme a:</p>
+    <div class="box-blue"><ul>
+      <li>Ley Federal de Protección de Datos Personales en Posesión de los Particulares</li>
+      <li>Legislación aplicable de los Estados Unidos Mexicanos</li>
+      <li>Normatividad vigente en Baja California</li>
+    </ul></div>
+    <div style="margin-top:12px">
+      <span class="tag">LFPDPPP</span>
+      <span class="tag">INAI</span>
+      <span class="tag">Baja California</span>
+      <span class="tag">PROFECO</span>
+    </div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <strong>Baja Renta</strong> · Aviso de Privacidad · Mayo 2026<br>
+  Plataforma de Arrendamiento Habitacional · Baja California, México
+</footer>
+
+</body>
+</html>

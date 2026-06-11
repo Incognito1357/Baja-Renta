@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Política de Privacidad — Baja Renta</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', sans-serif; background: #0a0f1e; color: #cbd5e1; line-height: 1.7; min-height: 100vh; }
+
+    .header { background: linear-gradient(135deg, #0d1f3c, #0a0f1e); border-bottom: 1px solid rgba(59,130,246,0.2); padding: 28px 24px 24px; text-align: center; position: sticky; top: 0; z-index: 10; backdrop-filter: blur(12px); }
+    .logo-wrap { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 6px; }
+    .logo-name { font-family: 'Dancing Script', cursive; font-size: 26px; color: white; text-shadow: 0 0 20px rgba(59,130,246,0.5); }
+    .header-title { color: white; font-size: 16px; font-weight: 700; margin-top: 4px; }
+    .header-sub { color: #64748b; font-size: 12px; margin-top: 2px; }
+    .back-btn { display: inline-flex; align-items: center; gap: 6px; color: #3b82f6; font-size: 13px; font-weight: 600; text-decoration: none; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.25); border-radius: 99px; padding: 5px 14px; margin-bottom: 12px; transition: all .2s; }
+    .back-btn:hover { background: rgba(59,130,246,0.2); }
+
+    .container { max-width: 700px; margin: 0 auto; padding: 36px 24px 80px; }
+
+    .intro-box { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); border-radius: 14px; padding: 18px 20px; margin-bottom: 32px; }
+    .intro-box p { font-size: 13px; color: #94a3b8; line-height: 1.7; }
+    .intro-box strong { color: #93c5fd; }
+
+    .section { margin-bottom: 24px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 22px; }
+    .section-num { display: inline-block; background: linear-gradient(135deg, #3b82f6, #6366f1); color: white; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 99px; margin-bottom: 10px; letter-spacing: 0.5px; }
+    .section h2 { color: white; font-size: 15px; font-weight: 700; margin-bottom: 12px; }
+    .section p { font-size: 14px; color: #94a3b8; margin-bottom: 8px; }
+    .section p:last-child { margin-bottom: 0; }
+    .section h3 { color: #93c5fd; font-size: 12px; font-weight: 700; margin: 14px 0 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    ul { list-style: none; padding: 0; margin: 8px 0; }
+    li { font-size: 14px; color: #94a3b8; padding: 5px 0 5px 20px; position: relative; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    li:last-child { border-bottom: none; }
+    li::before { content: "›"; position: absolute; left: 5px; color: #3b82f6; font-weight: 700; }
+
+    .box-green { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); border-radius: 10px; padding: 12px 16px; margin: 10px 0; }
+    .box-green li { color: #6ee7b7; } .box-green li::before { color: #10b981; }
+    .box-red { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 12px 16px; margin: 10px 0; }
+    .box-red li { color: #fca5a5; } .box-red li::before { color: #ef4444; }
+    .box-amber { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); border-radius: 10px; padding: 12px 16px; margin: 10px 0; }
+    .box-amber p { color: #fcd34d; font-size: 13px; margin: 0; }
+    .box-blue { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); border-radius: 10px; padding: 12px 16px; margin: 10px 0; }
+    .box-blue li { color: #93c5fd; } .box-blue li::before { color: #3b82f6; }
+    .box-purple { background: rgba(139,92,246,0.08); border: 1px solid rgba(139,92,246,0.2); border-radius: 10px; padding: 12px 16px; margin: 10px 0; }
+    .box-purple li { color: #c4b5fd; } .box-purple li::before { color: #8b5cf6; }
+
+    .rights-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0; }
+    .right-card { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); border-radius: 12px; padding: 14px; text-align: center; }
+    .right-icon { font-size: 22px; margin-bottom: 6px; }
+    .right-label { color: #93c5fd; font-size: 13px; font-weight: 700; }
+    .right-desc { color: #64748b; font-size: 11px; margin-top: 3px; }
+
+    .contact-card { background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(99,102,241,0.1)); border: 1px solid rgba(99,102,241,0.25); border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 24px; }
+    .contact-card h2 { color: white; font-size: 15px; font-weight: 700; margin-bottom: 14px; }
+    .contact-item { color: #93c5fd; font-size: 14px; margin-bottom: 6px; }
+    .contact-item a { color: #3b82f6; text-decoration: none; font-weight: 600; }
+
+    .tag { display: inline-block; background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.3); border-radius: 6px; padding: 2px 8px; font-size: 11px; color: #a5b4fc; margin: 2px; }
+
+    .footer { text-align: center; padding: 20px; color: #334155; font-size: 12px; border-top: 1px solid rgba(255,255,255,0.06); }
+    .footer strong { color: #475569; }
+
+    .highlight-white { color: white; font-weight: 600; }
+    .highlight-green { color: #10b981; font-weight: 600; }
+    .highlight-red { color: #ef4444; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <a href="index.html" class="back-btn">← Regresar</a>
+  <div class="logo-wrap">
+    <svg width="32" height="21" viewBox="0 0 110 72" fill="none">
+      <path d="M10 18 C22 6,38 6,50 18 C62 30,78 30,100 18" stroke="#3b82f6" stroke-width="9" stroke-linecap="round" fill="none"/>
+      <path d="M10 36 C22 24,38 24,50 36 C62 48,78 48,100 36" stroke="#3b82f6" stroke-width="9" stroke-linecap="round" fill="none"/>
+      <path d="M10 54 C22 42,38 42,50 54 C62 66,78 66,100 54" stroke="#3b82f6" stroke-width="9" stroke-linecap="round" fill="none"/>
+    </svg>
+    <span class="logo-name">Baja Renta</span>
+  </div>
+  <div class="header-title">Política de Privacidad</div>
+  <div class="header-sub">Última actualización: Mayo 2026</div>
+</header>
+
+<div class="container">
+
+  <div class="intro-box">
+    <p>Esta Política de Privacidad describe cómo <strong>Baja Renta</strong> recopila, utiliza, protege y comparte la información personal de los usuarios de nuestra plataforma de arrendamiento habitacional en Baja California, México. Al usar nuestra app, aceptas las prácticas descritas a continuación.</p>
+  </div>
+
+  <!-- 1. Información que recopilamos -->
+  <div class="section">
+    <span class="section-num">SECCIÓN 1</span>
+    <h2>Información que recopilamos</h2>
+    <p>Para brindarte el servicio de conectar arrendadores y arrendatarios, recopilamos distintos tipos de información dependiendo de cómo uses la plataforma.</p>
+
+    <h3>Información que tú nos proporcionas</h3>
+    <div class="box-blue"><ul>
+      <li><span class="highlight-white">Datos de cuenta:</span> nombre completo, correo electrónico, número de teléfono y contraseña al registrarte</li>
+      <li><span class="highlight-white">Perfil de arrendatario:</span> empleo, ingresos mensuales, referencias personales y laborales</li>
+      <li><span class="highlight-white">Perfil de arrendador:</span> información de la propiedad, precio, depósito, fotos, ubicación y características del inmueble</li>
+      <li><span class="highlight-white">Documentos de identidad:</span> INE, pasaporte o licencia de conducir para verificación documental</li>
+      <li><span class="highlight-white">Datos de pago:</span> información de tarjeta de crédito o débito para procesar pagos (procesados de forma segura con cifrado SSL 256-bit)</li>
+    </ul></div>
+
+    <h3>Información que recopilamos automáticamente</h3>
+    <div class="box-purple"><ul>
+      <li>Dirección IP y tipo de dispositivo</li>
+      <li>Sistema operativo y versión del navegador</li>
+      <li>Páginas visitadas y tiempo en la plataforma</li>
+      <li>Geolocalización aproximada (solo para búsqueda de propiedades por ciudad)</li>
+      <li>Cookies y tecnologías de seguimiento similares</li>
+    </ul></div>
+
+    <h3>Verificación documental de identidad</h3>
+    <p>Verificamos tu identidad mediante los documentos que subas a la plataforma: <span class="highlight-white">INE o identificación oficial, comprobante de ingresos y estado de cuenta</span>. Estos documentos son revisados por el equipo autorizado de Baja Renta y, cuando corresponda, por el propietario del inmueble. <span class="highlight-green">No recopilamos ni procesamos datos biométricos.</span></p>
+  </div>
+
+  <!-- 2. Cómo usamos tu información -->
+  <div class="section">
+    <span class="section-num">SECCIÓN 2</span>
+    <h2>Cómo usamos tu información</h2>
+    <p>Usamos la información recopilada para los siguientes propósitos:</p>
+
+    <h3>Propósitos principales del servicio</h3>
+    <div class="box-green"><ul>
+      <li>Crear y gestionar tu cuenta de usuario</li>
+      <li>Conectar arrendadores con arrendatarios potenciales</li>
+      <li>Mostrar el perfil del solicitante al propietario para su evaluación y aprobación</li>
+      <li>Procesar pagos de primera mensualidad de forma segura</li>
+      <li>Verificar tu identidad antes de enviar una solicitud de renta</li>
+      <li>Enviar confirmaciones de pago y contratos por correo electrónico</li>
+      <li>Permitir que los propietarios publiquen y gestionen sus propiedades</li>
+      <li>Facilitar el proceso de aprobación o rechazo de solicitudes</li>
+    </ul></div>
+
+    <h3>Propósitos secundarios</h3>
+    <div class="box-amber"><p>⚠️ Puedes optar por no participar en propósitos secundarios en cualquier momento desde la configuración de tu cuenta.</p></div>
+    <ul>
+      <li>Enviar notificaciones sobre nuevas propiedades que coincidan con tus filtros de búsqueda</li>
+      <li>Mejorar la funcionalidad y experiencia de la plataforma</li>
+      <li>Análisis internos de uso y estadísticas agregadas</li>
+      <li>Comunicaciones de marketing relacionadas con Baja Renta</li>
+    </ul>
+  </div>
+
+  <!-- 3. Qué información compartimos -->
+  <div class="section">
+    <span class="section-num">SECCIÓN 3</span>
+    <h2>Qué información compartimos y con quién</h2>
+
+    <h3>Con propietarios de la plataforma</h3>
+    <p>Cuando envías una solicitud de renta, el propietario puede ver tu:</p>
+    <div class="box-blue"><ul>
+      <li>Nombre completo, teléfono y correo electrónico</li>
+      <li>Ocupación e ingreso mensual declarado</li>
+      <li>Referencias personales y laborales (nombre, relación y teléfono)</li>
+      <li>Estado de verificación de identidad (Verificado / No verificado)</li>
+      <li>Documentos entregados</li>
+    </ul></div>
+
+    <h3>Con proveedores de servicios</h3>
+    <div class="box-purple"><ul>
+      <li><span class="highlight-white">Revisión documental:</span> verificación de identidad mediante documentos oficiales</li>
+      <li><span class="highlight-white">Procesadores de pago:</span> para transacciones con cifrado SSL 256-bit</li>
+      <li><span class="highlight-white">Servicios de correo:</span> para envío de confirmaciones y contratos</li>
+    </ul></div>
+
+    <h3>Lo que nunca hacemos</h3>
+    <div class="box-red"><ul>
+      <li>No vendemos tu información personal a terceros</li>
+      <li>No compartimos tus datos con anunciantes</li>
+      <li>No recopilamos ni transferimos datos biométricos</li>
+      <li>No accedemos a tu información de pago — solo el procesador autorizado</li>
+    </ul></div>
+
+    <h3>Cuando la ley lo requiere</h3>
+    <p>Podemos compartir información con autoridades competentes cuando exista una obligación legal, orden judicial o para proteger derechos, propiedad o seguridad de usuarios.</p>
+  </div>
+
+  <!-- 4. Seguridad -->
+  <div class="section">
+    <span class="section-num">SECCIÓN 4</span>
+    <h2>Cómo protegemos tu información</h2>
+    <p>La seguridad de tu información es una prioridad para Baja Renta.</p>
+    <div class="box-green"><ul>
+      <li>Cifrado SSL 256-bit en todas las transmisiones de datos sensibles</li>
+      <li>Hashing con SHA-256 para credenciales de acceso — nunca almacenamos contraseñas en texto plano</li>
+      <li>Autenticación de doble factor (2FA) para cuentas con acceso administrativo</li>
+      <li>Verificación documental de identidad antes de procesar solicitudes de arrendamiento</li>
+      <li>Acceso restringido a datos de usuarios — solo personal autorizado</li>
+      <li>Revisión manual de propiedades antes de publicación por el equipo Baja Renta</li>
+    </ul></div>
+    <div class="box-amber"><p>⚠️ Ningún sistema de seguridad es infalible al 100%. En caso de una brecha de seguridad que afecte tus datos, te notificaremos en un plazo máximo de 72 horas.</p></div>
+  </div>
+
+  <!-- 5. Tus derechos -->
+  <div class="section">
+    <span class="section-num">SECCIÓN 5</span>
+    <h2>Tus derechos sobre tu información</h2>
+    <p>Tienes control total sobre tu información personal. Puedes ejercer los siguientes derechos en cualquier momento:</p>
+    <div class="rights-grid">
+      <div class="right-card">
+        <div class="right-icon">👁️</div>
+        <div class="right-label">Acceder</div>
+        <div class="right-desc">Ver qué datos tenemos sobre ti</div>
+      </div>
+      <div class="right-card">
+        <div class="right-icon">✏️</div>
+        <div class="right-label">Corregir</div>
+        <div class="right-desc">Actualizar información incorrecta</div>
+      </div>
+      <div class="right-card">
+        <div class="right-icon">🗑️</div>
+        <div class="right-label">Eliminar</div>
+        <div class="right-desc">Borrado inmediato al eliminar cuenta</div>
+      </div>
+      <div class="right-card">
+        <div class="right-icon">📦</div>
+        <div class="right-label">Exportar</div>
+        <div class="right-desc">Obtener copia de tus datos</div>
+      </div>
+      <div class="right-card">
+        <div class="right-icon">🚫</div>
+        <div class="right-label">Oponerte</div>
+        <div class="right-desc">Limitar ciertos usos de tus datos</div>
+      </div>
+      <div class="right-card">
+        <div class="right-icon">🔄</div>
+        <div class="right-label">Revocar</div>
+        <div class="right-desc">Retirar un permiso que diste antes</div>
+      </div>
+    </div>
+
+    <h3>¿Qué significa "Oponerte"?</h3>
+    <p>Puedes decirle a Baja Renta que no use tus datos para ciertos propósitos, incluso si antes lo aceptaste. Por ejemplo:</p>
+    <div class="box-blue">
+      <ul>
+        <li>Ya no quieres recibir correos o notificaciones sobre nuevas propiedades disponibles</li>
+        <li>No quieres que tus datos se usen para análisis internos o estadísticas de uso</li>
+        <li>No quieres que tu perfil sea visible para propietarios mientras no tengas una búsqueda activa</li>
+        <li>No deseas que tu historial de propiedades vistas se use para recomendaciones personalizadas</li>
+      </ul>
+    </div>
+
+    <h3>¿Qué significa "Revocar"?</h3>
+    <p>Significa retirar un permiso que diste anteriormente — tienes derecho a cambiar de opinión cuando quieras. Por ejemplo:</p>
+    <div class="box-purple">
+      <ul>
+        <li>Aceptaste notificaciones push al registrarte → luego decides apagarlas desde Configuración</li>
+        <li>Activaste la geolocalización para buscar propiedades cerca → decides retirar ese permiso</li>
+        <li>Aceptaste cookies de análisis al entrar → ahora prefieres que solo se usen las esenciales</li>
+        <li>Tu perfil estaba visible para propietarios → cancelaste tu búsqueda y ya no quieres ser visible</li>
+      </ul>
+    </div>
+
+    <h3>🗑️ Eliminación de cuenta — borrado inmediato</h3>
+    <p>Cuando eliminas tu cuenta en Baja Renta, <strong style="color:#ef4444">todos tus datos personales son eliminados de forma inmediata e irreversible</strong> en el momento de la solicitud, incluyendo:</p>
+    <div class="box-red">
+      <ul>
+        <li>Nombre completo, correo electrónico, número de teléfono y contraseña</li>
+        <li>Historial de propiedades vistas, guardadas y filtros de búsqueda</li>
+        <li>Solicitudes de renta enviadas o recibidas</li>
+        <li>Fotos de perfil y documentos de identidad subidos</li>
+        <li>Referencias personales y laborales proporcionadas</li>
+        <li>Preferencias, configuración y documentos de verificación</li>
+        <li>Propiedades publicadas y datos asociados (para arrendadores)</li>
+      </ul>
+    </div>
+    <div class="box-amber">
+      <p>⚠️ <strong>Excepción legal:</strong> el historial de transacciones económicas (pagos de mensualidad) se conserva por 5 años por obligación fiscal conforme a la legislación mexicana, incluso si eliminas tu cuenta. Esta información queda disociada de tu identidad personal.</p>
+    </div>
+
+    <p style="margin-top:14px">Para ejercer cualquiera de estos derechos escríbenos a <a href="mailto:servicio@bajarenta.com" style="color:#3b82f6;font-weight:600">servicio@bajarenta.com</a>. Respondemos en un plazo máximo de <strong style="color:white">30 días hábiles</strong>.</p>
+  </div>
+
+  <!-- 6. Cookies -->
+  <div class="section">
+    <span class="section-num">SECCIÓN 6</span>
+    <h2>Cookies y tecnologías similares</h2>
+    <p>Usamos cookies para mejorar tu experiencia en la plataforma.</p>
+    <ul>
+      <li><span class="highlight-white">Cookies esenciales:</span> necesarias para el funcionamiento básico de la app (sesión, autenticación)</li>
+      <li><span class="highlight-white">Cookies de rendimiento:</span> nos ayudan a entender cómo usas la plataforma</li>
+      <li><span class="highlight-white">Cookies de preferencias:</span> recuerdan tu ciudad favorita, filtros y configuración</li>
+    </ul>
+    <p>Puedes deshabilitar las cookies no esenciales desde la configuración de tu navegador. Algunas funciones pueden verse limitadas si lo haces.</p>
+  </div>
+
+  <!-- 7. Menores -->
+  <div class="section">
+    <span class="section-num">SECCIÓN 7</span>
+    <h2>Menores de edad</h2>
+    <p>Baja Renta está diseñada exclusivamente para personas <span class="highlight-white">mayores de 18 años</span> con capacidad legal para celebrar contratos de arrendamiento.</p>
+    <div class="box-red"><ul>
+      <li>No recopilamos intencionalmente información de menores de 18 años</li>
+      <li>Si detectamos una cuenta de un menor, la suspenderemos de inmediato</li>
+      <li>Si eres padre o tutor y crees que tu hijo tiene una cuenta, contáctanos</li>
+    </ul></div>
+  </div>
+
+  <!-- 8. Retención -->
+  <div class="section">
+    <span class="section-num">SECCIÓN 8</span>
+    <h2>Retención de datos</h2>
+    <p>Conservamos tu información durante el tiempo necesario para prestarte el servicio y cumplir con obligaciones legales.</p>
+    <ul>
+      <li><span class="highlight-white">Datos de cuenta activa:</span> mientras mantengas tu cuenta abierta</li>
+      <li><span class="highlight-white">Historial de transacciones:</span> 5 años por obligaciones fiscales y contables</li>
+      <li><span class="highlight-white">Documentos de verificación:</span> 2 años posteriores a la terminación de la relación contractual</li>
+      <li><span class="highlight-white">Logs de actividad:</span> hasta 12 meses</li>
+    </ul>
+    <p>Cuando solicites eliminar tu cuenta, procesaremos y ejecutaremos la eliminación de tus datos personales en un plazo máximo de <strong>15 días hábiles</strong> a partir de la recepción de tu solicitud, enviada a <a href="mailto:servicio@bajarenta.com" style="color:#3b82f6;font-weight:600;">servicio@bajarenta.com</a>, salvo cuando la ley nos obligue a conservarlos por un período adicional.</p>
+  </div>
+
+  <!-- 9. Cambios -->
+  <div class="section">
+    <span class="section-num">SECCIÓN 9</span>
+    <h2>Cambios a esta política</h2>
+    <p>Podemos actualizar esta Política de Privacidad en cualquier momento. Cuando hagamos cambios significativos, te notificaremos a través de:</p>
+    <ul>
+      <li>Un aviso dentro de la aplicación</li>
+      <li>Un correo electrónico al email registrado en tu cuenta</li>
+    </ul>
+    <div class="box-amber"><p>⚠️ El uso continuado de Baja Renta después de los cambios implica tu aceptación de la política actualizada.</p></div>
+  </div>
+
+  <!-- 10. Jurisdicción -->
+  <div class="section">
+    <span class="section-num">SECCIÓN 10</span>
+    <h2>Jurisdicción y ley aplicable</h2>
+    <p>Esta Política de Privacidad se rige por las leyes de los <span class="highlight-white">Estados Unidos Mexicanos</span> y del Estado de <span class="highlight-white">Baja California</span>, en particular por:</p>
+    <div class="box-blue"><ul>
+      <li>Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP)</li>
+      <li>Reglamento de la LFPDPPP</li>
+      <li>Lineamientos del INAI</li>
+    </ul></div>
+    <p>Cualquier disputa relacionada con esta política será sometida a los tribunales competentes de Baja California, México.</p>
+    <div style="margin-top:10px">
+      <span class="tag">LFPDPPP</span><span class="tag">INAI</span><span class="tag">Baja California</span><span class="tag">México</span><span class="tag">SSL 256-bit</span>
+    </div>
+  </div>
+
+  <!-- Contacto -->
+  <div class="contact-card">
+    <h2>📬 Contáctanos sobre privacidad</h2>
+    <div class="contact-item">Correo: <a href="mailto:servicio@bajarenta.com">servicio@bajarenta.com</a></div>
+    <div class="contact-item">Sitio web: <a href="https://www.bajarenta.com" target="_blank">www.bajarenta.com</a></div>
+    <div class="contact-item" style="margin-top:8px;color:#64748b;font-size:12px">Respondemos en un plazo máximo de 30 días hábiles</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <strong>Baja Renta</strong> · Política de Privacidad · Mayo 2026<br>
+  Plataforma de Arrendamiento Habitacional · Baja California, México
+</footer>
+
+</body>
+</html>
