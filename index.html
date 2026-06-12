@@ -3022,7 +3022,6 @@ function SelfRegisterScreen({ onBack, onComplete, onLogin, darkMode = true }) {
                 }).then(function() {
                   sendEmail('welcome_owner', form.email, { name: form.name, email: form.email });
                   setShowPushPrompt(true);
-                  onComplete({ name: form.name, email: form.email, phone: form.phone || '' });
                 }).catch(function() {
                   sendEmail('welcome_owner', form.email, { name: form.name, email: form.email });
                   onComplete({ name: form.name, email: form.email, phone: form.phone || '' });
@@ -5325,7 +5324,6 @@ function VisitorRegister({ onBack, onComplete, onLogin, darkMode = true }) {
                 }).then(function() {
                   sendEmail('welcome_visitor', form.email, { name: form.name, email: form.email });
                   setShowPushPrompt(true);
-                  onComplete({ name: form.name, email: form.email, phone: form.phone });
                 }).catch(function() {
                   sendEmail('welcome_visitor', form.email, { name: form.name, email: form.email });
                   onComplete({ name: form.name, email: form.email, phone: form.phone });
