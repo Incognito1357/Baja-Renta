@@ -316,13 +316,17 @@ function PushPrompt({ email, role, onDone }) {
         border: "1px solid #ffffff15", borderBottom: "none",
         animation: "fadeUp .35s ease",
       }}>
-        {/* Icon */}
+        {/* Logo + Icon */}
         <div style={{ textAlign: "center", marginBottom: 20 }}>
+          <div style={{ marginBottom: 12 }}>
+            <span style={{ fontFamily: "'Dancing Script', cursive", fontSize: 28, color: "#3b82f6", fontWeight: 700 }}>Baja</span>
+            <span style={{ fontFamily: "'Syne', sans-serif", fontSize: 28, color: "white", fontWeight: 800, marginLeft: 6 }}>Renta</span>
+          </div>
           <div style={{
-            width: 64, height: 64, borderRadius: "50%",
+            width: 56, height: 56, borderRadius: "50%",
             background: accent + "20", border: "2px solid " + accent + "40",
             display: "inline-flex", alignItems: "center", justifyContent: "center",
-            fontSize: 28,
+            fontSize: 24,
           }}>🔔</div>
         </div>
 
