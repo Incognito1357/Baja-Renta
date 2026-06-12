@@ -25,10 +25,8 @@
 </head>
 <body>
   <div id="root"></div>
-  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
-  <!-- React -->
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -295,6 +293,88 @@ var sendPush = function(token, title, body) {
 };
 
 // ── COMPONENTS ────────────────────────────────────────────────────────────────
+
+function PushPrompt({ email, role, onDone }) {
+  const isOwner = role === "owner";
+  const accent = isOwner ? "#f59e0b" : "#3b82f6";
+  const grad   = isOwner ? "linear-gradient(135deg,#f59e0b,#d97706)" : "linear-gradient(135deg,#3b82f6,#6366f1)";
+
+  const handleAccept = function() {
+    requestPushPermission(email, function(token) { console.log("FCM token:", token); });
+    onDone();
+  };
+
+  return (
+    <div style={{
+      position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)",
+      display: "flex", alignItems: "flex-end", justifyContent: "center",
+      zIndex: 9999, padding: "0 0 0 0",
+    }}>
+      <div style={{
+        background: "#0d1f3c", borderRadius: "24px 24px 0 0",
+        padding: "32px 24px 40px", width: "100%", maxWidth: 430,
+        border: "1px solid #ffffff15", borderBottom: "none",
+        animation: "fadeUp .35s ease",
+      }}>
+        {/* Icon */}
+        <div style={{ textAlign: "center", marginBottom: 20 }}>
+          <div style={{
+            width: 64, height: 64, borderRadius: "50%",
+            background: accent + "20", border: "2px solid " + accent + "40",
+            display: "inline-flex", alignItems: "center", justifyContent: "center",
+            fontSize: 28,
+          }}>🔔</div>
+        </div>
+
+        {/* Title */}
+        <h2 style={{ color: "white", fontSize: 20, fontWeight: 800, textAlign: "center", marginBottom: 8, fontFamily: "'Syne',sans-serif" }}>
+          Mantente informado
+        </h2>
+        <p style={{ color: "#94a3b8", fontSize: 13, textAlign: "center", marginBottom: 24, lineHeight: 1.6 }}>
+          Activa las notificaciones para recibir alertas importantes en tiempo real.
+        </p>
+
+        {/* Benefits */}
+        <div style={{ background: "#ffffff06", borderRadius: 16, padding: "16px 20px", marginBottom: 24 }}>
+          {(isOwner ? [
+            { icon: "📥", text: "Nueva solicitud de arrendamiento recibida" },
+            { icon: "✅", text: "Tu propiedad fue aprobada por Baja Renta" },
+            { icon: "💬", text: "Mensajes y actualizaciones del proceso" },
+          ] : [
+            { icon: "✅", text: "Tu solicitud fue aprobada por el propietario" },
+            { icon: "❌", text: "Actualización sobre el estado de tu solicitud" },
+            { icon: "🏠", text: "Nuevas propiedades disponibles en tu ciudad" },
+          ]).map(function(item, i) {
+            return (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "8px 0", borderTop: i > 0 ? "1px solid #ffffff10" : "none" }}>
+                <span style={{ fontSize: 18 }}>{item.icon}</span>
+                <span style={{ color: "#cbd5e1", fontSize: 13 }}>{item.text}</span>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Buttons */}
+        <button onClick={handleAccept} className="btn-glow" style={{
+          width: "100%", background: grad, border: "none",
+          borderRadius: 16, padding: "16px", color: "white",
+          fontSize: 16, fontWeight: 700, cursor: "pointer",
+          fontFamily: "'DM Sans',sans-serif", marginBottom: 12,
+        }}>
+          🔔 Activar notificaciones
+        </button>
+        <button onClick={onDone} style={{
+          width: "100%", background: "none", border: "1px solid #ffffff15",
+          borderRadius: 16, padding: "14px", color: "#64748b",
+          fontSize: 14, cursor: "pointer", fontFamily: "'DM Sans',sans-serif",
+        }}>
+          Ahora no
+        </button>
+      </div>
+    </div>
+  );
+}
+
 
 function SplashScreen({ onStart }) {
   return (
@@ -2727,6 +2807,7 @@ function SelfRegisterScreen({ onBack, onComplete, onLogin, darkMode = true }) {
   const allFilled = form.name && form.email && form.phone && form.password && form.confirmPassword && passwordsMatch && form.dob && isAdult && agreed;
   const [otpError, setOtpError] = useState("");
   const [otpLoading, setOtpLoading] = useState(false);
+  const [showPushPrompt, setShowPushPrompt] = useState(false);
 
   const handleOwnerRegister = function() {
     if (!allFilled) return;
@@ -2892,6 +2973,7 @@ function SelfRegisterScreen({ onBack, onComplete, onLogin, darkMode = true }) {
 
   if (regStep === "verify") {
     return (
+      <div>{showPushPrompt && <PushPrompt email={form.email} role="owner" onDone={function() { setShowPushPrompt(false); onComplete({ name: form.name, email: form.email, phone: form.phone || "" }); }} />}
       <div style={{ minHeight: "100vh", background: bg, padding: "48px 24px", display: "flex", flexDirection: "column" }}>
         <button onClick={() => setRegStep("form")} style={{ background: "none", border: "none", color: textSub, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontSize: 14, marginBottom: 40, fontFamily: "'DM Sans',sans-serif" }}>
           <Icon name="back" size={16} /> Regresar
@@ -2931,7 +3013,20 @@ function SelfRegisterScreen({ onBack, onComplete, onLogin, darkMode = true }) {
               body: JSON.stringify({ email: form.email, code: code.join("") }),
             }).then(function(r) { return r.json(); }).then(function(res) {
               setOtpLoading(false);
-              if (res.valid) { sendEmail('welcome_owner', form.email, { name: form.name, email: form.email }); requestPushPermission(form.email, function(token) { console.log('owner push token:', token); }); onComplete({ name: form.name, email: form.email, phone: form.phone || '' }); }
+              if (res.valid) {
+                fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/register-user", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json", "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ" },
+                  body: JSON.stringify({ email: form.email, password: form.password, role: "owner", full_name: form.name, phone: form.phone || null, rfc: form.rfc || null, date_of_birth: form.dob || null }),
+                }).then(function() {
+                  sendEmail('welcome_owner', form.email, { name: form.name, email: form.email });
+                  setShowPushPrompt(true);
+                  onComplete({ name: form.name, email: form.email, phone: form.phone || '' });
+                }).catch(function() {
+                  sendEmail('welcome_owner', form.email, { name: form.name, email: form.email });
+                  onComplete({ name: form.name, email: form.email, phone: form.phone || '' });
+                });
+              }
               else { setOtpError("Código incorrecto o expirado. Intenta de nuevo."); setCode(["","","",""]); }
             }).catch(function() {
               setOtpLoading(false);
@@ -5137,6 +5232,7 @@ function VisitorRegister({ onBack, onComplete, onLogin, darkMode = true }) {
   const [otpError, setOtpError] = useState("");
   const [otpLoading, setOtpLoading] = useState(false);
 
+  const [showPushPrompt, setShowPushPrompt] = useState(false);
   const handleVisitorRegister = function() {
     if (!allFilled) return;
     setOtpError("");
@@ -5175,6 +5271,7 @@ function VisitorRegister({ onBack, onComplete, onLogin, darkMode = true }) {
 
   if (regStep === "verify") {
     return (
+      {showPushPrompt && <PushPrompt email={form.email} role="visitor" onDone={function() { setShowPushPrompt(false); onComplete({ name: form.name, email: form.email, phone: form.phone }); }} />}
       <div style={{ minHeight: "100vh", background: bg, padding: "48px 24px", display: "flex", flexDirection: "column", transition: "background .3s" }}>
         <button onClick={() => setRegStep("form")} style={{ background: "none", border: "none", color: textSub, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontSize: 14, marginBottom: 40, fontFamily: "'DM Sans',sans-serif" }}>
           <Icon name="back" size={16} /> Regresar
@@ -5217,7 +5314,20 @@ function VisitorRegister({ onBack, onComplete, onLogin, darkMode = true }) {
               body: JSON.stringify({ email: form.email, code: code.join("") }),
             }).then(function(r) { return r.json(); }).then(function(res) {
               setOtpLoading(false);
-              if (res.valid) { sendEmail('welcome_visitor', form.email, { name: form.name, email: form.email }); requestPushPermission(form.email, function(token) { console.log('visitor push token:', token); }); onComplete({ name: form.name, email: form.email, phone: form.phone }); }
+              if (res.valid) {
+                fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/register-user", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json", "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ" },
+                  body: JSON.stringify({ email: form.email, password: form.password, role: "visitor", full_name: form.name, phone: form.phone || null, date_of_birth: form.dob || null }),
+                }).then(function() {
+                  sendEmail('welcome_visitor', form.email, { name: form.name, email: form.email });
+                  setShowPushPrompt(true);
+                  onComplete({ name: form.name, email: form.email, phone: form.phone });
+                }).catch(function() {
+                  sendEmail('welcome_visitor', form.email, { name: form.name, email: form.email });
+                  onComplete({ name: form.name, email: form.email, phone: form.phone });
+                });
+              }
               else { setOtpError("Código incorrecto o expirado. Intenta de nuevo."); setCode(["","","",""]); }
             }).catch(function() {
               setOtpLoading(false);
