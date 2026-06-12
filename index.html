@@ -2973,7 +2973,8 @@ function SelfRegisterScreen({ onBack, onComplete, onLogin, darkMode = true }) {
 
   if (regStep === "verify") {
     return (
-      <div>{showPushPrompt && <PushPrompt email={form.email} role="owner" onDone={function() { setShowPushPrompt(false); onComplete({ name: form.name, email: form.email, phone: form.phone || "" }); }} />}
+      <div style={{ position: "relative" }}>
+        {showPushPrompt && <PushPrompt email={form.email} role="owner" onDone={function() { setShowPushPrompt(false); onComplete({ name: form.name, email: form.email, phone: form.phone || "" }); }} />}
       <div style={{ minHeight: "100vh", background: bg, padding: "48px 24px", display: "flex", flexDirection: "column" }}>
         <button onClick={() => setRegStep("form")} style={{ background: "none", border: "none", color: textSub, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontSize: 14, marginBottom: 40, fontFamily: "'DM Sans',sans-serif" }}>
           <Icon name="back" size={16} /> Regresar
@@ -3056,6 +3057,7 @@ function SelfRegisterScreen({ onBack, onComplete, onLogin, darkMode = true }) {
             Reenviar código
           </button>
         </div>
+      </div>
       </div>
     );
   }
@@ -5271,7 +5273,8 @@ function VisitorRegister({ onBack, onComplete, onLogin, darkMode = true }) {
 
   if (regStep === "verify") {
     return (
-      {showPushPrompt && <PushPrompt email={form.email} role="visitor" onDone={function() { setShowPushPrompt(false); onComplete({ name: form.name, email: form.email, phone: form.phone }); }} />}
+      <div style={{ position: "relative" }}>
+        {showPushPrompt && <PushPrompt email={form.email} role="visitor" onDone={function() { setShowPushPrompt(false); onComplete({ name: form.name, email: form.email, phone: form.phone }); }} />}
       <div style={{ minHeight: "100vh", background: bg, padding: "48px 24px", display: "flex", flexDirection: "column", transition: "background .3s" }}>
         <button onClick={() => setRegStep("form")} style={{ background: "none", border: "none", color: textSub, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontSize: 14, marginBottom: 40, fontFamily: "'DM Sans',sans-serif" }}>
           <Icon name="back" size={16} /> Regresar
@@ -5354,6 +5357,7 @@ function VisitorRegister({ onBack, onComplete, onLogin, darkMode = true }) {
             Reenviar código
           </button>
         </div>
+      </div>
       </div>
     );
   }
