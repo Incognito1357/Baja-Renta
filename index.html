@@ -1749,7 +1749,7 @@ function SettingsScreen({ onBack, onSignOut, darkModeProp, onToggleTheme, onChan
               label: "Correo electrónico", icon: "✉️", val: emails, set: setEmails,
               tooltip: "Te enviaremos correos a tu dirección registrada cuando tu solicitud de renta sea aprobada o rechazada, y para confirmaciones importantes de tu cuenta.",
             },
-            { label: darkMode ? "Modo oscuro" : "Modo claro", icon: darkMode ? "🌙" : "☀️", val: darkMode, set: setDarkMode, tooltip: null },
+            { label: darkMode ? "Modo oscuro" : "Modo claro", icon: darkMode ? "🌙" : "☀️", val: darkMode, set: setDarkMode, tooltip: null, noLabel: true },
           ].map((s, i, arr) => (
             <div key={i} style={{ borderBottom: i < arr.length - 1 ? `1px solid #ffffff10` : "none", transition: "border-color .3s" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px" }}>
@@ -1773,9 +1773,9 @@ function SettingsScreen({ onBack, onSignOut, darkModeProp, onToggleTheme, onChan
                   )}
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: s.val ? "#10b981" : "#ef4444", minWidth: 20, textAlign: "right" }}>
+                  {!s.noLabel && <span style={{ fontSize: 11, fontWeight: 700, color: s.val ? "#10b981" : "#ef4444", minWidth: 20, textAlign: "right" }}>
                     {s.val ? "On" : "Off"}
-                  </span>
+                  </span>}
                   <button onClick={() => s.set(v => !v)} style={{
                     width: 48, height: 26, borderRadius: 99, border: "none", cursor: "pointer", flexShrink: 0,
                     background: s.val ? "#10b981" : "#ef4444",
@@ -3993,7 +3993,7 @@ function OwnerSettingsScreen({ onBack, onSignOut, darkModeProp, onToggleTheme, c
       toggles: [
         { label: "Notificaciones push", icon: "🔔", val: notifications, set: setNotifications, tooltip: "Recibe alertas en tu dispositivo cuando un inquilino envíe una solicitud para tu propiedad, cuando el equipo de Baja Renta apruebe o rechace tu publicación, y cuando haya actualizaciones en el proceso de gestión." },
         { label: "Correo electrónico", icon: "✉️", val: emails, set: setEmails, tooltip: "Te enviaremos correos a tu dirección registrada cuando recibas nuevas solicitudes de renta, cuando tu propiedad sea aprobada por el equipo de Baja Renta, y para recordatorios de documentos pendientes." },
-        { label: darkMode ? "Modo oscuro" : "Modo claro", icon: darkMode ? "🌙" : "☀️", val: darkMode, set: function() { if (onToggleTheme) onToggleTheme(); }, tooltip: null },
+        { label: darkMode ? "Modo oscuro" : "Modo claro", icon: darkMode ? "🌙" : "☀️", val: darkMode, set: function() { if (onToggleTheme) onToggleTheme(); }, tooltip: null, noLabel: true },
       ],
     },
     {
@@ -4070,9 +4070,9 @@ function OwnerSettingsScreen({ onBack, onSignOut, darkModeProp, onToggleTheme, c
                         )}
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <span style={{ fontSize: 11, fontWeight: 700, color: s.val ? "#10b981" : "#ef4444", minWidth: 20, textAlign: "right" }}>
+                        {!s.noLabel && <span style={{ fontSize: 11, fontWeight: 700, color: s.val ? "#10b981" : "#ef4444", minWidth: 20, textAlign: "right" }}>
                           {s.val ? "On" : "Off"}
-                        </span>
+                        </span>}
                         <button onClick={() => { if (s.set) s.set(v => !v); }} style={{
                           width: 48, height: 26, borderRadius: 99, border: "none", cursor: "pointer", flexShrink: 0,
                           background: s.val ? "#10b981" : "#ef4444",
