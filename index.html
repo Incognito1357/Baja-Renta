@@ -25,6 +25,10 @@
 </head>
 <body>
   <div id="root"></div>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
+  <!-- React -->
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -230,6 +234,64 @@ var sendEmail = function(type, to, data) {
     headers: { "Content-Type": "application/json", "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ" },
     body: JSON.stringify({ type: type, to: to, data: data || {} }),
   }).catch(function(e) { console.log("send-email error:", e); });
+};
+
+
+// ── FIREBASE PUSH NOTIFICATIONS ────────────────────────────────────────────────
+var fbMessaging = null;
+var initFirebase = function() {
+  try {
+    if (typeof firebase === "undefined") return;
+    if (fbMessaging) return;
+    var firebaseConfig = {
+      apiKey: "AIzaSyCluq8UBfeJwtGEJ9CE4yh4PUSU-P6PsmY",
+      authDomain: "baja-renta.firebaseapp.com",
+      projectId: "baja-renta",
+      storageBucket: "baja-renta.firebasestorage.app",
+      messagingSenderId: "444376140507",
+      appId: "1:444376140507:web:131151df5e526073fc9afe"
+    };
+    if (!firebase.apps || !firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    fbMessaging = firebase.messaging();
+  } catch(e) { console.log("Firebase init error:", e); }
+};
+
+var requestPushPermission = function(email, onToken) {
+  try {
+    initFirebase();
+    if (!fbMessaging) return;
+    Notification.requestPermission().then(function(permission) {
+      if (permission !== "granted") return;
+      fbMessaging.getToken({ vapidKey: "BBZuQqMYZZCKnQ5E_8Hu62PQn8Dn9xev_pCwcVXlQ71pkLhge732dy6OFWa0Og6NGbeSnCe9_q5sK48UVvcfbnA" }).then(function(token) {
+        if (token) {
+          console.log("FCM Token:", token);
+          // Save token to Supabase
+          if (email) {
+            fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/push_tokens", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+                "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+                "Prefer": "resolution=merge-duplicates",
+              },
+              body: JSON.stringify({ user_email: email, token: token, platform: "web" }),
+            }).catch(function(e) { console.log("Save token error:", e); });
+          }
+          if (onToken) onToken(token);
+        }
+      }).catch(function(e) { console.log("Token error:", e); });
+    });
+  } catch(e) { console.log("Push permission error:", e); }
+};
+
+var sendPush = function(token, title, body) {
+  if (!token) return;
+  fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/send-push", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ" },
+    body: JSON.stringify({ token: token, title: title, body: body }),
+  }).catch(function(e) { console.log("send-push error:", e); });
 };
 
 // ── COMPONENTS ────────────────────────────────────────────────────────────────
@@ -1615,13 +1677,18 @@ function SettingsScreen({ onBack, onSignOut, darkModeProp, onToggleTheme, onChan
                     </div>
                   )}
                 </div>
-                <button onClick={() => s.set(v => !v)} style={{
-                  width: 48, height: 26, borderRadius: 99, border: "none", cursor: "pointer", flexShrink: 0,
-                  background: s.val ? "linear-gradient(135deg, #3b82f6, #6366f1)" : (darkMode ? "#334155" : "#cbd5e1"),
-                  position: "relative", transition: "background .3s",
-                }}>
-                  <div style={{ width: 20, height: 20, borderRadius: "50%", background: "white", position: "absolute", top: 3, left: s.val ? 25 : 3, transition: "left .3s" }} />
-                </button>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: s.val ? "#10b981" : "#ef4444", minWidth: 20, textAlign: "right" }}>
+                    {s.val ? "On" : "Off"}
+                  </span>
+                  <button onClick={() => s.set(v => !v)} style={{
+                    width: 48, height: 26, borderRadius: 99, border: "none", cursor: "pointer", flexShrink: 0,
+                    background: s.val ? "#10b981" : "#ef4444",
+                    position: "relative", transition: "background .3s",
+                  }}>
+                    <div style={{ width: 20, height: 20, borderRadius: "50%", background: "white", position: "absolute", top: 3, left: s.val ? 25 : 3, transition: "left .3s" }} />
+                  </button>
+                </div>
               </div>
             </div>
           ))}
@@ -2699,7 +2766,7 @@ function SelfRegisterScreen({ onBack, onComplete, onLogin, darkMode = true }) {
       body: JSON.stringify({ email: loginForm.email, password: loginForm.password }),
     }).then(function(r) { return r.json(); }).then(function(res) {
       if (res.access_token) {
-        onComplete();
+        onComplete({ name: loginForm.email, email: loginForm.email, phone: "" });
       } else {
         setLoginError(true);
       }
@@ -2864,7 +2931,7 @@ function SelfRegisterScreen({ onBack, onComplete, onLogin, darkMode = true }) {
               body: JSON.stringify({ email: form.email, code: code.join("") }),
             }).then(function(r) { return r.json(); }).then(function(res) {
               setOtpLoading(false);
-              if (res.valid) { sendEmail('welcome_owner', form.email, { name: form.name, email: form.email }); onComplete(); }
+              if (res.valid) { sendEmail('welcome_owner', form.email, { name: form.name, email: form.email }); requestPushPermission(form.email, function(token) { console.log('owner push token:', token); }); onComplete({ name: form.name, email: form.email, phone: form.phone || '' }); }
               else { setOtpError("Código incorrecto o expirado. Intenta de nuevo."); setCode(["","","",""]); }
             }).catch(function() {
               setOtpLoading(false);
@@ -3891,13 +3958,18 @@ function OwnerSettingsScreen({ onBack, onSignOut, darkModeProp, onToggleTheme, c
                           </div>
                         )}
                       </div>
-                      <button onClick={() => { if (s.set) s.set(v => !v); }} style={{
-                        width: 48, height: 26, borderRadius: 99, border: "none", cursor: "pointer", flexShrink: 0,
-                        background: s.val ? "linear-gradient(135deg, #f59e0b, #d97706)" : (darkMode ? "#334155" : "#cbd5e1"),
-                        position: "relative", transition: "background .3s",
-                      }}>
-                        <div style={{ width: 20, height: 20, borderRadius: "50%", background: "white", position: "absolute", top: 3, left: s.val ? 25 : 3, transition: "left .3s" }} />
-                      </button>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: s.val ? "#10b981" : "#ef4444", minWidth: 20, textAlign: "right" }}>
+                          {s.val ? "On" : "Off"}
+                        </span>
+                        <button onClick={() => { if (s.set) s.set(v => !v); }} style={{
+                          width: 48, height: 26, borderRadius: 99, border: "none", cursor: "pointer", flexShrink: 0,
+                          background: s.val ? "#10b981" : "#ef4444",
+                          position: "relative", transition: "background .3s",
+                        }}>
+                          <div style={{ width: 20, height: 20, borderRadius: "50%", background: "white", position: "absolute", top: 3, left: s.val ? 25 : 3, transition: "left .3s" }} />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -4042,16 +4114,19 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
               <p style={{ color: textSub, fontSize: 12, marginTop: 2 }}>Propietario</p>
             </div>
           </div>
-          <button onClick={() => setShowSettings(true)} style={{
-            width: 40, height: 40, borderRadius: "50%", background: cardBg,
-            border: `1px solid ${border}`, display: "flex", alignItems: "center",
-            justifyContent: "center", cursor: "pointer",
-          }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            {/* Settings Gear */}
+            <button onClick={() => setShowSettings(true)} style={{
+              width: 40, height: 40, borderRadius: "50%", background: cardBg,
+              border: `1px solid ${border}`, display: "flex", alignItems: "center",
+              justifyContent: "center", cursor: "pointer",
+            }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="3"/>
               <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
             </svg>
-          </button>
+            </button>
+          </div>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
           {[
@@ -4126,6 +4201,8 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
 
 
 function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkModeProp, onToggleTheme, currentUser = {} }) {
+  const [ownerUser, setOwnerUser] = useState(currentUser);
+  const mergedUser = Object.assign({}, currentUser, ownerUser.name ? ownerUser : {});
   const listedProperties = listedProps || MOCK_LISTED;
   const [mode, setMode] = useState(null);
   const darkMode = darkModeProp !== undefined ? darkModeProp : true;
@@ -4238,11 +4315,11 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
   const accentGrad = mode === "managed" ? "linear-gradient(135deg, #3b82f6, #6366f1)" : "linear-gradient(135deg, #f59e0b, #d97706)";
 
   if (!mode) {
-    return <SelfRegisterScreen onBack={onBack} onComplete={() => setMode("chooseMode")} onLogin={() => setMode("ownerLogin")} darkMode={darkMode} />;
+    return <SelfRegisterScreen onBack={onBack} onComplete={function(userData) { if (userData) setOwnerUser(userData); setMode("chooseMode"); }} onLogin={() => setMode("ownerLogin")} darkMode={darkMode} />;
   }
 
   if (mode === "ownerLogin") {
-    return <LoginScreen onBack={onBack} onLogin={() => setMode("chooseMode")} onMasterLogin={() => setMode("masterPanel")} onRegister={() => setMode(null)} darkMode={darkMode} />;
+    return <LoginScreen onBack={onBack} onLogin={function() { setOwnerUser({ name: "", email: "", phone: "" }); setMode("chooseMode"); }} onMasterLogin={() => setMode("masterPanel")} onRegister={() => setMode(null)} darkMode={darkMode} />;
   }
 
   if (mode === "masterPanel") {
@@ -4344,7 +4421,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
   }
 
   if (mode === "dashboard") {
-    return <OwnerDashboard onBack={onBack} onPublish={() => { setMode("self"); setFormStep("details"); setSubmitted(false); }} darkModeProp={darkMode} onToggleTheme={onToggleTheme} currentUser={currentUser} />;
+    return <OwnerDashboard onBack={onBack} onPublish={() => { setMode("self"); setFormStep("details"); setSubmitted(false); }} darkModeProp={darkMode} onToggleTheme={onToggleTheme} currentUser={mergedUser} />;
   }
 
   if (submitted && mode === "managed") {
@@ -5140,7 +5217,7 @@ function VisitorRegister({ onBack, onComplete, onLogin, darkMode = true }) {
               body: JSON.stringify({ email: form.email, code: code.join("") }),
             }).then(function(r) { return r.json(); }).then(function(res) {
               setOtpLoading(false);
-              if (res.valid) { sendEmail('welcome_visitor', form.email, { name: form.name, email: form.email }); onComplete({ name: form.name, email: form.email, phone: form.phone }); }
+              if (res.valid) { sendEmail('welcome_visitor', form.email, { name: form.name, email: form.email }); requestPushPermission(form.email, function(token) { console.log('visitor push token:', token); }); onComplete({ name: form.name, email: form.email, phone: form.phone }); }
               else { setOtpError("Código incorrecto o expirado. Intenta de nuevo."); setCode(["","","",""]); }
             }).catch(function() {
               setOtpLoading(false);
