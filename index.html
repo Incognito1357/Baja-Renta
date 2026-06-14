@@ -6045,6 +6045,7 @@ function MasterLogin({ onBack, onLogin }) {
           </div>
           <h2 style={{ fontFamily: "'Syne',sans-serif", color: textOP, fontSize: 24, fontWeight: 800 }}>Panel Maestro</h2>
           <p style={{ color: textSubOP, fontSize: 13, marginTop: 4 }}>Baja Renta — Administrador</p>
+          <p style={{ color: "#f59e0b", fontSize: 11, marginTop: 4 }}>{fetchStatus}</p>
         </div>
       </div>
 
@@ -6150,15 +6151,23 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
     setProperties(buildList());
   }, [JSON.stringify(publishedProperties)]);
 
+  const [fetchStatus, setFetchStatus] = useState("cargando...");
+
   // Fetch properties from Supabase on mount
   useEffect(function() {
+    setFetchStatus("cargando...");
     fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties?select=*&order=created_at.desc", {
       headers: {
         "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
         "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
       },
     }).then(function(r) { return r.json(); }).then(function(data) {
-      if (!Array.isArray(data) || data.length === 0) return;
+      if (!Array.isArray(data)) {
+        setFetchStatus("Error: " + JSON.stringify(data).slice(0, 100));
+        return;
+      }
+      setFetchStatus("✅ " + data.length + " propiedades en BD");
+      if (data.length === 0) return;
       var supaProps = data.map(function(p) {
         return {
           id: p.id,
@@ -6197,7 +6206,10 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
         var mocks = ALL_PROPERTIES.map(function(p) { return Object.assign({}, p, { isNew: false }); });
         return mocks.concat(supaProps);
       });
-    }).catch(function(e) { console.log("Supabase fetch error:", e); });
+    }).catch(function(e) {
+      setFetchStatus("❌ Error conexión: " + e.message);
+      console.log("Supabase fetch error:", e);
+    });
   }, []);
 
   const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ";
@@ -6915,6 +6927,7 @@ function App() {
 
   if (screen === "splash") return <SplashScreen onStart={() => { playSound("click"); setScreen("profile"); }} />;
   if (screen === "profile") return <ProfileSelect onSelect={handleProfileSelect} darkMode={darkMode} />;
+  if (screen === "masterLogin") return <LoginScreen onBack={() => setScreen("profile")} onLogin={() => setScreen("profile")} onMasterLogin={() => setScreen("master")} onRegister={() => setScreen("profile")} darkMode={darkMode} />;
   if (screen === "login") return <LoginScreen onBack={() => setScreen("profile")} onLogin={() => setScreen("cards")} onMasterLogin={() => setScreen("master")} onRegister={() => setScreen("visitorRegister")} darkMode={darkMode} />;
   if (screen === "visitorRegister") return <VisitorRegister onBack={() => setScreen("profile")} onComplete={(userData) => { if (userData) setCurrentUser(userData); setScreen("filter"); }} onLogin={() => setScreen("login")} darkMode={darkMode} />;
   if (screen === "guestFilter") return <GuestFilter onBack={() => setScreen("profile")} onContinue={(f) => { setFilters(f); setScreen("catalog"); }} />;
