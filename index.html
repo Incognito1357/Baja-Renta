@@ -6193,9 +6193,9 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
           isMock: false,
         };
       });
-      setProperties(function(prev) {
-        var mockOnly = prev.filter(function(p) { return p.isMock || p.isNew === false; });
-        return mockOnly.concat(supaProps);
+      setProperties(function() {
+        var mocks = ALL_PROPERTIES.map(function(p) { return Object.assign({}, p, { isNew: false }); });
+        return mocks.concat(supaProps);
       });
     }).catch(function(e) { console.log("Supabase fetch error:", e); });
   }, []);
