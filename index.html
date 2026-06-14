@@ -5923,8 +5923,9 @@ function GuestFilter({ onBack, onContinue }) {
   );
 }
 
-function GuestCatalog({ onBack, filters = {}, onRegister }) {
+function GuestCatalog({ onBack, filters = {}, onRegister, properties: propList }) {
   const [selected, setSelected] = useState(null);
+  const catalogProps = propList && propList.length > 0 ? propList : PROPERTIES;
 
   if (selected) {
     return <GuestPropertyDetail p={selected} onBack={() => setSelected(null)} onRegister={onRegister} />;
@@ -5950,8 +5951,8 @@ function GuestCatalog({ onBack, filters = {}, onRegister }) {
       </div>
 
       <div style={{ padding: "20px 24px" }}>
-        <p style={{ color: "#64748b", fontSize: 13, marginBottom: 20 }}>{PROPERTIES.length} propiedades disponibles</p>
-        {PROPERTIES.map(p => (
+        <p style={{ color: "#64748b", fontSize: 13, marginBottom: 20 }}>{catalogProps.length} propiedades disponibles</p>
+        {catalogProps.map(p => (
           <button key={p.id} onClick={() => setSelected(p)} style={{
             width: "100%", background: "#ffffff06", border: "1px solid #ffffff15",
             borderRadius: 20, overflow: "hidden", marginBottom: 16, display: "flex", cursor: "pointer", textAlign: "left",
@@ -7061,7 +7062,7 @@ function App() {
   if (screen === "login") return <LoginScreen onBack={() => setScreen("profile")} onLogin={() => setScreen("cards")} onMasterLogin={() => setScreen("master")} onRegister={() => setScreen("visitorRegister")} darkMode={darkMode} />;
   if (screen === "visitorRegister") return <VisitorRegister onBack={() => setScreen("profile")} onComplete={(userData) => { if (userData) setCurrentUser(userData); setScreen("filter"); }} onLogin={() => setScreen("login")} darkMode={darkMode} />;
   if (screen === "guestFilter") return <GuestFilter onBack={() => setScreen("profile")} onContinue={(f) => { setFilters(f); setScreen("catalog"); }} />;
-  if (screen === "catalog") return <GuestCatalog filters={filters} onBack={() => setScreen("guestFilter")} onRegister={() => setScreen("visitorRegister")} />;
+  if (screen === "catalog") return <GuestCatalog filters={filters} properties={publishedProperties} onBack={() => setScreen("guestFilter")} onRegister={() => setScreen("visitorRegister")} />;
   if (screen === "filter") return (
     <FilterSlide
       key={filterStep}
