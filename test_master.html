@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head><meta charset="UTF-8"/><title>Test Master</title></head>
+<body style="background:#0a0f1e;color:white;font-family:sans-serif;padding:24px">
+<h2>Test Supabase Properties</h2>
+<div id="result">Cargando...</div>
+<script>
+const ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ";
+
+fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties?select=*&order=created_at.desc", {
+  headers: {
+    "apikey": ANON,
+    "Authorization": "Bearer " + ANON,
+  }
+}).then(r => r.json()).then(data => {
+  const el = document.getElementById("result");
+  if (!Array.isArray(data) || data.length === 0) {
+    el.innerHTML = "<p style='color:#ef4444'>❌ No hay propiedades o error: " + JSON.stringify(data) + "</p>";
+    return;
+  }
+  el.innerHTML = "<p style='color:#10b981'>✅ " + data.length + " propiedades encontradas:</p>" +
+    data.map(p => `<div style="background:#ffffff10;border-radius:8px;padding:12px;margin-top:8px">
+      <b>${p.name}</b> — ${p.city} — Status: <b style="color:#f59e0b">${p.status}</b>
+      <br><small style="color:#64748b">ID: ${p.id}</small>
+    </div>`).join("");
+}).catch(e => {
+  document.getElementById("result").innerHTML = "<p style='color:#ef4444'>Error: " + e.message + "</p>";
+});
+</script>
+</body>
+</html>
