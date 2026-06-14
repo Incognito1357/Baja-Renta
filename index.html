@@ -4175,6 +4175,8 @@ function OwnerSettingsScreen({ onBack, onSignOut, darkModeProp, onToggleTheme, c
 }
 
 function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, currentUser = {} }) {
+  const isMiguel = currentUser && currentUser.email === "miguelayalamartinez@gmail.com";
+  const myProperties = isMiguel ? myProperties : [];
   const [tab, setTab] = useState("properties");
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [allApprovedApplicants, setAllApprovedApplicants] = useState({});
@@ -4248,9 +4250,9 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
           {[
-            { label: "Propiedades", val: MOCK_LISTED.length },
-            { label: "Total vistas", val: MOCK_LISTED.reduce((a, p) => a + p.views, 0) },
-            { label: "Solicitudes", val: MOCK_LISTED.reduce((a, p) => a + p.applicants.length, 0) },
+            { label: "Propiedades", val: myProperties.length },
+            { label: "Total vistas", val: myProperties.reduce((a, p) => a + p.views, 0) },
+            { label: "Solicitudes", val: myProperties.reduce((a, p) => a + p.applicants.length, 0) },
           ].map((s, i) => (
             <div key={i} style={{ background: cardBg, border: `1px solid ${border}`, borderRadius: 14, padding: "12px 10px", textAlign: "center" }}>
               <p style={{ fontFamily: "'DM Sans',sans-serif", color: text, fontSize: 22, fontWeight: 700 }}>{s.val}</p>
@@ -4262,7 +4264,7 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
 
       <div style={{ padding: "20px 24px" }}>
         <h3 style={{ color: text, fontSize: 15, fontWeight: 700, fontFamily: "'DM Sans',sans-serif", marginBottom: 14 }}>Mis propiedades</h3>
-        {MOCK_LISTED.map(p => (
+        {myProperties.map(p => (
           <button key={p.id} onClick={() => setSelectedProperty(p)} style={{
             width: "100%", background: cardBg, border: `1px solid ${border}`,
             borderRadius: 20, overflow: "hidden", marginBottom: 14,
@@ -4321,7 +4323,8 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
 function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkModeProp, onToggleTheme, currentUser = {} }) {
   const [ownerUser, setOwnerUser] = useState(currentUser);
   const mergedUser = Object.assign({}, currentUser, ownerUser.name ? ownerUser : {});
-  const listedProperties = listedProps || MOCK_LISTED;
+  const isMiguel = currentUser && currentUser.email === "miguelayalamartinez@gmail.com";
+  const listedProperties = listedProps || (isMiguel ? myProperties : []);
   const [mode, setMode] = useState(null);
   const darkMode = darkModeProp !== undefined ? darkModeProp : true;
 
@@ -6626,7 +6629,7 @@ function App() {
   };
 
   // Owner listed properties with live applicant submissions from visitors
-  const [listedProperties, setListedProperties] = useState(MOCK_LISTED);
+  const [listedProperties, setListedProperties] = useState([]);
   const addApplicant = (propertyId, applicant) => {
     setListedProperties(prev => prev.map(p =>
       p.id === propertyId
