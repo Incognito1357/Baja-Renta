@@ -866,6 +866,10 @@ function LoginScreen({ onBack, onLogin, onMasterLogin, onRegister, darkMode = tr
       }).then(function(r) { return r.json(); }).then(function(res) {
         setLoading(false);
         if (res.access_token) {
+          // Request push if not already granted
+          if (typeof Notification !== "undefined" && Notification.permission === "default") {
+            requestPushPermission(email, function(token) { console.log("login push token:", token); });
+          }
           onLogin();
         } else {
           setError(true);
@@ -2862,6 +2866,9 @@ function SelfRegisterScreen({ onBack, onComplete, onLogin, darkMode = true }) {
       body: JSON.stringify({ email: loginForm.email, password: loginForm.password }),
     }).then(function(r) { return r.json(); }).then(function(res) {
       if (res.access_token) {
+        if (typeof Notification !== "undefined" && Notification.permission === "default") {
+          requestPushPermission(loginForm.email, function(token) { console.log("owner login push token:", token); });
+        }
         onComplete({ name: loginForm.email, email: loginForm.email, phone: "" });
       } else {
         setLoginError(true);
@@ -5050,14 +5057,88 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
         </div>
       ) : (
         <div>
+          {/* Self mode - submit to review button */}
+          {!masterApproved && (function() {
+            var selfFormReady = propForm.name && propForm.city && propForm.address && propForm.price && propForm.deposit;
+            return (
+              <div style={{ marginBottom: 12 }}>
+                <button onClick={function() {
+                  if (!selfFormReady) return;
+                  buildAndPublish();
+                }} disabled={!selfFormReady} className={selfFormReady ? "btn-glow" : ""} style={{
+                  width: "100%",
+                  background: selfFormReady ? "linear-gradient(135deg, #f59e0b, #d97706)" : (darkMode ? "#ffffff10" : "#e2e8f0"),
+                  border: "none", borderRadius: 16, padding: "18px", color: selfFormReady ? "white" : textSubOP,
+                  fontSize: 16, fontWeight: 700,
+                  cursor: selfFormReady ? "pointer" : "not-allowed",
+                  fontFamily: "'DM Sans',sans-serif", transition: "all .3s",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  opacity: selfFormReady ? 1 : 0.6,
+                }}>
+                  <Icon name="upload" size={18} color={selfFormReady ? "white" : textSubOP} />
+                  {selfFormReady ? "Enviar propiedad a revisión" : "Completa el formulario para continuar"}
+                </button>
+                {!selfFormReady && (
+                  <div style={{ marginTop: 10, background: "#f59e0b10", border: "1px solid #f59e0b30", borderRadius: 12, padding: "10px 14px" }}>
+                    <p style={{ color: "#f59e0b", fontSize: 12, fontWeight: 600, marginBottom: 4 }}>📋 Campos requeridos:</p>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                      {[
+                        { label: "Nombre", done: !!propForm.name },
+                        { label: "Ciudad", done: !!propForm.city },
+                        { label: "Dirección", done: !!propForm.address },
+                        { label: "Precio", done: !!propForm.price },
+                        { label: "Depósito", done: !!propForm.deposit },
+                      ].map(function(f) {
+                        return (
+                          <span key={f.label} style={{
+                            background: f.done ? "#10b98115" : "#ef444415",
+                            border: "1px solid " + (f.done ? "#10b98130" : "#ef444430"),
+                            borderRadius: 99, padding: "2px 10px",
+                            color: f.done ? "#10b981" : "#ef4444",
+                            fontSize: 11, fontWeight: 600,
+                          }}>
+                            {f.done ? "✓" : "○"} {f.label}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+                <p style={{ color: textSubOP, fontSize: 12, textAlign: "center", marginTop: 8 }}>
+                  🛎️ Nuestro equipo revisará tu propiedad en 24–72 hrs laborables
+                </p>
+              </div>
+            );
+          })()}
           {masterApproved ? (
-            <button onClick={() => setFormStep("payment")} className="btn-glow" style={{
+            <button onClick={function() {
+              fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/create-checkout", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+                },
+                body: JSON.stringify({
+                  property_name: propForm.name || "Propiedad",
+                  owner_email: propForm.email || "",
+                  property_id: propForm.id || null,
+                }),
+              }).then(function(r) { return r.json(); }).then(function(res) {
+                if (res.url) {
+                  window.open(res.url, "_blank");
+                } else {
+                  alert("Error al crear sesión de pago. Intenta de nuevo.");
+                }
+              }).catch(function() {
+                alert("Error de conexión. Verifica tu internet e intenta de nuevo.");
+              });
+            }} className="btn-glow" style={{
               width: "100%", background: accentGrad,
               border: "none", borderRadius: 16, padding: "18px", color: textOP,
               fontSize: 16, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", transition: "all .3s",
               display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
             }}>
-              <Icon name="arrow" size={18} color="white" /> {"Continuar al pago · $500 MXN"}
+              <Icon name="arrow" size={18} color="white" /> {"💳 Pagar $500 MXN y publicar"}
             </button>
           ) : (
             <div>
@@ -5870,6 +5951,9 @@ function MasterLogin({ onBack, onLogin }) {
     }).then(function(r) { return r.json(); }).then(function(res) {
       setLoading(false);
       if (res.access_token) {
+        if (typeof Notification !== "undefined" && Notification.permission === "default") {
+          requestPushPermission(user, function(token) { console.log("visitor login push token:", token); });
+        }
         onLogin();
       } else {
         setError(true);
@@ -5998,22 +6082,62 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
     setProperties(buildList());
   }, [publishedProperties.length]);
 
-  const toggleStatus = (id) => {
-    const _foundProp = properties.find(function(p) { return p.id === id; }); const isNewProp = _foundProp ? _foundProp.isNew : false;
-    setProperties(prev => prev.map(p => {
-      if (p.id !== id) return p;
-      const newStatus = p.status === "pendiente" ? "aprobada" : "pendiente";
-      if (isNewProp && newStatus === "aprobada" && onApproveProperty) {
-        onApproveProperty(id);
+  const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ";
+  const SUPA_URL = "https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties";
+
+  const updatePropertyStatus = function(id, status, prop) {
+    // Update in Supabase (only real properties, not mocks)
+    if (prop && !prop.isMock) {
+      fetch(SUPA_URL + "?id=eq." + id, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": ANON_KEY,
+          "Authorization": "Bearer " + ANON_KEY,
+          "Prefer": "return=minimal",
+        },
+        body: JSON.stringify({ status: status === "aprobada" ? "approved" : status === "rechazada" ? "rejected" : "pending" }),
+      }).catch(function(e) { console.log("Supabase update error:", e); });
+    }
+    // Send email to owner
+    if (prop && prop.ownerEmail) {
+      if (status === "aprobada") {
+        sendEmail("property_published", prop.ownerEmail, {
+          property_name: prop.name,
+          city: prop.city || "",
+          price: prop.price ? "$" + prop.price.toLocaleString() : "",
+          mode: prop.mode || "self",
+        });
+      } else if (status === "rechazada") {
+        sendEmail("application_rejected", prop.ownerEmail, {
+          property_name: prop.name,
+          reason: "El equipo de Baja Renta ha revisado tu propiedad y no cumple con los requisitos actuales de publicación.",
+        });
       }
-      return { ...p, status: newStatus };
-    }));
+    }
+    // Notify master via email when property approved
+    if (status === "aprobada" && onApproveProperty) {
+      onApproveProperty(id);
+    }
   };
 
-  const rejectStatus = (id) => {
-    setProperties(prev => prev.map(p =>
-      p.id === id ? { ...p, status: "rechazada" } : p
-    ));
+  const toggleStatus = function(id) {
+    const _foundProp = properties.find(function(p) { return p.id === id; });
+    const isNewProp = _foundProp ? _foundProp.isNew : false;
+    setProperties(function(prev) { return prev.map(function(p) {
+      if (p.id !== id) return p;
+      const newStatus = p.status === "pendiente" ? "aprobada" : "pendiente";
+      updatePropertyStatus(id, newStatus, p);
+      return Object.assign({}, p, { status: newStatus });
+    }); });
+  };
+
+  const rejectStatus = function(id) {
+    setProperties(function(prev) { return prev.map(function(p) {
+      if (p.id !== id) return p;
+      updatePropertyStatus(id, "rechazada", p);
+      return Object.assign({}, p, { status: "rechazada" });
+    }); });
   };
   const filtered = filter === "todas" ? properties : properties.filter(p => p.status === filter);
   const pendingCount = properties.filter(p => p.status === "pendiente").length;
@@ -6475,8 +6599,21 @@ function App() {
   const [darkMode, setDarkMode] = useState(true);
   const [profile, setProfile] = useState(null);
   const [currentUser, setCurrentUser] = useState({ name: "", email: "", phone: "" });
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [publishedProperties, setPublishedProperties] = useState([...PROPERTIES]);
   const [ownerSubmissions, setOwnerSubmissions] = useState([]);
+
+  // Check URL for payment result on load
+  useEffect(function() {
+    try {
+      var params = new URLSearchParams(window.location.search);
+      if (params.get("payment") === "success") {
+        setPaymentSuccess(true);
+        // Clean URL
+        window.history.replaceState({}, "", window.location.pathname);
+      }
+    } catch(e) {}
+  }, []);
   // Owner submits -> goes to pending review (NOT published yet)
   const addProperty = (p) => {
     setOwnerSubmissions(prev => [...prev, { ...p, _status: "pendiente" }]);
@@ -6630,6 +6767,28 @@ function App() {
     setScreen("splash"); setProfile(null); setFilterStep(0);
     setFilters({}); setCardIdx(0); setLikedProperty(null);
   };
+
+  if (paymentSuccess) return (
+    <div style={{ minHeight: "100vh", background: "#0a0f1e", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+      <div style={{ textAlign: "center", maxWidth: 340 }}>
+        <div style={{ fontSize: 64, marginBottom: 16 }}>🎉</div>
+        <h2 style={{ color: "white", fontFamily: "'Syne',sans-serif", fontSize: 24, fontWeight: 800, marginBottom: 8 }}>¡Pago exitoso!</h2>
+        <p style={{ color: "#94a3b8", fontSize: 14, lineHeight: 1.7, marginBottom: 8 }}>
+          Tu pago de <strong style={{ color: "#10b981" }}>$500 MXN</strong> fue procesado correctamente.
+        </p>
+        <p style={{ color: "#64748b", fontSize: 13, lineHeight: 1.6, marginBottom: 28 }}>
+          Recibirás un recibo por correo. El equipo de Baja Renta revisará tu propiedad en 24–72 horas y recibirás una notificación cuando esté publicada.
+        </p>
+        <button onClick={function() { setPaymentSuccess(false); setScreen("owner"); }} className="btn-glow" style={{
+          width: "100%", background: "linear-gradient(135deg,#f59e0b,#d97706)",
+          border: "none", borderRadius: 16, padding: "16px", color: "white",
+          fontSize: 16, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif",
+        }}>
+          🏠 Ir a mi dashboard
+        </button>
+      </div>
+    </div>
+  );
 
   if (screen === "splash") return <SplashScreen onStart={() => { playSound("click"); setScreen("profile"); }} />;
   if (screen === "profile") return <ProfileSelect onSelect={handleProfileSelect} darkMode={darkMode} />;
