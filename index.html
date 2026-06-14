@@ -6150,9 +6150,9 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
     setProperties(buildList());
   }, [JSON.stringify(publishedProperties)]);
 
-  // Fetch pending/approved/rejected properties from Supabase on mount
+  // Fetch properties from Supabase on mount
   useEffect(function() {
-    fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties?select=*,profiles(full_name)", {
+    fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties?select=*&order=created_at.desc", {
       headers: {
         "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
         "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
@@ -6162,8 +6162,8 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
       var supaProps = data.map(function(p) {
         return {
           id: p.id,
-          name: p.name,
-          owner: (p.profiles && p.profiles.full_name) || "Propietario",
+          name: p.name || "Propiedad",
+          owner: "Propietario registrado",
           ownerEmail: "",
           city: p.city || "—",
           state: "Baja California",
@@ -6185,17 +6185,17 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
           patio: p.patio,
           status: p.status === "pending" ? "pendiente" : p.status === "approved" ? "aprobada" : p.status === "rejected" ? "rechazada" : "pendiente",
           img: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80",
-          images: [],
+          images: ["https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80"],
           submitted: p.created_at ? p.created_at.slice(0, 10) : "—",
           _mode: p.management_mode || "self",
           isNew: true,
           isSupa: true,
+          isMock: false,
         };
       });
       setProperties(function(prev) {
-        var existingIds = prev.map(function(p) { return String(p.id); });
-        var newFromSupa = supaProps.filter(function(p) { return !existingIds.includes(String(p.id)); });
-        return prev.concat(newFromSupa);
+        var mockOnly = prev.filter(function(p) { return p.isMock || p.isNew === false; });
+        return mockOnly.concat(supaProps);
       });
     }).catch(function(e) { console.log("Supabase fetch error:", e); });
   }, []);
