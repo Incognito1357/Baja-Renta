@@ -870,7 +870,7 @@ function LoginScreen({ onBack, onLogin, onMasterLogin, onRegister, darkMode = tr
           if (typeof Notification !== "undefined" && Notification.permission === "default") {
             requestPushPermission(email, function(token) { console.log("login push token:", token); });
           }
-          onLogin();
+          onLogin({ email: email, name: email, phone: "" });
         } else {
           setError(true);
         }
@@ -4176,7 +4176,35 @@ function OwnerSettingsScreen({ onBack, onSignOut, darkModeProp, onToggleTheme, c
 
 function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, currentUser = {} }) {
   const isMiguel = currentUser && currentUser.email === "miguelayalamartinez@gmail.com";
-  const myProperties = isMiguel ? myProperties : [];
+  const [supaProperties, setSupaProperties] = useState([]);
+
+  useEffect(function() {
+    if (!currentUser || !currentUser.email) return;
+    var email = currentUser.email;
+    var url = isMiguel
+      ? "https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties?select=*&order=created_at.desc"
+      : "https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties?owner_email=eq." + encodeURIComponent(email) + "&select=*&order=created_at.desc";
+    fetch(url, {
+      headers: {
+        "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+      },
+    }).then(function(r) { return r.json(); }).then(function(data) {
+      if (!Array.isArray(data)) return;
+      setSupaProperties(data.map(function(p) {
+        return {
+          id: p.id, name: p.name, city: p.city, price: p.price, deposit: p.deposit,
+          status: p.status === "approved" ? "aprobada" : p.status === "rejected" ? "rechazada" : "pendiente",
+          img: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80",
+          images: ["https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80"],
+          bedrooms: p.bedrooms, bathrooms: p.bathrooms, _mode: p.management_mode || "self",
+          applicants: [], isMock: false,
+        };
+      }));
+    }).catch(function(e) { console.log("owner dashboard fetch error:", e); });
+  }, []);
+
+  const myProperties = isMiguel ? MOCK_LISTED.concat(supaProperties) : supaProperties;
   const [tab, setTab] = useState("properties");
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [allApprovedApplicants, setAllApprovedApplicants] = useState({});
@@ -4264,6 +4292,7 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
 
       <div style={{ padding: "20px 24px" }}>
         <h3 style={{ color: text, fontSize: 15, fontWeight: 700, fontFamily: "'DM Sans',sans-serif", marginBottom: 14 }}>Mis propiedades</h3>
+        <p style={{ color: "#f59e0b", fontSize: 11, marginBottom: 8 }}>Email: {currentUser && currentUser.email ? currentUser.email : "sin email"} | Props: {supaProperties.length}</p>
         {myProperties.map(p => (
           <button key={p.id} onClick={() => setSelectedProperty(p)} style={{
             width: "100%", background: cardBg, border: `1px solid ${border}`,
@@ -4320,9 +4349,10 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
 }
 
 
-function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkModeProp, onToggleTheme, currentUser = {} }) {
+function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkModeProp, onToggleTheme, currentUser = {}, onSetUser }) {
   const [ownerUser, setOwnerUser] = useState(currentUser);
-  const mergedUser = Object.assign({}, currentUser, ownerUser.name ? ownerUser : {});
+  var mergedEmail = ownerUser.email || currentUser.email || "";
+  const mergedUser = Object.assign({}, currentUser, ownerUser, { email: mergedEmail });
   const isMiguel = currentUser && currentUser.email === "miguelayalamartinez@gmail.com";
   const listedProperties = listedProps || (isMiguel ? myProperties : []);
   const [mode, setMode] = useState(null);
@@ -4339,6 +4369,22 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
   const [submitted, setSubmitted] = useState(false);
   const [formStep, setFormStep] = useState("details");
   const [masterApproved, setMasterApproved] = useState(false);
+
+  // Check if owner's property was approved in Supabase
+  useEffect(function() {
+    if (!currentUser || !currentUser.email) return;
+    var email = currentUser.email;
+    fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties?status=eq.approved&owner_email=eq." + encodeURIComponent(email) + "&select=id,name,status", {
+      headers: {
+        "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+      },
+    }).then(function(r) { return r.json(); }).then(function(data) {
+      if (Array.isArray(data) && data.length > 0) {
+        setMasterApproved(true);
+      }
+    }).catch(function(e) { console.log("approval check error:", e); });
+  }, [currentUser && currentUser.email]);
   const [showThankYou, setShowThankYou] = useState(false);
   const [managed_agreed, setManaged_agreed] = useState(false);
   const [cardName, setCardName] = useState("");
@@ -4444,6 +4490,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
       management_mode: mode === "managed" ? "managed" : "self",
       status: "pending",
       is_mock: false,
+      owner_email: currentUser && currentUser.email ? currentUser.email : null,
     };
 
     fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties", {
@@ -4475,11 +4522,11 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
   const accentGrad = mode === "managed" ? "linear-gradient(135deg, #3b82f6, #6366f1)" : "linear-gradient(135deg, #f59e0b, #d97706)";
 
   if (!mode) {
-    return <SelfRegisterScreen onBack={onBack} onComplete={function(userData) { if (userData) setOwnerUser(userData); setMode("chooseMode"); }} onLogin={() => setMode("ownerLogin")} darkMode={darkMode} />;
+    return <SelfRegisterScreen onBack={onBack} onComplete={function(userData) { if (userData) { setOwnerUser(userData); if (onSetUser) onSetUser(userData); } setMode("chooseMode"); }} onLogin={() => setMode("ownerLogin")} darkMode={darkMode} />;
   }
 
   if (mode === "ownerLogin") {
-    return <LoginScreen onBack={onBack} onLogin={function() { setOwnerUser({ name: "", email: "", phone: "" }); setMode("chooseMode"); }} onMasterLogin={() => setMode("masterPanel")} onRegister={() => setMode(null)} darkMode={darkMode} />;
+    return <LoginScreen onBack={onBack} onLogin={function(userData) { var u = userData || { name: "", email: "", phone: "" }; setOwnerUser(u); if (onSetUser) onSetUser(u); setMode("chooseMode"); }} onMasterLogin={() => setMode("masterPanel")} onRegister={() => setMode(null)} darkMode={darkMode} />;
   }
 
   if (mode === "masterPanel") {
@@ -6967,7 +7014,7 @@ function App() {
       darkMode={darkMode}
     />
   );
-  if (screen === "owner") return <OwnerPanel onBack={() => setScreen("profile")} onPublish={addProperty} listedProperties={listedProperties} darkModeProp={darkMode} onToggleTheme={() => setDarkMode(v => !v)} currentUser={currentUser} />;
+  if (screen === "owner") return <OwnerPanel onBack={() => setScreen("profile")} onPublish={addProperty} listedProperties={listedProperties} darkModeProp={darkMode} onToggleTheme={() => setDarkMode(v => !v)} currentUser={currentUser} onSetUser={setCurrentUser} />;
   if (screen === "success") return <SuccessScreen onRestart={restart} />;
   if (screen === "master") return <MasterDashboard onBack={() => setScreen("profile")} publishedProperties={ownerSubmissions} onApproveProperty={approveProperty} />;
   return null;
