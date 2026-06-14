@@ -6856,7 +6856,7 @@ function App() {
         };
       });
       setPublishedProperties(function(prev) {
-        var mockProps = prev.filter(function(p) { return p.isMock !== false; });
+        var mockProps = prev.filter(function(p) { return p.isMock === true || p.isMock === undefined; });
         return mockProps.concat(supaApproved);
       });
     }).catch(function(e) { console.log("approved properties fetch error:", e); });
