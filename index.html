@@ -4412,15 +4412,53 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
       images: uploadedPhotos.length > 0
         ? uploadedPhotos.map(p => p.url).concat(DEFAULT_PHOTOS).slice(0, 5)
         : DEFAULT_PHOTOS,
-      // Full form data for master review
       _ownerForm: { ...propForm },
       _uploadedPhotos: uploadedPhotos,
       _uploadedDocs: uploadedDocs,
       _submittedAt: new Date().toLocaleString("es-MX"),
       _mode: mode,
     };
+
+    // Save to Supabase
+    var supaData = {
+      name: newProp.name,
+      city: newProp.city || "Tijuana",
+      address: newProp.address || "—",
+      price: newProp.price,
+      deposit: newProp.deposit,
+      type: newProp.type,
+      bedrooms: newProp.bedrooms,
+      bathrooms: newProp.bathrooms,
+      floors: newProp.floors,
+      parking: newProp.parking,
+      pool: newProp.pool || false,
+      pet_friendly: newProp.petFriendly || false,
+      kids_allowed: newProp.kidsAllowed !== false,
+      laundry: newProp.laundry || false,
+      patio: newProp.patio || false,
+      living_room: newProp.livingRoom !== false,
+      dining_room: newProp.diningRoom || false,
+      kitchen: newProp.kitchen !== false,
+      management_mode: mode === "managed" ? "managed" : "self",
+      status: "pending",
+      is_mock: false,
+      owner_id: "00000000-0000-0000-0000-000000000000",
+    };
+
+    fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+        "Prefer": "return=representation",
+      },
+      body: JSON.stringify(supaData),
+    }).then(function(r) { return r.json(); }).then(function(res) {
+      console.log("Property saved to Supabase:", res);
+    }).catch(function(e) { console.log("Supabase save error:", e); });
+
     if (onPublish) onPublish(newProp);
-    // Notify master - new property pending review
     sendEmail("new_property_pending", "miguelayalamartinez@gmail.com", {
       property_name: newProp.name,
       owner_name: propForm.ownerName || "Propietario",
