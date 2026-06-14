@@ -4444,7 +4444,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
   }
 
   if (mode === "masterPanel") {
-    return <MasterDashboard onBack={() => setMode(null)} publishedProperties={listedProperties} />;
+    return <MasterDashboard onBack={() => setMode(null)} publishedProperties={listedProperties} onApproveProperty={null} />;
   }
 
   if (mode === "managedAgreement") {
@@ -6085,6 +6085,56 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
   useEffect(() => {
     setProperties(buildList());
   }, [JSON.stringify(publishedProperties)]);
+
+  // Fetch pending/approved/rejected properties from Supabase on mount
+  useEffect(function() {
+    fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties?select=*,profiles(full_name)", {
+      headers: {
+        "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+      },
+    }).then(function(r) { return r.json(); }).then(function(data) {
+      if (!Array.isArray(data) || data.length === 0) return;
+      var supaProps = data.map(function(p) {
+        return {
+          id: p.id,
+          name: p.name,
+          owner: (p.profiles && p.profiles.full_name) || "Propietario",
+          ownerEmail: "",
+          city: p.city || "—",
+          state: "Baja California",
+          address: p.address || "—",
+          type: p.type || "Casa",
+          price: p.price || 0,
+          deposit: p.deposit || 0,
+          bedrooms: p.bedrooms || 0,
+          bathrooms: p.bathrooms || 0,
+          floors: p.floors || 1,
+          parking: p.parking || "—",
+          pool: p.pool,
+          petFriendly: p.pet_friendly,
+          kidsAllowed: p.kids_allowed,
+          livingRoom: p.living_room,
+          diningRoom: p.dining_room,
+          kitchen: p.kitchen,
+          laundry: p.laundry,
+          patio: p.patio,
+          status: p.status === "pending" ? "pendiente" : p.status === "approved" ? "aprobada" : p.status === "rejected" ? "rechazada" : "pendiente",
+          img: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80",
+          images: [],
+          submitted: p.created_at ? p.created_at.slice(0, 10) : "—",
+          _mode: p.management_mode || "self",
+          isNew: true,
+          isSupa: true,
+        };
+      });
+      setProperties(function(prev) {
+        var existingIds = prev.map(function(p) { return String(p.id); });
+        var newFromSupa = supaProps.filter(function(p) { return !existingIds.includes(String(p.id)); });
+        return prev.concat(newFromSupa);
+      });
+    }).catch(function(e) { console.log("Supabase fetch error:", e); });
+  }, []);
 
   const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ";
   const SUPA_URL = "https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties";
