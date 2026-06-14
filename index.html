@@ -6027,7 +6027,8 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
     ...publishedProperties.map(p => ({
       id: p.id,
       name: p.name,
-      owner: "Propietario registrado",
+      owner: p.ownerName || p._ownerName || "Propietario registrado",
+      ownerEmail: p.ownerEmail || p._ownerEmail || "",
       city: p.city || "—",
       state: p.state || "—",
       address: p.address || "—",
@@ -6083,7 +6084,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
     : visitors;
   useEffect(() => {
     setProperties(buildList());
-  }, [publishedProperties.length]);
+  }, [JSON.stringify(publishedProperties)]);
 
   const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ";
   const SUPA_URL = "https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties";
@@ -6619,7 +6620,12 @@ function App() {
   }, []);
   // Owner submits -> goes to pending review (NOT published yet)
   const addProperty = (p) => {
-    setOwnerSubmissions(prev => [...prev, { ...p, _status: "pendiente" }]);
+    setOwnerSubmissions(prev => [...prev, { 
+      ...p, 
+      _status: "pendiente",
+      _ownerName: currentUser.name || "Propietario",
+      _ownerEmail: currentUser.email || "",
+    }]);
   };
   // Master approves -> property becomes visible to visitors
   const approveProperty = (id) => {
