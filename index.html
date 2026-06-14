@@ -4371,7 +4371,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
     "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80",
   ];
   const [propForm, setPropForm] = useState({
-    name: "", state: "", city: "", address: "", price: "", deposit: "", floors: "",
+    name: "", state: "Baja California", city: "", address: "", price: "", deposit: "", floors: "",
     bedrooms: "", bathrooms: "",
     parking: "",
     livingRoom: false, diningRoom: false, kitchen: false, laundry: false,
@@ -4420,17 +4420,19 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
     };
 
     // Save to Supabase
+    var validCities = ["Tijuana", "Rosarito", "Ensenada", "Mexicali", "Tecate", "San Quintín"];
+    var supaCity = validCities.includes(propForm.city) ? propForm.city : "Tijuana";
     var supaData = {
       name: newProp.name,
-      city: newProp.city || "Tijuana",
+      city: supaCity,
       address: newProp.address || "—",
-      price: newProp.price,
-      deposit: newProp.deposit,
-      type: newProp.type,
-      bedrooms: newProp.bedrooms,
-      bathrooms: newProp.bathrooms,
-      floors: newProp.floors,
-      parking: newProp.parking,
+      price: newProp.price || 0,
+      deposit: newProp.deposit || 0,
+      type: "Casa",
+      bedrooms: newProp.bedrooms || 1,
+      bathrooms: newProp.bathrooms || 1,
+      floors: newProp.floors || 1,
+      parking: ["Privado","Público","Ninguno"].includes(newProp.parking) ? newProp.parking : "Privado",
       pool: newProp.pool || false,
       pet_friendly: newProp.petFriendly || false,
       kids_allowed: newProp.kidsAllowed !== false,
@@ -4442,7 +4444,6 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
       management_mode: mode === "managed" ? "managed" : "self",
       status: "pending",
       is_mock: false,
-      owner_id: "00000000-0000-0000-0000-000000000000",
     };
 
     fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties", {
@@ -4897,9 +4898,34 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
         }} />
       </div>
 
+      {/* Estado — fixed dropdown */}
+      <select value={propForm.state} onChange={e => setPF("state", e.target.value)} style={{
+        display: "block", width: "100%", background: cardBgOP,
+        border: `1px solid ${propForm.state ? accent+"50" : "#ffffff10"}`,
+        borderRadius: 12, padding: "14px 16px", color: propForm.state ? textOP : "#64748b",
+        fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none",
+        marginBottom: 10, cursor: "pointer",
+      }}>
+        <option value="" disabled>Estado</option>
+        <option value="Baja California">Baja California</option>
+      </select>
+
+      {/* Ciudad — dropdown */}
+      <select value={propForm.city} onChange={e => setPF("city", e.target.value)} style={{
+        display: "block", width: "100%", background: cardBgOP,
+        border: `1px solid ${propForm.city ? accent+"50" : "#ffffff10"}`,
+        borderRadius: 12, padding: "14px 16px", color: propForm.city ? textOP : "#64748b",
+        fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none",
+        marginBottom: 10, cursor: "pointer",
+      }}>
+        <option value="" disabled>Ciudad</option>
+        <option value="Tijuana">Tijuana</option>
+        <option value="Mexicali">Mexicali</option>
+        <option value="Ensenada">Ensenada</option>
+        <option value="Rosarito">Rosarito</option>
+      </select>
+
       {[
-        { ph: "Estado", key: "state" },
-        { ph: "Ciudad", key: "city" },
         { ph: "Dirección completa", key: "address" },
         { ph: "Precio mensual (MXN)", key: "price" },
         { ph: "Depósito requerido (MXN)", key: "deposit" },
