@@ -3964,6 +3964,41 @@ function PropertyDetail_Owner({ property, onBack, approvedApplicants, onApprove,
           </>
         )}
       </div>
+      {/* Payment button when approved */}
+      {(property.status === "aprobada" || property.status === "approved") && (
+        <div style={{ padding: "16px", borderTop: "1px solid #ffffff10" }}>
+          <button onClick={function() {
+            fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/create-checkout", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+              },
+              body: JSON.stringify({
+                property_name: property.name,
+                owner_email: property.owner_email || "",
+                property_id: property.id,
+              }),
+            }).then(function(r) { return r.json(); }).then(function(res) {
+              if (res.url) { window.open(res.url, "_blank"); }
+              else { alert("Error al crear sesión de pago. Intenta de nuevo."); }
+            }).catch(function() {
+              alert("Error de conexión. Verifica tu internet.");
+            });
+          }} className="btn-glow" style={{
+            width: "100%", background: "linear-gradient(135deg,#10b981,#059669)",
+            border: "none", borderRadius: 16, padding: "16px", color: "white",
+            fontSize: 15, fontWeight: 700, cursor: "pointer",
+            fontFamily: "'DM Sans',sans-serif",
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+          }}>
+            💳 Pagar $500 MXN y publicar
+          </button>
+          <p style={{ color: "#64748b", fontSize: 11, textAlign: "center", marginTop: 8 }}>
+            ✅ Propiedad aprobada · Publicación activa por 90 días
+          </p>
+        </div>
+      )}
     </div>
   );
 }
@@ -4198,7 +4233,7 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
           img: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80",
           images: ["https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80"],
           bedrooms: p.bedrooms, bathrooms: p.bathrooms, _mode: p.management_mode || "self",
-          applicants: [], isMock: false,
+          applicants: [], views: 0, isMock: false,
         };
       }));
     }).catch(function(e) { console.log("owner dashboard fetch error:", e); });
@@ -4292,7 +4327,6 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
 
       <div style={{ padding: "20px 24px" }}>
         <h3 style={{ color: text, fontSize: 15, fontWeight: 700, fontFamily: "'DM Sans',sans-serif", marginBottom: 14 }}>Mis propiedades</h3>
-        <p style={{ color: "#f59e0b", fontSize: 11, marginBottom: 8 }}>Email: {currentUser && currentUser.email ? currentUser.email : "sin email"} | Props: {supaProperties.length}</p>
         {myProperties.map(p => (
           <button key={p.id} onClick={() => setSelectedProperty(p)} style={{
             width: "100%", background: cardBg, border: `1px solid ${border}`,
@@ -6778,6 +6812,55 @@ function App() {
   const [currentUser, setCurrentUser] = useState({ name: "", email: "", phone: "" });
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [publishedProperties, setPublishedProperties] = useState([...PROPERTIES]);
+
+  // Load approved properties from Supabase
+  useEffect(function() {
+    fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties?status=eq.approved&select=*&order=created_at.desc", {
+      headers: {
+        "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+      },
+    }).then(function(r) { return r.json(); }).then(function(data) {
+      if (!Array.isArray(data) || data.length === 0) return;
+      var supaApproved = data.map(function(p) {
+        return {
+          id: p.id,
+          name: p.name || "Propiedad",
+          city: p.city || "Tijuana",
+          state: "Baja California",
+          address: p.address || "—",
+          price: p.price || 0,
+          deposit: p.deposit || 0,
+          type: p.type || "Casa",
+          bedrooms: p.bedrooms || 0,
+          bathrooms: p.bathrooms || 0,
+          floors: p.floors || 1,
+          parking: p.parking || "Privado",
+          pool: p.pool || false,
+          petFriendly: p.pet_friendly || false,
+          kidsAllowed: p.kids_allowed !== false,
+          livingRoom: p.living_room !== false,
+          diningRoom: p.dining_room || false,
+          kitchen: p.kitchen !== false,
+          laundry: p.laundry || false,
+          patio: p.patio || false,
+          img: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80",
+          images: ["https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80"],
+          owner: "Propietario",
+          ownerPhone: "",
+          ownerEmail: p.owner_email || "",
+          views: 0,
+          likes: 0,
+          applicants: [],
+          isMock: false,
+        };
+      });
+      setPublishedProperties(function(prev) {
+        var mockProps = prev.filter(function(p) { return p.isMock !== false; });
+        return mockProps.concat(supaApproved);
+      });
+    }).catch(function(e) { console.log("approved properties fetch error:", e); });
+  }, []);
   const [ownerSubmissions, setOwnerSubmissions] = useState([]);
 
   // Check URL for payment result on load
