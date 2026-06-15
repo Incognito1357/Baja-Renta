@@ -3810,14 +3810,8 @@ function ApplicantDetail({ applicant, onBack, isApproved, isRejected, onApprove,
 }
 
 function PropertyDetail_Owner({ property, onBack, approvedApplicants, onApprove, darkMode = true }) {
-  const bg      = darkMode ? "#0a0f1e" : "#f8fafc";
-  const text    = darkMode ? "white"   : "#0f172a";
-  const textSub = darkMode ? "#64748b" : "#64748b";
-  const cardBg  = darkMode ? "#ffffff06" : "#ffffff";
-  const border  = darkMode ? "#ffffff10" : "#e2e8f0";
-
   var p = {
-    id: property.id || "",
+    id: String(property.id || ""),
     name: property.name || "Propiedad",
     city: property.city || "—",
     price: property.price || 0,
@@ -3828,95 +3822,98 @@ function PropertyDetail_Owner({ property, onBack, approvedApplicants, onApprove,
     img: property.img || "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80",
     applicants: property.applicants || [],
     views: property.views || 0,
-    weeklyViews: property.weeklyViews || [0,0,0,0,0,0,0],
     owner_email: property.owner_email || "",
   };
+  var bg = "#0a0f1e";
+  var text = "white";
+  var sub = "#64748b";
+  var card = "#ffffff08";
+  var bdr = "#ffffff12";
+  var isApproved = p.status === "aprobada" || p.status === "approved";
+  const [tab, setTab] = useState("info");
+  const [selApplicant, setSelApplicant] = useState(null);
 
-  var safeApproved = approvedApplicants || {};
-  const [tab, setTab] = useState("stats");
-  const [selectedApplicant, setSelectedApplicant] = useState(null);
-
-  if (selectedApplicant) {
-    var key0 = p.id + "-" + selectedApplicant.id;
-    return <ApplicantDetail
-      darkMode={darkMode}
-      applicant={selectedApplicant}
-      isApproved={safeApproved[key0] === true}
-      isRejected={safeApproved[key0] === "rejected"}
-      onApprove={function() { if (onApprove) onApprove(selectedApplicant.id); }}
-      onBack={() => setSelectedApplicant(null)}
-    />;
+  if (selApplicant) {
+    var aKey = p.id + "-" + selApplicant.id;
+    return (
+      <div style={{ minHeight: "100vh", background: bg, padding: 24 }}>
+        <button onClick={function() { setSelApplicant(null); }} style={{ background: "none", border: "none", color: "#3b82f6", cursor: "pointer", fontSize: 15, marginBottom: 20 }}>← Regresar</button>
+        <p style={{ color: text, fontSize: 17, fontWeight: 700, marginBottom: 4 }}>{selApplicant.name || "Solicitante"}</p>
+        <p style={{ color: sub, fontSize: 13, marginBottom: 4 }}>{selApplicant.email || "—"}</p>
+        <p style={{ color: sub, fontSize: 13, marginBottom: 4 }}>{selApplicant.phone || "—"}</p>
+        <p style={{ color: sub, fontSize: 13, marginBottom: 20 }}>{selApplicant.job || "—"}</p>
+        {(approvedApplicants || {})[aKey] !== true && (
+          <button onClick={function() { if (onApprove) onApprove(selApplicant.id); setSelApplicant(null); }} style={{ width: "100%", background: "#10b981", border: "none", borderRadius: 14, padding: 16, color: "white", fontSize: 15, fontWeight: 700, cursor: "pointer", marginBottom: 10 }}>
+            ✓ Aprobar solicitante
+          </button>
+        )}
+        {(approvedApplicants || {})[aKey] === true && (
+          <p style={{ color: "#10b981", fontWeight: 700, fontSize: 14 }}>✅ Solicitante aprobado</p>
+        )}
+      </div>
+    );
   }
 
   return (
     <div style={{ minHeight: "100vh", background: bg, paddingBottom: 120 }}>
-      <div style={{ position: "relative", height: "28vh", overflow: "hidden" }}>
+      <div style={{ position: "relative", height: 220, overflow: "hidden" }}>
         <img src={p.img} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={function(e) { e.target.src = "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80"; }} />
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom,#00000050,#0a0f1e)" }} />
-        <button onClick={onBack} style={{ position: "absolute", top: 16, left: 16, background: "#000000a0", border: "none", borderRadius: 99, width: 38, height: 38, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <Icon name="back" size={16} color="white" />
-        </button>
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent, #0a0f1e)" }} />
+        <button onClick={onBack} style={{ position: "absolute", top: 16, left: 16, background: "#000a", border: "none", borderRadius: 99, width: 38, height: 38, cursor: "pointer", color: "white", fontSize: 18 }}>←</button>
         <div style={{ position: "absolute", bottom: 16, left: 20, right: 20 }}>
-          <h2 style={{ color: "white", fontSize: 18, fontWeight: 700, fontFamily: "'DM Sans',sans-serif" }}>{p.name}</h2>
-          <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 12 }}>{p.city}</p>
+          <p style={{ color: "white", fontSize: 19, fontWeight: 700, marginBottom: 2 }}>{p.name}</p>
+          <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 12 }}>{p.city}</p>
         </div>
       </div>
 
-      <div style={{ padding: "16px 20px", borderBottom: "1px solid " + border }}>
-        <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-          <span style={{ background: p.status === "aprobada" ? "#10b98120" : "#f59e0b20", border: "1px solid " + (p.status === "aprobada" ? "#10b98150" : "#f59e0b50"), borderRadius: 99, padding: "4px 12px", color: p.status === "aprobada" ? "#10b981" : "#f59e0b", fontSize: 11, fontWeight: 700 }}>
-            {p.status === "aprobada" ? "\u2705 Aprobada" : p.status === "rechazada" ? "\u274c Rechazada" : "\u23f3 Pendiente"}
-          </span>
-        </div>
-        <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
-          <p style={{ color: "#3b82f6", fontSize: 20, fontWeight: 700, fontFamily: "'DM Sans',sans-serif" }}>${p.price.toLocaleString()}<span style={{ color: textSub, fontSize: 11 }}>/mes</span></p>
-          <div style={{ marginLeft: "auto", display: "flex", gap: 16 }}>
-            <div style={{ textAlign: "center" }}><p style={{ color: text, fontSize: 16, fontWeight: 700 }}>{p.bedrooms}</p><p style={{ color: textSub, fontSize: 10 }}>Cuartos</p></div>
-            <div style={{ textAlign: "center" }}><p style={{ color: text, fontSize: 16, fontWeight: 700 }}>{p.bathrooms}</p><p style={{ color: textSub, fontSize: 10 }}>Banos</p></div>
-            <div style={{ textAlign: "center" }}><p style={{ color: text, fontSize: 16, fontWeight: 700 }}>{p.views}</p><p style={{ color: textSub, fontSize: 10 }}>Vistas</p></div>
-          </div>
+      <div style={{ padding: "16px 20px", borderBottom: "1px solid " + bdr }}>
+        <span style={{ background: isApproved ? "#10b98120" : "#f59e0b20", border: "1px solid " + (isApproved ? "#10b98150" : "#f59e0b50"), borderRadius: 99, padding: "4px 14px", color: isApproved ? "#10b981" : "#f59e0b", fontSize: 11, fontWeight: 700 }}>
+          {isApproved ? "✅ Aprobada" : p.status === "rechazada" ? "❌ Rechazada" : "⏳ Pendiente"}
+        </span>
+        <p style={{ color: "#3b82f6", fontSize: 22, fontWeight: 700, marginTop: 10 }}>{"$" + p.price.toLocaleString()}<span style={{ color: sub, fontSize: 12 }}>/mes</span></p>
+        <div style={{ display: "flex", gap: 20, marginTop: 8 }}>
+          <p style={{ color: sub, fontSize: 12 }}>🛏 {p.bedrooms} rec</p>
+          <p style={{ color: sub, fontSize: 12 }}>🚿 {p.bathrooms} baños</p>
+          <p style={{ color: sub, fontSize: 12 }}>👁 {p.views} vistas</p>
         </div>
       </div>
 
-      <div style={{ display: "flex", borderBottom: "1px solid " + border }}>
-        {[["stats","Estadisticas"],["applicants","Solicitudes (" + p.applicants.length + ")"]].map(function(t) {
-          return <button key={t[0]} onClick={function() { setTab(t[0]); }} style={{ flex: 1, padding: "12px", background: "none", border: "none", borderBottom: tab === t[0] ? "2px solid #f59e0b" : "2px solid transparent", color: tab === t[0] ? "#f59e0b" : textSub, fontSize: 13, fontWeight: tab === t[0] ? 700 : 400, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>{t[1]}</button>;
+      <div style={{ display: "flex", borderBottom: "1px solid " + bdr }}>
+        {[["info","Info"],["solicitudes","Solicitudes (" + p.applicants.length + ")"]].map(function(t) {
+          return <button key={t[0]} onClick={function() { setTab(t[0]); }} style={{ flex: 1, padding: 12, background: "none", border: "none", borderBottom: tab === t[0] ? "2px solid #f59e0b" : "2px solid transparent", color: tab === t[0] ? "#f59e0b" : sub, fontSize: 13, fontWeight: tab === t[0] ? 700 : 400, cursor: "pointer" }}>{t[1]}</button>;
         })}
       </div>
 
-      <div style={{ padding: "20px" }}>
-        {tab === "stats" && (
+      <div style={{ padding: 20 }}>
+        {tab === "info" && (
           <div>
-            <div style={{ background: cardBg, border: "1px solid " + border, borderRadius: 16, padding: 16, marginBottom: 12 }}>
-              <p style={{ color: textSub, fontSize: 12, marginBottom: 8 }}>Vistas esta semana</p>
-              <MiniBar values={p.weeklyViews} color="#3b82f6" />
-            </div>
-            <div style={{ background: cardBg, border: "1px solid " + border, borderRadius: 16, padding: 16 }}>
-              <p style={{ color: textSub, fontSize: 12, marginBottom: 4 }}>Deposito</p>
-              <p style={{ color: text, fontSize: 18, fontWeight: 700, fontFamily: "'DM Sans',sans-serif" }}>${p.deposit.toLocaleString()}</p>
+            <div style={{ background: card, border: "1px solid " + bdr, borderRadius: 14, padding: 16, marginBottom: 12 }}>
+              <p style={{ color: sub, fontSize: 12, marginBottom: 4 }}>Deposito</p>
+              <p style={{ color: text, fontSize: 18, fontWeight: 700 }}>{"$" + p.deposit.toLocaleString()}</p>
             </div>
           </div>
         )}
-        {tab === "applicants" && (
+        {tab === "solicitudes" && (
           <div>
             {p.applicants.length === 0 ? (
-              <div style={{ textAlign: "center", padding: "40px 0" }}>
-                <p style={{ fontSize: 32, marginBottom: 8 }}>📋</p>
-                <p style={{ color: "#475569", fontSize: 14 }}>Sin solicitudes aun</p>
+              <div style={{ textAlign: "center", padding: 40 }}>
+                <p style={{ fontSize: 32 }}>📋</p>
+                <p style={{ color: sub, fontSize: 14, marginTop: 8 }}>Sin solicitudes aun</p>
               </div>
             ) : p.applicants.map(function(a) {
-              var key = p.id + "-" + a.id;
+              var aKey = p.id + "-" + a.id;
+              var approved = (approvedApplicants || {})[aKey] === true;
               return (
-                <button key={a.id} onClick={function() { setSelectedApplicant(a); }} style={{ width: "100%", background: cardBg, border: "1px solid " + border, borderRadius: 16, padding: "14px 16px", marginBottom: 12, display: "flex", alignItems: "center", gap: 12, cursor: "pointer", textAlign: "left" }}>
-                  <div style={{ width: 44, height: 44, borderRadius: "50%", background: "#1e3a5f", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <span style={{ color: "white", fontSize: 16, fontWeight: 700 }}>{(a.name || "?")[0].toUpperCase()}</span>
+                <button key={String(a.id)} onClick={function() { setSelApplicant(a); }} style={{ width: "100%", background: card, border: "1px solid " + bdr, borderRadius: 14, padding: "14px 16px", marginBottom: 10, display: "flex", alignItems: "center", gap: 12, cursor: "pointer", textAlign: "left" }}>
+                  <div style={{ width: 42, height: 42, borderRadius: "50%", background: "#1e3a5f", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <span style={{ color: "white", fontSize: 15, fontWeight: 700 }}>{(a.name || "?")[0].toUpperCase()}</span>
                   </div>
                   <div style={{ flex: 1 }}>
-                    <p style={{ color: text, fontSize: 14, fontWeight: 700, fontFamily: "'DM Sans',sans-serif" }}>{a.name || "Solicitante"}</p>
-                    <p style={{ color: textSub, fontSize: 12 }}>{a.email || a.job || "—"}</p>
+                    <p style={{ color: text, fontSize: 14, fontWeight: 700 }}>{a.name || "Solicitante"}</p>
+                    <p style={{ color: sub, fontSize: 12 }}>{a.email || "—"}</p>
                   </div>
-                  <span style={{ color: safeApproved[key] === true ? "#10b981" : safeApproved[key] === "rejected" ? "#ef4444" : "#f59e0b", fontSize: 11, fontWeight: 700 }}>
-                    {safeApproved[key] === true ? "\u2713 Aprobado" : safeApproved[key] === "rejected" ? "\u2717 Rechazado" : "\u26a0\ufe0f Revisar"}
+                  <span style={{ color: approved ? "#10b981" : "#f59e0b", fontSize: 11, fontWeight: 700 }}>
+                    {approved ? "✓ Aprobado" : "⚠ Revisar"}
                   </span>
                 </button>
               );
@@ -3925,21 +3922,21 @@ function PropertyDetail_Owner({ property, onBack, approvedApplicants, onApprove,
         )}
       </div>
 
-      {(p.status === "aprobada" || p.status === "approved") && (
-        <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, padding: "16px 20px 32px", background: "linear-gradient(to top," + bg + " 70%,transparent)", maxWidth: 430, margin: "0 auto" }}>
+      {isApproved && (
+        <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, padding: "16px 20px 32px", background: "linear-gradient(to top, #0a0f1e 70%, transparent)" }}>
           <button onClick={function() {
             fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/create-checkout", {
               method: "POST",
               headers: { "Content-Type": "application/json", "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ" },
               body: JSON.stringify({ property_name: p.name, owner_email: p.owner_email, property_id: p.id }),
             }).then(function(r) { return r.json(); }).then(function(res) {
-              if (res.url) { window.open(res.url, "_blank"); }
-              else { alert("Error al crear sesion de pago."); }
+              if (res.url) window.open(res.url, "_blank");
+              else alert("Error al crear sesion de pago.");
             }).catch(function() { alert("Error de conexion."); });
-          }} className="btn-glow" style={{ width: "100%", background: "linear-gradient(135deg,#10b981,#059669)", border: "none", borderRadius: 16, padding: "16px", color: "white", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+          }} style={{ width: "100%", background: "linear-gradient(135deg,#10b981,#059669)", border: "none", borderRadius: 16, padding: 16, color: "white", fontSize: 15, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
             💳 Pagar $500 MXN y publicar
           </button>
-          <p style={{ color: textSub, fontSize: 11, textAlign: "center", marginTop: 8 }}>✅ Propiedad aprobada · 90 dias de publicacion</p>
+          <p style={{ color: sub, fontSize: 11, textAlign: "center", marginTop: 8 }}>Publicacion activa por 90 dias</p>
         </div>
       )}
     </div>
