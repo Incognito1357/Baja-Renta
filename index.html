@@ -4227,12 +4227,13 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
   };
 
   if (selectedProperty) {
+    var sp = selectedProperty;
     return <OwnerPropertyDetail
-      property={selectedProperty}
-      approvedApplicants={allApprovedApplicants}
-      onApprove={function(applicantId) { handleApprove(selectedProperty.id, applicantId, selectedProperty.applicants || []); }}
+      property={sp}
+      approvedApplicants={{}}
+      onApprove={function(aid) { handleApprove(sp.id, aid, sp.applicants || []); }}
       onBack={function() { setSelectedProperty(null); }}
-      darkMode={darkMode}
+      darkMode={true}
     />;
   }
 
