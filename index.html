@@ -3809,7 +3809,7 @@ function ApplicantDetail({ applicant, onBack, isApproved, isRejected, onApprove,
   );
 }
 
-function PropertyDetail_Owner({ property, onBack, approvedApplicants, onApprove, darkMode = true }) {
+function OwnerPropertyDetail({ property, onBack, approvedApplicants, onApprove, darkMode = true }) {
   const [tab, setTab] = useState("info");
   const [selApplicant, setSelApplicant] = useState(null);
 
@@ -4227,7 +4227,7 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
   };
 
   if (selectedProperty) {
-    return <PropertyDetail_Owner
+    return <OwnerPropertyDetail
       property={selectedProperty}
       approvedApplicants={allApprovedApplicants}
       onApprove={function(applicantId) { handleApprove(selectedProperty.id, applicantId, selectedProperty.applicants || []); }}
