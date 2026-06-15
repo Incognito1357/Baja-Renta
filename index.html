@@ -4286,10 +4286,19 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
   };
 
   if (selectedProperty) {
+    var safeProp = Object.assign({
+      applicants: [],
+      img: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80",
+      images: ["https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80"],
+      views: 0, likes: 0,
+    }, selectedProperty, {
+      applicants: selectedProperty.applicants || [],
+      img: selectedProperty.img || "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80",
+    });
     return <PropertyDetail_Owner
-      property={selectedProperty}
+      property={safeProp}
       approvedApplicants={allApprovedApplicants}
-      onApprove={(applicantId) => handleApprove(selectedProperty.id, applicantId, selectedProperty.applicants)}
+      onApprove={function(applicantId) { handleApprove(safeProp.id, applicantId, safeProp.applicants); }}
       onBack={() => setSelectedProperty(null)}
       darkMode={darkMode}
     />;
