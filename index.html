@@ -4155,6 +4155,10 @@ function OwnerSettingsScreen({ onBack, onSignOut, darkModeProp, onToggleTheme, c
 function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, currentUser = {} }) {
   const isMiguel = currentUser && currentUser.email === "miguelayalamartinez@gmail.com";
   const [supaProperties, setSupaProperties] = useState([]);
+  const [tab, setTab] = useState("properties");
+  const [selectedProperty, setSelectedProperty] = useState(null);
+  const [allApprovedApplicants, setAllApprovedApplicants] = useState({});
+  const [showSettings, setShowSettings] = useState(false);
 
   useEffect(function() {
     if (!currentUser || !currentUser.email) return;
@@ -4206,10 +4210,6 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
   }, [currentUser && currentUser.email]);
 
   const myProperties = isMiguel ? MOCK_LISTED.concat(supaProperties) : supaProperties;
-  const [tab, setTab] = useState("properties");
-  const [selectedProperty, setSelectedProperty] = useState(null);
-  const [allApprovedApplicants, setAllApprovedApplicants] = useState({});
-  const [showSettings, setShowSettings] = useState(false);
   const darkMode = darkModeProp !== undefined ? darkModeProp : true;
 
   const bg      = darkMode ? "#0a0f1e"   : "#f8fafc";
