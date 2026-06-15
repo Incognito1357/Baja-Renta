@@ -6814,7 +6814,7 @@ function App() {
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [publishedProperties, setPublishedProperties] = useState([...PROPERTIES]);
 
-  // Load approved properties from Supabase
+  // Load approved properties from Supabase — show them FIRST
   useEffect(function() {
     fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties?status=eq.approved&select=*&order=created_at.desc", {
       headers: {
@@ -6856,10 +6856,8 @@ function App() {
           isMock: false,
         };
       });
-      setPublishedProperties(function(prev) {
-        var mockProps = prev.filter(function(p) { return p.isMock === true || p.isMock === undefined; });
-        return mockProps.concat(supaApproved);
-      });
+      // Show Supabase properties FIRST, then mocks
+      setPublishedProperties(supaApproved.concat(PROPERTIES));
     }).catch(function(e) { console.log("approved properties fetch error:", e); });
   }, []);
   const [ownerSubmissions, setOwnerSubmissions] = useState([]);
