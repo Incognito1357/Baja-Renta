@@ -30,19 +30,7 @@
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script>
-window.onerror = function(msg, src, line, col, err) {
-  document.body.innerHTML = '<div style="background:#0a0f1e;color:white;padding:20px;min-height:100vh;font-family:monospace">' +
-    '<h2 style="color:#ef4444">ERROR</h2>' +
-    '<p style="color:#f59e0b">Message: ' + msg + '</p>' +
-    '<p style="color:#64748b">Line: ' + line + ' Col: ' + col + '</p>' +
-    '<p style="color:#64748b">Source: ' + src + '</p>' +
-    '<p style="color:#64748b;word-break:break-all">' + (err ? err.stack : "") + '</p>' +
-    '</div>';
-  return true;
-};
-</script>
-<script type="text/babel">
+  <script type="text/babel">
     const { useState, useEffect, useRef } = React;
 
 
@@ -1333,7 +1321,7 @@ function HelpScreen({ onBack, darkMode = true }) {
     },
   ];
 
-  const allFaqs = faqs.flatMap(cat => cat.items.map(item => ({ ...item, cat: cat.cat })));
+  var allFaqs = faqs.reduce(function(acc, cat) { return acc.concat(cat.items.map(function(item) { return Object.assign({}, item, { cat: cat.cat }); })); }, []);
   const filtered = search
     ? allFaqs.filter(f => f.q.toLowerCase().includes(search.toLowerCase()) || f.a.toLowerCase().includes(search.toLowerCase()))
     : null;
@@ -2088,7 +2076,7 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
   const handleDocUpload = (key, file) => {
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (e) => setUploadedDocs(d => ({ ...d, [key]: { name: file.name, type: file.type, data: e.target.result } }));
+    reader.onload = (e) => setUploadedDocs(function(d) { var n = Object.assign({}, d); n[key] = { name: file.name, type: file.type, data: e.target.result }; return n; });
     reader.readAsDataURL(file);
   };
   const [profilePhoto, setProfilePhoto] = useState(null);
@@ -2115,8 +2103,8 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
   const overlayGrad = darkMode
     ? "linear-gradient(to bottom, #00000040, transparent 40%, #0a0f1e 100%)"
     : "linear-gradient(to bottom, #00000010 0%, transparent 60%, transparent 100%)";
-  const setF = (k, v) => setAppForm(f => ({ ...f, [k]: v }));
-  const setRef = (i, field, v) => setAppForm(f => { const r = [...f.refs]; r[i] = { ...r[i], [field]: v }; return { ...f, refs: r }; });
+  var setF = function(k, v) { setAppForm(function(f) { var n = Object.assign({}, f); n[k] = v; return n; }); };
+  var setRef = function(i, field, v) { setAppForm(function(f) { var r = f.refs.slice(); r[i] = Object.assign({}, r[i]); r[i][field] = v; var n = Object.assign({}, f); n.refs = r; return n; }); };
   const appReady = appForm.name && appForm.email && appForm.phone && appForm.job && appForm.income;
 
   const deposit = property.deposit;
@@ -2820,8 +2808,8 @@ function SelfRegisterScreen({ onBack, onComplete, onLogin, darkMode = true }) {
   const [code, setCode] = useState(["", "", "", ""]);
   const ref0 = useRef(); const ref1 = useRef(); const ref2 = useRef(); const ref3 = useRef();
   const codeRefs = [ref0, ref1, ref2, ref3];
-  const setF = (k, v) => setForm(f => ({ ...f, [k]: v }));
-  const setL = (k, v) => setLoginForm(f => ({ ...f, [k]: v }));
+  var setF = function(k, v) { setForm(function(f) { var n = Object.assign({}, f); n[k] = v; return n; }); };
+  var setL = function(k, v) { setLoginForm(function(f) { var n = Object.assign({}, f); n[k] = v; return n; }); };
   const getAge = (dob) => {
     if (!dob) return null;
     const today = new Date();
@@ -3424,7 +3412,7 @@ function ApplicantDetail({ applicant, onBack, isApproved, isRejected, onApprove,
   );
   const toggleRef = (i) => {
     if (isApproved) return;
-    setRefVerified(s => { const n = [...s]; n[i] = !n[i]; return n; });
+    setRefVerified(function(s) { var n = s.slice(); n[i] = !n[i]; return n; });
   };
   const docsMap = [
     { key: "ine", label: "INE / Identificación", icon: "🪪" },
@@ -3432,11 +3420,11 @@ function ApplicantDetail({ applicant, onBack, isApproved, isRejected, onApprove,
     { key: "estadoCuenta", label: "Estado de cuenta", icon: "🏦" },
   ];
   const [docVerified, setDocVerified] = useState(
-    docsMap.reduce((acc, d) => ({ ...acc, [d.key]: isApproved ? true : applicant.docs[d.key] }), {})
+    docsMap.reduce(function(acc, d) { var n = Object.assign({}, acc); n[d.key] = isApproved ? true : applicant.docs[d.key]; return n; }, {})
   );
   const toggleDoc = (key) => {
     if (isApproved) return;
-    setDocVerified(s => ({ ...s, [key]: !s[key] }));
+    setDocVerified(function(s) { var n = Object.assign({}, s); n[key] = !s[key]; return n; });
   };
 
   return (
@@ -4434,7 +4422,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (ev) => {
-      setUploadedDocs(prev => ({ ...prev, [key]: { name: file.name, type: file.type, data: ev.target.result } }));
+      setUploadedDocs(function(prev) { var n = Object.assign({}, prev); n[key] = { name: file.name, type: file.type, data: ev.target.result }; return n; });
     };
     reader.readAsDataURL(file);
   };
@@ -4455,8 +4443,8 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
     kidsAllowed: false, mapsUrl: "",
   });
 
-  const setPF = (k, v) => setPropForm(f => ({ ...f, [k]: v }));
-  const togglePF = (k) => setPropForm(f => ({ ...f, [k]: !f[k] }));
+  var setPF = function(k, v) { setPropForm(function(f) { var n = Object.assign({}, f); n[k] = v; return n; }); };
+  var togglePF = function(k) { setPropForm(function(f) { var n = Object.assign({}, f); n[k] = !f[k]; return n; }); };
 
   const formatCard = (v) => v.replace(/\D/g,"").slice(0,16).replace(/(.{4})/g,"$1 ").trim();
   const formatExp  = (v) => { const d = v.replace(/\D/g,"").slice(0,4); return d.length > 2 ? d.slice(0,2)+"/"+d.slice(2) : d; };
@@ -4488,7 +4476,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
       images: uploadedPhotos.length > 0
         ? uploadedPhotos.map(p => p.url).concat(DEFAULT_PHOTOS).slice(0, 5)
         : DEFAULT_PHOTOS,
-      _ownerForm: { ...propForm },
+      _ownerForm: Object.assign({}, propForm),
       _uploadedPhotos: uploadedPhotos,
       _uploadedDocs: uploadedDocs,
       _submittedAt: new Date().toLocaleString("es-MX"),
@@ -5454,7 +5442,7 @@ function VisitorRegister({ onBack, onComplete, onLogin, darkMode = true }) {
   const [code, setCode] = useState(["", "", "", ""]);
   const ref0 = useRef(); const ref1 = useRef(); const ref2 = useRef(); const ref3 = useRef();
   const codeRefs = [ref0, ref1, ref2, ref3];
-  const setF = (k, v) => setForm(f => ({ ...f, [k]: v }));
+  var setF = function(k, v) { setForm(function(f) { var n = Object.assign({}, f); n[k] = v; return n; }); };
   const getAge = (dob) => {
     if (!dob) return null;
     const today = new Date();
@@ -6166,7 +6154,7 @@ function MasterLogin({ onBack, onLogin }) {
 
 function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }) {
   const buildList = () => [
-    ...ALL_PROPERTIES.map(p => ({ ...p, isNew: false })),
+    ...ALL_PROPERTIES.map(function(p) { return Object.assign({}, p, { isNew: false }); }),
     ...publishedProperties.map(p => ({
       id: p.id,
       name: p.name,
@@ -6880,7 +6868,7 @@ function App() {
   };
   // Master approves -> property becomes visible to visitors
   const approveProperty = (id) => {
-    setOwnerSubmissions(prev => prev.map(p => p.id === id ? { ...p, _status: "aprobada" } : p));
+    setOwnerSubmissions(function(prev) { return prev.map(function(p) { return p.id === id ? Object.assign({}, p, { _status: 'aprobada' }) : p; }); });
     const prop = ownerSubmissions.find(p => p.id === id);
     if (prop) setPublishedProperties(prev => [...prev, prop]);
   };
@@ -6912,12 +6900,12 @@ function App() {
     // Also update local state
     setListedProperties(prev => prev.map(p =>
       p.id === propertyId
-        ? { ...p, applicants: [...p.applicants, {
+        ? Object.assign({}, p, { applicants: p.applicants.concat([{
             ...applicant,
             id: Date.now(),
             status: "Necesita revisión",
             docs: { ine: true, comprobante: true, estadoCuenta: true },
-          }] }
+          }]) })
         : p
     ));
   };
@@ -7020,7 +7008,7 @@ function App() {
     else setScreen("filter");
   };
 
-  const handleFilterAnswer = (ans) => { playSound("click"); setFilters(f => ({ ...f, ...ans })); };
+  var handleFilterAnswer = function(ans) { playSound("click"); setFilters(function(f) { return Object.assign({}, f, ans); }); };
 
   const handleFilterNext = () => {
     if (filterStep < FILTER_STEPS.length - 1) { playSound("swoosh"); setFilterStep(s => s + 1); }
