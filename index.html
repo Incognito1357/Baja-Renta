@@ -4226,18 +4226,41 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
       },
     }).then(function(r) { return r.json(); }).then(function(data) {
       if (!Array.isArray(data)) return;
-      setSupaProperties(data.map(function(p) {
-        return {
-          id: p.id, name: p.name, city: p.city, price: p.price, deposit: p.deposit,
-          status: p.status === "approved" ? "aprobada" : p.status === "rejected" ? "rechazada" : "pendiente",
-          img: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80",
-          images: ["https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80"],
-          bedrooms: p.bedrooms, bathrooms: p.bathrooms, _mode: p.management_mode || "self",
-          applicants: [], views: 0, isMock: false,
-        };
-      }));
+      // For each property, load its applications
+      var propPromises = data.map(function(p) {
+        return fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/applications?property_id=eq." + p.id + "&select=*", {
+          headers: {
+            "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+            "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+          },
+        }).then(function(r) { return r.json(); }).then(function(apps) {
+          var applicants = Array.isArray(apps) ? apps.map(function(a) {
+            return {
+              id: a.id,
+              name: a.visitor_name || "Visitante",
+              email: a.visitor_email || "",
+              phone: a.visitor_phone || "",
+              job: a.job_title || "",
+              income: a.monthly_income || 0,
+              status: a.status === "approved" ? "Aprobado" : a.status === "rejected" ? "Rechazado" : "Necesita revisión",
+              docs: { ine: true, comprobante: true, estadoCuenta: true },
+            };
+          }) : [];
+          return {
+            id: p.id, name: p.name, city: p.city, price: p.price, deposit: p.deposit,
+            status: p.status === "approved" ? "aprobada" : p.status === "rejected" ? "rechazada" : "pendiente",
+            img: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80",
+            images: ["https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80"],
+            bedrooms: p.bedrooms, bathrooms: p.bathrooms, _mode: p.management_mode || "self",
+            views: 0, applicants: applicants, isMock: false,
+          };
+        });
+      });
+      Promise.all(propPromises).then(function(props) {
+        setSupaProperties(props);
+      });
     }).catch(function(e) { console.log("owner dashboard fetch error:", e); });
-  }, []);
+  }, [currentUser && currentUser.email]);
 
   const myProperties = isMiguel ? MOCK_LISTED.concat(supaProperties) : supaProperties;
   const [tab, setTab] = useState("properties");
@@ -6892,6 +6915,28 @@ function App() {
   // Owner listed properties with live applicant submissions from visitors
   const [listedProperties, setListedProperties] = useState([]);
   const addApplicant = (propertyId, applicant) => {
+    // Save application to Supabase
+    fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/applications", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+        "Prefer": "return=minimal",
+      },
+      body: JSON.stringify({
+        property_id: typeof propertyId === "string" && propertyId.includes("-") ? propertyId : null,
+        property_name: applicant.propertyName || "",
+        visitor_name: applicant.name || "",
+        visitor_email: applicant.email || "",
+        visitor_phone: applicant.phone || "",
+        job_title: applicant.job || "",
+        monthly_income: parseInt(applicant.income) || 0,
+        status: "pending",
+      }),
+    }).catch(function(e) { console.log("application save error:", e); });
+
+    // Also update local state
     setListedProperties(prev => prev.map(p =>
       p.id === propertyId
         ? { ...p, applicants: [...p.applicants, {
