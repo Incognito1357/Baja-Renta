@@ -4286,22 +4286,37 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
   };
 
   if (selectedProperty) {
-    var safeProp = Object.assign({
-      applicants: [],
-      img: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80",
-      images: ["https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80"],
-      views: 0, likes: 0,
-    }, selectedProperty, {
-      applicants: selectedProperty.applicants || [],
-      img: selectedProperty.img || "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80",
-    });
-    return <PropertyDetail_Owner
-      property={safeProp}
-      approvedApplicants={allApprovedApplicants}
-      onApprove={function(applicantId) { handleApprove(safeProp.id, applicantId, safeProp.applicants); }}
-      onBack={() => setSelectedProperty(null)}
-      darkMode={darkMode}
-    />;
+    try {
+      var safeProp = Object.assign({
+        applicants: [],
+        img: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80",
+        images: ["https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80"],
+        views: 0, likes: 0, price: 0, deposit: 0, city: "—", name: "Propiedad",
+        bedrooms: 0, bathrooms: 0, status: "pendiente",
+      }, selectedProperty, {
+        applicants: selectedProperty.applicants || [],
+        img: selectedProperty.img || "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80",
+        price: selectedProperty.price || 0,
+        deposit: selectedProperty.deposit || 0,
+        views: selectedProperty.views || 0,
+        likes: selectedProperty.likes || 0,
+      });
+      return <PropertyDetail_Owner
+        property={safeProp}
+        approvedApplicants={allApprovedApplicants}
+        onApprove={function(applicantId) { handleApprove(safeProp.id, applicantId, safeProp.applicants); }}
+        onBack={() => setSelectedProperty(null)}
+        darkMode={darkMode}
+      />;
+    } catch(e) {
+      return (
+        <div style={{ minHeight: "100vh", background: "#0a0f1e", padding: 24 }}>
+          <button onClick={() => setSelectedProperty(null)} style={{ background: "none", border: "none", color: "#3b82f6", cursor: "pointer", fontSize: 14, marginBottom: 20 }}>← Regresar</button>
+          <p style={{ color: "white", fontSize: 16, fontWeight: 700 }}>{selectedProperty.name}</p>
+          <p style={{ color: "#64748b", fontSize: 13, marginTop: 8 }}>Error al cargar: {e.message}</p>
+        </div>
+      );
+    }
   }
 
   if (showSettings) {
