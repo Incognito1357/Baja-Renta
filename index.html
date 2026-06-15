@@ -4367,12 +4367,13 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
             borderRadius: 20, overflow: "hidden", marginBottom: 14,
             display: "flex", cursor: "pointer", textAlign: "left",
           }}>
-            <img src={p.img} alt={p.name} style={{ width: 100, height: 100, objectFit: "cover", flexShrink: 0 }} />
+            <img src={p.img || "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80"} alt={p.name} style={{ width: 100, height: 100, objectFit: "cover", flexShrink: 0 }} />
             <div style={{ padding: "12px 14px", flex: 1, minWidth: 0 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
                 <p style={{ fontFamily: "'DM Sans',sans-serif", color: text, fontSize: 14, fontWeight: 700, lineHeight: 1.2 }}>{p.name}</p>
                 {(() => {
-                  const st = getRentedStatus(p);
+                  const pApplicants = p.applicants || [];
+                  const st = pApplicants.some(a => allApprovedApplicants[`${p.id}-${a.id}`] === true) ? "Rentado" : (p.status || "pendiente");
                   return (
                     <span style={{ background: statusBg(st), border: `1px solid ${statusColor(st)}30`, borderRadius: 99, padding: "2px 8px", color: statusColor(st), fontSize: 10, fontWeight: 700, flexShrink: 0, marginLeft: 6 }}>
                       {st === "Rentado" ? "🏠 Rentado" : st}
@@ -4382,13 +4383,13 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
               </div>
               <p style={{ color: textSub, fontSize: 12, marginBottom: 8 }}>{p.city}</p>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <p style={{ fontFamily: "'DM Sans',sans-serif", color: "#3b82f6", fontSize: 14, fontWeight: 700 }}>{`$${p.price.toLocaleString()}`}<span style={{ color: textSub, fontSize: 10 }}>/mes</span></p>
+                <p style={{ fontFamily: "'DM Sans',sans-serif", color: "#3b82f6", fontSize: 14, fontWeight: 700 }}>{`$${(p.price || 0).toLocaleString()}`}<span style={{ color: textSub, fontSize: 10 }}>/mes</span></p>
                 <div style={{ display: "flex", gap: 8 }}>
-                  <span style={{ color: textSub, fontSize: 11 }}>👁 {p.views}</span>
-                  <span style={{ color: textSub, fontSize: 11 }}>❤️ {p.likes}</span>
-                  {p.applicants.length > 0 && (() => {
-                    const hasApproved = p.applicants.some(a => allApprovedApplicants[`${p.id}-${a.id}`] === true);
-                    const pendingCount = p.applicants.filter(a => !allApprovedApplicants[`${p.id}-${a.id}`]).length;
+                  <span style={{ color: textSub, fontSize: 11 }}>👁 {p.views || 0}</span>
+                  {(p.applicants || []).length > 0 && (() => {
+                    const pApplicants = p.applicants || [];
+                    const hasApproved = pApplicants.some(a => allApprovedApplicants[`${p.id}-${a.id}`] === true);
+                    const pendingCount = pApplicants.filter(a => !allApprovedApplicants[`${p.id}-${a.id}`]).length;
                     return hasApproved ? (
                       <span style={{ color: "#10b981", fontSize: 11, fontWeight: 700 }}>{"✓"} Aprobado</span>
                     ) : (
