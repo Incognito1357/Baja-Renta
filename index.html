@@ -4233,9 +4233,9 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
       <div style={{ minHeight: "100vh", background: "#0a0f1e", padding: 24 }}>
         <button onClick={() => setSelectedProperty(null)} style={{ background: "none", border: "none", color: "#3b82f6", cursor: "pointer", fontSize: 16, marginBottom: 20, display: "block" }}>← Regresar</button>
         <p style={{ color: "white", fontSize: 18, fontWeight: 700 }}>{selectedProperty.name || "Propiedad"}</p>
-        <p style={{ color: "#64748b", fontSize: 13, marginTop: 8 }}>Ciudad: {selectedProperty.city || "—"}</p>
+        <p style={{ color: "#64748b", fontSize: 13, marginTop: 8 }}>ID: {String(selectedProperty.id)}</p>
         <p style={{ color: "#64748b", fontSize: 13 }}>Status: {selectedProperty.status || "—"}</p>
-        <p style={{ color: "#64748b", fontSize: 13 }}>Precio: ${(selectedProperty.price || 0).toLocaleString()}</p>
+        <p style={{ color: "#64748b", fontSize: 13 }}>isMock: {String(selectedProperty.isMock)}</p>
         <p style={{ color: "#10b981", fontSize: 12, marginTop: 16 }}>✅ Pantalla de prueba — funciona</p>
       </div>
     );
@@ -4248,7 +4248,7 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
   const statusColor = (s) => s === "Rentado" ? "#6366f1" : s === "Activo" ? "#10b981" : "#f59e0b";
   const statusBg   = (s) => s === "Rentado" ? "#6366f115" : s === "Activo" ? "#10b98115" : "#f59e0b15";
   const getRentedStatus = (p) => {
-    const isRented = p.applicants.some(a => allApprovedApplicants[p.id + "-" + a.id] === true);
+    const isRented = (p.applicants || []).some(a => allApprovedApplicants[p.id + "-" + a.id] === true);
     return isRented ? "Rentado" : p.status;
   };
 
@@ -4285,8 +4285,8 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
           {[
             { label: "Propiedades", val: myProperties.length },
-            { label: "Total vistas", val: myProperties.reduce((a, p) => a + p.views, 0) },
-            { label: "Solicitudes", val: myProperties.reduce((a, p) => a + p.applicants.length, 0) },
+            { label: "Total vistas", val: myProperties.reduce(function(a, p) { return a + (p.views || 0); }, 0) },
+            { label: "Solicitudes", val: myProperties.reduce(function(a, p) { return a + (p.applicants || []).length; }, 0) },
           ].map((s, i) => (
             <div key={i} style={{ background: cardBg, border: "1px solid " + border, borderRadius: 14, padding: "12px 10px", textAlign: "center" }}>
               <p style={{ fontFamily: "'DM Sans',sans-serif", color: text, fontSize: 22, fontWeight: 700 }}>{s.val}</p>
