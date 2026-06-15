@@ -3817,7 +3817,9 @@ function PropertyDetail_Owner({ property, onBack, approvedApplicants, onApprove,
   const cardBg  = darkMode ? "#ffffff06" : "#ffffff";
   const border  = darkMode ? "#ffffff10" : "#e2e8f0";
   const gradBtm = darkMode ? "linear-gradient(to bottom, #00000050, #0a0f1e)" : "linear-gradient(to bottom, #00000030, transparent)";
-  const [tab, setTab] = useState(property.applicants.length > 0 ? "applicants" : "stats");
+  const safeApplicants = safeApplicants || [];
+  const safeApprovedApplicants = approvedApplicants || {};
+  const [tab, setTab] = useState(safeApplicants.length > 0 ? "applicants" : "stats");
   const [selectedApplicant, setSelectedApplicant] = useState(null);
 
   const handleApprove = (id) => {
@@ -3829,15 +3831,15 @@ function PropertyDetail_Owner({ property, onBack, approvedApplicants, onApprove,
     return <ApplicantDetail
       darkMode={darkMode}
       applicant={selectedApplicant}
-      isApproved={approvedApplicants[key] === true}
-      isRejected={approvedApplicants[key] === "rejected"}
+      isApproved={safeApprovedApplicants[key] === true}
+      isRejected={safeApprovedApplicants[key] === "rejected"}
       onApprove={() => { handleApprove(selectedApplicant.id); }}
       onBack={() => setSelectedApplicant(null)}
     />;
   }
 
   const days = ["L","M","X","J","V","S","D"];
-  const isRented = property.applicants.some(a => approvedApplicants[`${property.id}-${a.id}`] === true);
+  const isRented = safeApplicants.some(a => safeApprovedApplicants[`${property.id}-${a.id}`] === true);
   const currentStatus = isRented ? "Rentado" : property.status;
   const statusColor = (s) => s === "Rentado" ? "#6366f1" : s === "Activo" ? "#10b981" : "#f59e0b";
 
@@ -3866,7 +3868,7 @@ function PropertyDetail_Owner({ property, onBack, approvedApplicants, onApprove,
         {[
           { label: "Vistas", val: property.views, icon: "👁" },
           { label: "Likes", val: property.likes, icon: "❤️" },
-          { label: "Solicitudes", val: property.applicants.length, icon: "📋" },
+          { label: "Solicitudes", val: safeApplicants.length, icon: "📋" },
         ].map((s, i) => (
           <div key={i} style={{ background: cardBg, border: `1px solid ${border}`, borderRadius: 14, padding: "12px 8px", textAlign: "center" }}>
             <p style={{ fontSize: 18, marginBottom: 2 }}>{s.icon}</p>
@@ -3886,9 +3888,9 @@ function PropertyDetail_Owner({ property, onBack, approvedApplicants, onApprove,
             cursor: "pointer", fontFamily: "'DM Sans',sans-serif", transition: "all .2s",
           }}>
             {label}
-            {key === "applicants" && property.applicants.length > 0 && (
+            {key === "applicants" && safeApplicants.length > 0 && (
               <span style={{ marginLeft: 4, background: "#f59e0b", borderRadius: 99, padding: "0px 5px", color: "#000", fontSize: 9, fontWeight: 900 }}>
-                {property.applicants.length}
+                {safeApplicants.length}
               </span>
             )}
           </button>
@@ -3916,30 +3918,30 @@ function PropertyDetail_Owner({ property, onBack, approvedApplicants, onApprove,
         {/* Applicants tab */}
         {tab === "applicants" && (
           <>
-            {property.applicants.length === 0 ? (
+            {safeApplicants.length === 0 ? (
               <div style={{ textAlign: "center", padding: "40px 0" }}>
                 <p style={{ fontSize: 32, marginBottom: 8 }}>📋</p>
                 <p style={{ color: "#475569", fontSize: 14 }}>Sin solicitudes aún</p>
               </div>
-            ) : property.applicants.map(a => {
+            ) : safeApplicants.map(a => {
               const key = `${property.id}-${a.id}`;
               return (
               <button key={a.id} onClick={() => setSelectedApplicant(a)} style={{
                 width: "100%", background: cardBg,
-                border: `1px solid ${approvedApplicants[key] === true ? "#10b98130" : approvedApplicants[key] === "rejected" ? "#ef444430" : "#f59e0b30"}`,
+                border: `1px solid ${safeApprovedApplicants[key] === true ? "#10b98130" : safeApprovedApplicants[key] === "rejected" ? "#ef444430" : "#f59e0b30"}`,
                 borderRadius: 18, padding: "14px 16px", marginBottom: 12,
                 display: "flex", alignItems: "center", gap: 14, cursor: "pointer", textAlign: "left",
-                opacity: approvedApplicants[key] === "rejected" ? 0.5 : 1,
+                opacity: safeApprovedApplicants[key] === "rejected" ? 0.5 : 1,
               }}>
-                <img src={a.photo} alt={a.name} style={{ width: 52, height: 52, borderRadius: "50%", objectFit: "cover", border: `2px solid ${approvedApplicants[key] === true ? "#10b981" : approvedApplicants[key] === "rejected" ? "#ef4444" : "#f59e0b"}`, flexShrink: 0 }} />
+                <img src={a.photo} alt={a.name} style={{ width: 52, height: 52, borderRadius: "50%", objectFit: "cover", border: `2px solid ${safeApprovedApplicants[key] === true ? "#10b981" : safeApprovedApplicants[key] === "rejected" ? "#ef4444" : "#f59e0b"}`, flexShrink: 0 }} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 3 }}>
                     <p style={{ fontFamily: "'DM Sans',sans-serif", color: text, fontSize: 15, fontWeight: 700 }}>{a.name}</p>
-                    {approvedApplicants[key] === true ? (
+                    {safeApprovedApplicants[key] === true ? (
                       <span style={{ background: "#10b98115", border: "1px solid #10b98140", borderRadius: 99, padding: "2px 8px", color: "#10b981", fontSize: 10, fontWeight: 700, flexShrink: 0 }}>
                         ✓ Aprobado
                       </span>
-                    ) : approvedApplicants[key] === "rejected" ? (
+                    ) : safeApprovedApplicants[key] === "rejected" ? (
                       <span style={{ background: "#ef444415", border: "1px solid #ef444430", borderRadius: 99, padding: "2px 8px", color: "#ef4444", fontSize: 10, fontWeight: 700, flexShrink: 0 }}>
                         ✗ Rechazado
                       </span>
