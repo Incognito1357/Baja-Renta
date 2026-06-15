@@ -3903,14 +3903,14 @@ function PropertyDetail_Owner({ property, onBack, approvedApplicants, onApprove,
           <>
             <h3 style={{ color: text, fontSize: 14, fontWeight: 700, fontFamily: "'DM Sans',sans-serif", marginBottom: 12 }}>Vistas esta semana</h3>
             <div style={{ background: cardBg, border: `1px solid ${border}`, borderRadius: 16, padding: "16px", marginBottom: 16 }}>
-              <MiniBar values={property.weeklyViews} color="#3b82f6" />
+              <MiniBar values={property.weeklyViews || [0,0,0,0,0,0,0]} color="#3b82f6" />
               <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
                 {days.map(d => <span key={d} style={{ color: "#475569", fontSize: 10 }}>{d}</span>)}
               </div>
             </div>
             <div style={{ background: cardBg, border: `1px solid ${border}`, borderRadius: 16, padding: "16px" }}>
               <p style={{ color: textSub, fontSize: 12, marginBottom: 4 }}>Precio mensual</p>
-              <p style={{ fontFamily: "'DM Sans',sans-serif", color: "#3b82f6", fontSize: 24, fontWeight: 700 }}>{`$${property.price.toLocaleString()}`}</p>
+              <p style={{ fontFamily: "'DM Sans',sans-serif", color: "#3b82f6", fontSize: 24, fontWeight: 700 }}>{`$${(property.price || 0).toLocaleString()}`}</p>
             </div>
           </>
         )}
@@ -3933,7 +3933,7 @@ function PropertyDetail_Owner({ property, onBack, approvedApplicants, onApprove,
                 display: "flex", alignItems: "center", gap: 14, cursor: "pointer", textAlign: "left",
                 opacity: safeApprovedApplicants[key] === "rejected" ? 0.5 : 1,
               }}>
-                <img src={a.photo} alt={a.name} style={{ width: 52, height: 52, borderRadius: "50%", objectFit: "cover", border: `2px solid ${safeApprovedApplicants[key] === true ? "#10b981" : safeApprovedApplicants[key] === "rejected" ? "#ef4444" : "#f59e0b"}`, flexShrink: 0 }} />
+                <img src={a.photo || "https://ui-avatars.com/api/?name=" + encodeURIComponent(a.name || "U") + "&background=1e3a5f&color=fff"} alt={a.name} style={{ width: 52, height: 52, borderRadius: "50%", objectFit: "cover", border: `2px solid ${safeApprovedApplicants[key] === true ? "#10b981" : safeApprovedApplicants[key] === "rejected" ? "#ef4444" : "#f59e0b"}`, flexShrink: 0 }} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 3 }}>
                     <p style={{ fontFamily: "'DM Sans',sans-serif", color: text, fontSize: 15, fontWeight: 700 }}>{a.name}</p>
