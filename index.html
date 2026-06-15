@@ -2397,7 +2397,7 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
 
   if (step === "payment") {
     const total = monthly;
-    const formatCard = (v) => v.replace(/\D/g,"").slice(0,16).replace(/(.{4})/g,"$1 ").trim();
+    var formatCard = function(v) { var d = v.replace(/\D/g,"").slice(0,16); var r = ""; for(var x=0;x<d.length;x++) { if(x>0&&x%4===0) r+=" "; r+=d[x]; } return r.trim(); };
     const formatExpiry = (v) => { const d = v.replace(/\D/g,"").slice(0,4); return d.length>2?d.slice(0,2)+"/"+d.slice(2):d; };
     const canPay = cardName && cardNum.replace(/\s/g,"").length===16 && expiry.length===5 && cvv.length>=3;
 
@@ -4446,7 +4446,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
   var setPF = function(k, v) { setPropForm(function(f) { var n = Object.assign({}, f); n[k] = v; return n; }); };
   var togglePF = function(k) { setPropForm(function(f) { var n = Object.assign({}, f); n[k] = !f[k]; return n; }); };
 
-  const formatCard = (v) => v.replace(/\D/g,"").slice(0,16).replace(/(.{4})/g,"$1 ").trim();
+  var formatCard = function(v) { var d = v.replace(/\D/g,"").slice(0,16); var r = ""; for(var x=0;x<d.length;x++) { if(x>0&&x%4===0) r+=" "; r+=d[x]; } return r.trim(); };
   const formatExp  = (v) => { const d = v.replace(/\D/g,"").slice(0,4); return d.length > 2 ? d.slice(0,2)+"/"+d.slice(2) : d; };
   const canPay = cardName && cardNum.replace(/\s/g,"").length === 16 && expiry.length === 5 && cvv.length >= 3;
   const buildAndPublish = () => {
