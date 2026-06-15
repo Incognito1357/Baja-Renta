@@ -2657,7 +2657,7 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
           </div>
           <p style={{ color: "#94a3b8", fontSize: 13, marginBottom: 10 }}>Duración del contrato</p>
           <div style={{ display: "flex", gap: 8 }}>
-            {[["12", "1 año"]].map(([val, label]) => (
+            {[["12", "1 año"]].map(function(pair) { var val = pair[0], label = pair[1]; return  (
               <button key={val} onClick={() => setContract(val)} style={{
                 flex: 1, padding: "10px", borderRadius: 12, cursor: "pointer", fontSize: 13, fontWeight: 600,
                 background: contract === val ? "linear-gradient(135deg, #3b82f6, #6366f1)" : "#ffffff10",
@@ -3508,7 +3508,7 @@ function ApplicantDetail({ applicant, onBack, isApproved, isRejected, onApprove,
 
         {/* Sub tabs */}
         <div style={{ display: "flex", gap: 8 }}>
-          {[["profile","Perfil"],["refs","Referencias"],["docs","Documentos"]].map(([k,l]) => (
+          {[["profile","Perfil"],["refs","Referencias"],["docs","Documentos"]].map(function(pair) { var k = pair[0], l = pair[1]; return  (
             <button key={k} onClick={() => setDocTab(k)} style={{
               flex: 1, padding: "8px 0", borderRadius: 10, border: "none", cursor: "pointer",
               background: docTab === k ? "#f59e0b" : (darkMode ? "#ffffff08" : "#e2e8f0"),
@@ -4228,10 +4228,24 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
 
   if (selectedProperty) {
     var sp = selectedProperty;
+    var spSafe = {
+      id: String(sp.id || ""),
+      name: String(sp.name || "Propiedad"),
+      city: String(sp.city || "—"),
+      price: Number(sp.price) || 0,
+      deposit: Number(sp.deposit) || 0,
+      bedrooms: Number(sp.bedrooms) || 0,
+      bathrooms: Number(sp.bathrooms) || 0,
+      status: String(sp.status || "pendiente"),
+      img: String(sp.img || "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80"),
+      applicants: Array.isArray(sp.applicants) ? sp.applicants : [],
+      views: Number(sp.views) || 0,
+      owner_email: String(sp.owner_email || ""),
+    };
     return <OwnerPropertyDetail
-      property={sp}
+      property={spSafe}
       approvedApplicants={{}}
-      onApprove={function(aid) { handleApprove(sp.id, aid, sp.applicants || []); }}
+      onApprove={function() {}}
       onBack={function() { setSelectedProperty(null); }}
       darkMode={true}
     />;
@@ -6690,7 +6704,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
         <div>
           {/* Filter tabs */}
           <div style={{ display: "flex", padding: "0 24px", borderBottom: "1px solid #ffffff10", overflowX: "auto" }}>
-            {[["todas","Todas"],["pendiente","Pendientes"],["aprobada","Aprobadas"],["rechazada","Rechazadas"]].map(([key, label]) => (
+            {[["todas","Todas"],["pendiente","Pendientes"],["aprobada","Aprobadas"],["rechazada","Rechazadas"]].map(function(pair) { var key = pair[0], label = pair[1]; return  (
               <button key={key} onClick={() => setFilter(key)} style={{
                 flex: 1, minWidth: 70, padding: "12px 0", background: "none", border: "none",
                 borderBottom: "2px solid " + filter === key ? "#8b5cf6" : "transparent",
