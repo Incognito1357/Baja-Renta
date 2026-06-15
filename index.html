@@ -4229,16 +4229,13 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
   };
 
   if (selectedProperty) {
-    return (
-      <div style={{ minHeight: "100vh", background: "#0a0f1e", padding: 24 }}>
-        <button onClick={() => setSelectedProperty(null)} style={{ background: "none", border: "none", color: "#3b82f6", cursor: "pointer", fontSize: 16, marginBottom: 20, display: "block" }}>← Regresar</button>
-        <p style={{ color: "white", fontSize: 18, fontWeight: 700 }}>{selectedProperty.name || "Propiedad"}</p>
-        <p style={{ color: "#64748b", fontSize: 13, marginTop: 8 }}>ID: {String(selectedProperty.id)}</p>
-        <p style={{ color: "#64748b", fontSize: 13 }}>Status: {selectedProperty.status || "—"}</p>
-        <p style={{ color: "#64748b", fontSize: 13 }}>isMock: {String(selectedProperty.isMock)}</p>
-        <p style={{ color: "#10b981", fontSize: 12, marginTop: 16 }}>✅ Pantalla de prueba — funciona</p>
-      </div>
-    );
+    return <PropertyDetail_Owner
+      property={selectedProperty}
+      approvedApplicants={allApprovedApplicants}
+      onApprove={function(applicantId) { handleApprove(selectedProperty.id, applicantId, selectedProperty.applicants || []); }}
+      onBack={function() { setSelectedProperty(null); }}
+      darkMode={darkMode}
+    />;
   }
 
   if (showSettings) {
@@ -4299,46 +4296,47 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
       <div style={{ padding: "20px 24px" }}>
         <h3 style={{ color: text, fontSize: 15, fontWeight: 700, fontFamily: "'DM Sans',sans-serif", marginBottom: 14 }}>Mis propiedades</h3>
         <p style={{ color: "#f59e0b", fontSize: 11, marginBottom: 8 }}>Supa: {supaProperties.length} | Email: {currentUser && currentUser.email ? currentUser.email.slice(0,10) : "ninguno"}</p>
-        {myProperties.map(p => (
-          <button key={p.id} onClick={() => setSelectedProperty(p)} style={{
+        {myProperties.map(function(p) {
+          var safeP = {
+            id: p.id || "",
+            name: p.name || "Propiedad",
+            city: p.city || "—",
+            price: p.price || 0,
+            deposit: p.deposit || 0,
+            status: p.status || "pendiente",
+            img: p.img || "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80",
+            applicants: p.applicants || [],
+            views: p.views || 0,
+            bedrooms: p.bedrooms || 0,
+            bathrooms: p.bathrooms || 0,
+            isMock: p.isMock || false,
+            owner_email: p.owner_email || "",
+          };
+          var pApplicants = safeP.applicants;
+          var st = pApplicants.some(function(a) { return allApprovedApplicants[safeP.id + "-" + a.id] === true; }) ? "Rentado" : safeP.status;
+          return (
+          <button key={safeP.id || Math.random()} onClick={function() { setSelectedProperty(safeP); }} style={{
             width: "100%", background: cardBg, border: "1px solid " + border,
             borderRadius: 20, overflow: "hidden", marginBottom: 14,
             display: "flex", cursor: "pointer", textAlign: "left",
           }}>
-            <img src={p.img || "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80"} alt={p.name} style={{ width: 100, height: 100, objectFit: "cover", flexShrink: 0 }} />
+            <img src={safeP.img} alt={safeP.name} style={{ width: 100, height: 100, objectFit: "cover", flexShrink: 0 }} />
             <div style={{ padding: "12px 14px", flex: 1, minWidth: 0 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
-                <p style={{ fontFamily: "'DM Sans',sans-serif", color: text, fontSize: 14, fontWeight: 700, lineHeight: 1.2 }}>{p.name}</p>
-                {(() => {
-                  const pApplicants = p.applicants || [];
-                  const st = pApplicants.some(a => allApprovedApplicants[p.id + "-" + a.id] === true) ? "Rentado" : (p.status || "pendiente");
-                  return (
-                    <span style={{ background: statusBg(st), border: "1px solid " + statusColor(st) + "30", borderRadius: 99, padding: "2px 8px", color: statusColor(st), fontSize: 10, fontWeight: 700, flexShrink: 0, marginLeft: 6 }}>
-                      {st === "Rentado" ? "🏠 Rentado" : st}
-                    </span>
-                  );
-                })()}
+                <p style={{ fontFamily: "'DM Sans',sans-serif", color: text, fontSize: 14, fontWeight: 700, lineHeight: 1.2 }}>{safeP.name}</p>
+                <span style={{ background: statusBg(st), border: "1px solid " + statusColor(st) + "30", borderRadius: 99, padding: "2px 8px", color: statusColor(st), fontSize: 10, fontWeight: 700, flexShrink: 0, marginLeft: 6 }}>
+                  {st === "Rentado" ? "🏠 Rentado" : st}
+                </span>
               </div>
-              <p style={{ color: textSub, fontSize: 12, marginBottom: 8 }}>{p.city}</p>
+              <p style={{ color: textSub, fontSize: 12, marginBottom: 8 }}>{safeP.city}</p>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <p style={{ fontFamily: "'DM Sans',sans-serif", color: "#3b82f6", fontSize: 14, fontWeight: 700 }}>{"$" + (p.price || 0).toLocaleString()}<span style={{ color: textSub, fontSize: 10 }}>/mes</span></p>
-                <div style={{ display: "flex", gap: 8 }}>
-                  <span style={{ color: textSub, fontSize: 11 }}>👁 {p.views || 0}</span>
-                  {(p.applicants || []).length > 0 && (() => {
-                    const pApplicants = p.applicants || [];
-                    const hasApproved = pApplicants.some(a => allApprovedApplicants[p.id + "-" + a.id] === true);
-                    const pendingCount = pApplicants.filter(a => !allApprovedApplicants[p.id + "-" + a.id]).length;
-                    return hasApproved ? (
-                      <span style={{ color: "#10b981", fontSize: 11, fontWeight: 700 }}>{"✓"} Aprobado</span>
-                    ) : (
-                      <span style={{ color: "#f59e0b", fontSize: 11, fontWeight: 700 }}>⚠️ {pendingCount}</span>
-                    );
-                  })()}
-                </div>
+                <p style={{ fontFamily: "'DM Sans',sans-serif", color: "#3b82f6", fontSize: 14, fontWeight: 700 }}>{"$" + safeP.price.toLocaleString()}<span style={{ color: textSub, fontSize: 10 }}>/mes</span></p>
+                <span style={{ color: textSub, fontSize: 11 }}>👁 {safeP.views}</span>
               </div>
             </div>
           </button>
-        ))}
+          );
+        })}
       </div>
 
       <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, padding: "16px 24px 32px", background: "linear-gradient(to top, " + bg + " 70%, transparent)", transition: "background .3s" }}>
