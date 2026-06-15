@@ -30,7 +30,19 @@
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script type="text/babel">
+  <script>
+window.onerror = function(msg, src, line, col, err) {
+  document.body.innerHTML = '<div style="background:#0a0f1e;color:white;padding:20px;min-height:100vh;font-family:monospace">' +
+    '<h2 style="color:#ef4444">ERROR</h2>' +
+    '<p style="color:#f59e0b">Message: ' + msg + '</p>' +
+    '<p style="color:#64748b">Line: ' + line + ' Col: ' + col + '</p>' +
+    '<p style="color:#64748b">Source: ' + src + '</p>' +
+    '<p style="color:#64748b;word-break:break-all">' + (err ? err.stack : "") + '</p>' +
+    '</div>';
+  return true;
+};
+</script>
+<script type="text/babel">
     const { useState, useEffect, useRef } = React;
 
 
