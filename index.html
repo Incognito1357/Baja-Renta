@@ -4376,6 +4376,7 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
 
       <div style={{ padding: "20px 24px" }}>
         <h3 style={{ color: text, fontSize: 15, fontWeight: 700, fontFamily: "'DM Sans',sans-serif", marginBottom: 14 }}>Mis propiedades</h3>
+        <p style={{ color: "#f59e0b", fontSize: 11, marginBottom: 8 }}>Supa: {supaProperties.length} | Email: {currentUser && currentUser.email ? currentUser.email.slice(0,10) : "ninguno"}</p>
         {myProperties.map(p => (
           <button key={p.id} onClick={() => setSelectedProperty(p)} style={{
             width: "100%", background: cardBg, border: `1px solid ${border}`,
