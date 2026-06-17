@@ -1433,7 +1433,7 @@ function HelpScreen({ onBack, darkMode = true }) {
               })}
             </div>
           </div>
-        ))
+        ))}
 
         {/* Contact tab */}
         {!search && activeTab === "contact" && (
@@ -1460,7 +1460,7 @@ function HelpScreen({ onBack, darkMode = true }) {
                 </div>
                 <Icon name="arrow" size={14} color="#64748b" />
               </a>
-            ))
+            ))}
 
             <div style={{ background: cardBg, border: "1px solid " + border, borderRadius: 16, padding: "18px", marginTop: 8 }}>
               <p style={{ color: text, fontSize: 14, fontWeight: 700, marginBottom: 4 }}>🕐 Horario de atención</p>
@@ -2148,7 +2148,7 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
                 fontFamily: "'DM Sans',sans-serif", outline: "none",
               }} />
             </div>
-          ))
+          ))}
 
           {/* References */}
           <h3 style={{ fontFamily: "'Syne',sans-serif", color: text, fontSize: 15, fontWeight: 700, marginBottom: 6, marginTop: 20 }}>📞 3 Referencias personales</h3>
@@ -2204,7 +2204,7 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
                 />
               </div>
             </div>
-          ))
+          ))}
 
           {/* Documents */}
           <h3 style={{ fontFamily: "'Syne',sans-serif", color: text, fontSize: 15, fontWeight: 700, marginBottom: 6, marginTop: 20 }}>📎 Documentos requeridos</h3>
@@ -2734,7 +2734,7 @@ function PhotoUploader({ mode, photos, setPhotos }) {
                 <Icon name="x" size={11} color="white" />
               </button>
             </div>
-          ))
+          ))}
           {[...Array(5 - photos.length)].map((_, i) => (
             <div key={"e" + i} style={{
               aspectRatio: "1", borderRadius: 12, border: "1px dashed " + accentBorder,
@@ -3593,7 +3593,7 @@ function ApplicantDetail({ applicant, onBack, isApproved, isRejected, onApprove,
                   <p style={{ color: text, fontSize: 14, fontWeight: 600 }}>{r.val}</p>
                 </div>
               </div>
-            ))
+            ))}
 
             {/* Approve/Reject buttons */}
             <div style={{ height: 1, background: "#ffffff08", margin: "16px 0" }} />
@@ -4018,7 +4018,7 @@ function OwnerSettingsScreen({ onBack, onSignOut, darkModeProp, onToggleTheme, c
               </div>
             )}
           </div>
-        ))
+        ))}
 
         {/* Sign out */}
         <button onClick={onSignOut} style={{
@@ -6695,7 +6695,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
               </span>
             </div>
           </button>
-        ))
+        ))}
         {filtered.length === 0 && (
           <div style={{ textAlign: "center", padding: "48px 0" }}>
             <p style={{ fontSize: 32, marginBottom: 8 }}>🏠</p>
