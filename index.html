@@ -2154,7 +2154,7 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
           <h3 style={{ fontFamily: "'Syne',sans-serif", color: text, fontSize: 15, fontWeight: 700, marginBottom: 6, marginTop: 20 }}>📞 3 Referencias personales</h3>
           <p style={{ color: "#64748b", fontSize: 12, marginBottom: 12 }}>Nombre y teléfono de cada referencia</p>
           {appForm.refs.map((r, i) => (
-            <div key={i} style={{ background: "#ffffff06", border: "1px solid " + (r.name && r.phone) ? "#3b82f640" : border2, borderRadius: 14, padding: "14px", marginBottom: 12 }}>
+            <div key={i} style={{ background: "#ffffff06", border: "1px solid " + (((r.name && r.phone) ? "#3b82f640" : border2)), borderRadius: 14, padding: "14px", marginBottom: 12 }}>
               <p style={{ color: "#64748b", fontSize: 12, fontWeight: 700, marginBottom: 10 }}>Referencia {i + 1}</p>
               {/* Name field */}
               <div style={{ position: "relative", marginBottom: 8 }}>
