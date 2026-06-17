@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BAJA RENTA v2.1 - FIXED BUILD -->
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -1131,7 +1132,7 @@ function FilterSlide({ step, stepIndex, total, filters, onAnswer, onNext, onBack
             <button key={opt} onClick={() => setSelected(opt)}
               style={{
                 background: selected === opt ? "linear-gradient(135deg, #3b82f6, #6366f1)" : cardBg,
-                border: "1px solid " + selected === opt ? "transparent" : border,
+                border: "1px solid " + (selected === opt? "transparent" : border),
                 borderRadius: 16, padding: "16px 20px", cursor: "pointer",
                 color: selected === opt ? "white" : text,
                 fontSize: 15, textAlign: "left", fontFamily: "'DM Sans', sans-serif",
@@ -2468,14 +2469,14 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
         }} />
 
         <input placeholder="Número de tarjeta" value={cardNum} onChange={e => setCardNum(formatCard(e.target.value))} inputMode="numeric" style={{
-          display: "block", width: "100%", background: "#ffffff08", border: "1px solid " + cardNum.replace(/\s/g,"").length===16?"#3b82f650":border,
+          display: "block", width: "100%", background: "#ffffff08", border: "1px solid " + (cardNum.replace(/\s/g,"").length===16?"#3b82f650":border),
           borderRadius: 12, padding: "14px 16px", color: text, fontSize: 14,
           fontFamily: "'DM Sans',sans-serif", outline: "none", marginBottom: 10, letterSpacing: 2,
         }} />
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 24 }}>
           <input placeholder="MM/AA" value={expiry} onChange={e => setExpiry(formatExpiry(e.target.value))} inputMode="numeric" style={{
-            display: "block", width: "100%", background: "#ffffff08", border: "1px solid " + expiry.length===5?"#3b82f650":border,
+            display: "block", width: "100%", background: "#ffffff08", border: "1px solid " + (expiry.length===5?"#3b82f650":border),
             borderRadius: 12, padding: "14px 16px", color: text, fontSize: 14,
             fontFamily: "'DM Sans',sans-serif", outline: "none",
           }} />
@@ -2661,7 +2662,7 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
               <button key={val} onClick={() => setContract(val)} style={{
                 flex: 1, padding: "10px", borderRadius: 12, cursor: "pointer", fontSize: 13, fontWeight: 600,
                 background: contract === val ? "linear-gradient(135deg, #3b82f6, #6366f1)" : "#ffffff10",
-                border: "1px solid " + contract === val ? "transparent" : border,
+                border: "1px solid " + (contract === val ? "transparent" : border),
                 color: text, fontFamily: "'DM Sans',sans-serif", transition: "all .2s",
               }}>{label}</button>
             ))}
@@ -4868,7 +4869,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
       </button>
       <div style={{
         background: mode === "managed" ? "linear-gradient(135deg, #3b82f620, #6366f120)" : "linear-gradient(135deg, #f59e0b20, #d9770620)",
-        border: "1px solid " + mode === "managed" ? "#3b82f640" : "#f59e0b40",
+        border: "1px solid " + (mode === "managed"? "#3b82f640" : "#f59e0b40"),
         borderRadius: 14, padding: "12px 16px", marginBottom: 28,
         display: "flex", alignItems: "center", gap: 10,
       }}>
@@ -4982,7 +4983,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
         <p style={{ color: textSubOP, fontSize: 14, fontWeight: 600, marginBottom: 8 }}>🏠 Número de pisos</p>
         <div style={{ display: "flex", gap: 8 }}>
           {[{ label: "🏠 1 piso", val: "1" }, { label: "🏠 2 o más pisos", val: "2+" }].map(opt => (
-            <label key={opt.val} onClick={() => setPF("floors", opt.val)} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, background: propForm.floors === opt.val ? accent+"20" : "#ffffff06", border: "1px solid " + propForm.floors === opt.val ? accent+"50" : "#ffffff10", borderRadius: 10, padding: "14px 8px", cursor: "pointer", color: propForm.floors === opt.val ? "white" : "#94a3b8", fontSize: 15, fontWeight: 700, transition: "all .2s" }}>
+            <label key={opt.val} onClick={() => setPF("floors", opt.val)} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, background: propForm.floors === opt.val ? accent+"20" : "#ffffff06", border: "1px solid " + (propForm.floors === opt.val? accent+"50" : "#ffffff10"), borderRadius: 10, padding: "14px 8px", cursor: "pointer", color: propForm.floors === opt.val ? "white" : "#94a3b8", fontSize: 15, fontWeight: 700, transition: "all .2s" }}>
               {opt.label}
             </label>
           ))}
@@ -5015,7 +5016,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
           <p style={{ color: textSubOP, fontSize: 14, fontWeight: 600, marginBottom: 8 }}>🛏️ No. de recámaras</p>
           <div style={{ display: "flex", gap: 6 }}>
             {[1,2,3,4,"5+"].map(n => (
-              <label key={n} onClick={() => setPF("bedrooms", String(n))} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", background: propForm.bedrooms === String(n) ? accent+"20" : "#ffffff06", border: "1px solid " + propForm.bedrooms === String(n) ? accent+"60" : "#ffffff10", borderRadius: 8, padding: "11px 4px", cursor: "pointer", color: propForm.bedrooms === String(n) ? "white" : "#94a3b8", fontSize: 15, fontWeight: 800, transition: "all .2s" }}>
+              <label key={n} onClick={() => setPF("bedrooms", String(n))} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", background: propForm.bedrooms === String(n) ? accent+"20" : "#ffffff06", border: "1px solid " + (propForm.bedrooms === String(n) ? accent+"60" : "#ffffff10"), borderRadius: 8, padding: "11px 4px", cursor: "pointer", color: propForm.bedrooms === String(n) ? "white" : "#94a3b8", fontSize: 15, fontWeight: 800, transition: "all .2s" }}>
                 {n}
               </label>
             ))}
@@ -5025,7 +5026,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
           <p style={{ color: textSubOP, fontSize: 14, fontWeight: 600, marginBottom: 8 }}>🚿 No. de baños</p>
           <div style={{ display: "flex", gap: 6 }}>
             {[1,2,3,4,"4+"].map(n => (
-              <label key={n} onClick={() => setPF("bathrooms", String(n))} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", background: propForm.bathrooms === String(n) ? accent+"20" : "#ffffff06", border: "1px solid " + propForm.bathrooms === String(n) ? accent+"60" : "#ffffff10", borderRadius: 8, padding: "11px 4px", cursor: "pointer", color: propForm.bathrooms === String(n) ? "white" : "#94a3b8", fontSize: 15, fontWeight: 800, transition: "all .2s" }}>
+              <label key={n} onClick={() => setPF("bathrooms", String(n))} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", background: propForm.bathrooms === String(n) ? accent+"20" : "#ffffff06", border: "1px solid " + (propForm.bathrooms === String(n) ? accent+"60" : "#ffffff10"), borderRadius: 8, padding: "11px 4px", cursor: "pointer", color: propForm.bathrooms === String(n) ? "white" : "#94a3b8", fontSize: 15, fontWeight: 800, transition: "all .2s" }}>
                 {n}
               </label>
             ))}
@@ -5038,7 +5039,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
         <p style={{ color: textSubOP, fontSize: 14, fontWeight: 600, marginBottom: 8 }}>🚗 Tipo de estacionamiento {!propForm.parkingIncluded && <span style={{ fontSize: 11, fontWeight: 400, color: "#64748b" }}>— activa "Estacionamiento" primero</span>}</p>
         <div style={{ display: "flex", gap: 8 }}>
           {["Privado", "Público"].map(opt => (
-            <label key={opt} onClick={() => propForm.parkingIncluded && setPF("parking", opt)} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, background: propForm.parking === opt ? accent+"20" : "#ffffff06", border: "1px solid " + propForm.parking === opt ? accent+"50" : "#ffffff10", borderRadius: 10, padding: "14px 8px", cursor: propForm.parkingIncluded ? "pointer" : "not-allowed", color: propForm.parking === opt ? "white" : "#94a3b8", fontSize: 15, fontWeight: 700, textAlign: "center", transition: "all .2s" }}>
+            <label key={opt} onClick={() => propForm.parkingIncluded && setPF("parking", opt)} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, background: propForm.parking === opt ? accent+"20" : "#ffffff06", border: "1px solid " + (propForm.parking === opt? accent+"50" : "#ffffff10"), borderRadius: 10, padding: "14px 8px", cursor: propForm.parkingIncluded ? "pointer" : "not-allowed", color: propForm.parking === opt ? "white" : "#94a3b8", fontSize: 15, fontWeight: 700, textAlign: "center", transition: "all .2s" }}>
               {opt}
             </label>
           ))}
@@ -5294,7 +5295,7 @@ function GuestPropertyDetail({ p, onBack, onRegister }) {
             {p.images.map((img, i) => (
               <button key={i} onClick={() => setImgIdx(i)} style={{
                 width: i === imgIdx ? 52 : 44, height: 44, borderRadius: 10, overflow: "hidden",
-                border: "2px solid " + i === imgIdx ? "#3b82f6" : "transparent",
+                border: "2px solid " + (i === imgIdx? "#3b82f6" : "transparent"),
                 padding: 0, cursor: "pointer", transition: "all .2s", flexShrink: 0,
               }}>
                 <img src={img} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -5773,7 +5774,7 @@ function DrumPicker({ items, selected, onSelect, color = "#3b82f6" }) {
               height: itemH, display: "flex", alignItems: "center", justifyContent: "center",
               cursor: "pointer", transition: "all .3s",
               opacity: dist === 0 ? 1 : dist === 1 ? 0.5 : 0.2,
-              transform: "scale(" + dist === 0 ? 1 : 0.85 + ")",
+              transform: "scale(" + (dist === 0? 1 : 0.85 + ")"),
             }}>
               <span style={{
                 fontFamily: "'DM Sans',sans-serif",
@@ -6314,7 +6315,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
           <p style={{ color: "#64748b", fontSize: 13, marginBottom: 4 }}>👤 {p.owner} · {p.city}{p.state ? ", " + p.state : ""}</p>
           <p style={{ color: "#64748b", fontSize: 12, marginBottom: 4 }}>📅 Enviado: {p.submitted}</p>
           {isNew && p._mode && (
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: p._mode === "managed" ? "#3b82f615" : "#f59e0b15", border: "1px solid " + p._mode === "managed" ? "#3b82f630" : "#f59e0b30", borderRadius: 99, padding: "3px 12px", marginBottom: 16 }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: p._mode === "managed" ? "#3b82f615" : "#f59e0b15", border: "1px solid " + (p._mode === "managed"? "#3b82f630" : "#f59e0b30"), borderRadius: 99, padding: "3px 12px", marginBottom: 16 }}>
               <p style={{ color: p._mode === "managed" ? "#3b82f6" : "#f59e0b", fontSize: 11, fontWeight: 700 }}>
                 {p._mode === "managed" ? "🛎️ Gestión Baja Renta" : "🔑 Autogestión propietario"}
               </p>
@@ -6659,7 +6660,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
             {[["todas","Todas"],["pendiente","Pendientes"],["aprobada","Aprobadas"],["rechazada","Rechazadas"]].map(function(pair) { var key = pair[0], label = pair[1]; return  (
               <button key={key} onClick={() => setFilter(key)} style={{
                 flex: 1, minWidth: 70, padding: "12px 0", background: "none", border: "none",
-                borderBottom: "2px solid " + filter === key ? "#8b5cf6" : "transparent",
+                borderBottom: "2px solid " + (filter === key? "#8b5cf6" : "transparent"),
                 color: filter === key ? "#8b5cf6" : "#64748b",
                 fontSize: 11, fontWeight: filter === key ? 700 : 400,
                 cursor: "pointer", fontFamily: "'DM Sans',sans-serif", transition: "all .2s",
@@ -6671,7 +6672,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
         {filtered.map(p => (
           <button key={p.id} onClick={() => setSelected(p)} style={{
             width: "100%", background: "#ffffff06",
-            border: "1px solid " + p.status === "aprobada" ? "#10b98120" : "#f59e0b20",
+            border: "1px solid " + (p.status === "aprobada"? "#10b98120" : "#f59e0b20"),
             borderRadius: 20, overflow: "hidden", marginBottom: 14,
             display: "flex", cursor: "pointer", textAlign: "left",
           }}>
@@ -6681,7 +6682,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
                 <p style={{ fontFamily: "'Syne',sans-serif", color: "white", fontSize: 14, fontWeight: 700, lineHeight: 1.2, flex: 1, marginRight: 8 }}>{p.name}</p>
                 <span style={{
                   background: p.status === "aprobada" ? "#10b98115" : p.status === "rechazada" ? "#ef444415" : "#f59e0b15",
-                  border: "1px solid " + p.status === "aprobada" ? "#10b98140" : p.status === "rechazada" ? "#ef444440" : "#f59e0b40",
+                  border: "1px solid " + (p.status === "aprobada"? "#10b98140" : p.status === "rechazada" ? "#ef444440" : "#f59e0b40"),
                   borderRadius: 99, padding: "2px 8px",
                   color: p.status === "aprobada" ? "#10b981" : p.status === "rechazada" ? "#ef4444" : "#f59e0b",
                   fontSize: 10, fontWeight: 700, flexShrink: 0,
@@ -6781,8 +6782,8 @@ function App() {
           kitchen: p.kitchen !== false,
           laundry: p.laundry || false,
           patio: p.patio || false,
-          img: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80",
-          images: ["https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80"],
+          img: (function(){ try{ var imgs = Array.isArray(p.images)?p.images:JSON.parse(p.images||"[]"); return imgs[0]||"https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80"; }catch(e){ return "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80"; } })(),
+          images: (function(){ try{ var imgs = Array.isArray(p.images)?p.images:JSON.parse(p.images||"[]"); return imgs.length>0?imgs:["https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80"]; }catch(e){ return ["https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80"]; } })(),
           owner: "Propietario",
           ownerPhone: "",
           ownerEmail: p.owner_email || "",
