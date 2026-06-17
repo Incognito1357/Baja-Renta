@@ -2629,7 +2629,7 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
 
         {/* Google Maps link */}
         <a
-          href={property.mapsUrl || "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent((property.address || "") + " " + (property.city || "") + " " + (property.state || "") + " México")}
+          href={property.mapsUrl || "https://www.google.com/maps/search/?api=1&amp;query=" + encodeURIComponent((property.address || "") + " " + (property.city || "") + " " + (property.state || "") + " México")}
           target="_blank"
           rel="noopener noreferrer"
           style={{
