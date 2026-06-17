@@ -3850,22 +3850,45 @@ function OwnerPropertyDetail({ property, onBack, approvedApplicants, onApprove, 
           );
         })}
       </div>
-      {isApproved && (
-        <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, padding: "16px 20px 32px", background: "linear-gradient(to top, #0a0f1e, transparent)" }}>
+      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, padding: "16px 20px 32px", background: "linear-gradient(to top, #0a0f1e, transparent)" }}>
+        {property.status === "aprobada" ? (
+          <div>
+            <div style={{ background: "#f59e0b10", border: "1px solid #f59e0b30", borderRadius: 12, padding: "10px 16px", marginBottom: 10, textAlign: "center" }}>
+              <p style={{ color: "#fcd34d", fontSize: 12, fontWeight: 600 }}>📅 Publicación activa por 90 días · Pago único $500 MXN</p>
+              <p style={{ color: "#78716c", fontSize: 11, marginTop: 3 }}>Tu propiedad visible en el catálogo de Baja Renta</p>
+            </div>
+            <button onClick={function() {
+              fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/create-checkout", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ" },
+                body: JSON.stringify({ property_name: name, owner_email: property.owner_email || "", property_id: String(property.id || "") }),
+              }).then(function(r) { return r.json(); }).then(function(res) {
+                if (res.url) window.open(res.url, "_blank");
+                else alert("Error al crear sesion de pago.");
+              }).catch(function() { alert("Error de conexion."); });
+            }} style={{ width: "100%", background: "linear-gradient(135deg, #10b981, #059669)", border: "none", borderRadius: 16, padding: 16, color: "white", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
+              💳 Pagar $500 MXN y publicar
+            </button>
+          </div>
+        ) : property.status === "pendiente" ? (
           <button onClick={function() {
-            fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/create-checkout", {
-              method: "POST",
-              headers: { "Content-Type": "application/json", "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ" },
-              body: JSON.stringify({ property_name: name, owner_email: property.owner_email || "", property_id: String(property.id || "") }),
-            }).then(function(r) { return r.json(); }).then(function(res) {
-              if (res.url) window.open(res.url, "_blank");
-              else alert("Error al crear sesion de pago.");
-            }).catch(function() { alert("Error de conexion."); });
-          }} style={{ width: "100%", background: "linear-gradient(135deg, #10b981, #059669)", border: "none", borderRadius: 16, padding: 16, color: "white", fontSize: 15, fontWeight: 700, cursor: "pointer" }}>
-            Pagar $500 MXN y publicar
+            fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties?id=eq." + String(property.id), {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json", "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ", "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ" },
+              body: JSON.stringify({ status: "revision" }),
+            }).then(function() {
+              alert("¡Solicitud enviada! El equipo de Baja Renta revisará tu propiedad en 24-72 horas hábiles y recibirás un correo al ser aprobada.");
+            }).catch(function() { alert("Error de conexión."); });
+          }} style={{ width: "100%", background: "linear-gradient(135deg, #3b82f6, #6366f1)", border: "none", borderRadius: 16, padding: 16, color: "white", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
+            📤 Solicitar publicación
           </button>
-        </div>
-      )}
+        ) : (
+          <div style={{ background: "#f59e0b10", border: "1px solid #f59e0b30", borderRadius: 14, padding: "14px 16px", textAlign: "center" }}>
+            <p style={{ color: "#fcd34d", fontSize: 13, fontWeight: 700, marginBottom: 4 }}>⏳ En revisión</p>
+            <p style={{ color: "#78716c", fontSize: 12, lineHeight: 1.5 }}>El equipo de Baja Renta está revisando tu propiedad. Recibirás un correo cuando sea aprobada.</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -5236,9 +5259,6 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
             </div>
           )}
           <p style={{ color: textSubOP, fontSize: 12, textAlign: "center", marginTop: 8 }}>
-            {masterApproved ? "✅ Propiedad autorizada · 📅 Publicación activa por 90 días" : "📅 Publicación activa por 90 días una vez autorizada"}
-          </p>
-          <p style={{ color: textSubOP, fontSize: 12, textAlign: "center", marginTop: 4 }}>
             🛎️ Nuestro equipo revisará tu propiedad en 24–72 hrs laborables
           </p>
         </div>
