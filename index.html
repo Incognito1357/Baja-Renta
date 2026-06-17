@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BAJA RENTA v2.1 - FIXED BUILD -->
+<!-- BAJA RENTA v2.2 -->
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -669,7 +669,7 @@ function ForgotPasswordScreen({ onBack, darkMode = true, accentColor = "#3b82f6"
                   type="email"
                   value={email}
                   onChange={e => { setEmail(e.target.value); setError(""); }}
-                  style={{ display: "block", width: "100%", background: inputBg, border: "1px solid " + (error? "#ef444450" : border), borderRadius: 12, padding: "14px 14px 14px 44px", color: text, fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none" }}
+                  style={{ display: "block", width: "100%", background: inputBg, border: "1px solid " + error ? "#ef444450" : border, borderRadius: 12, padding: "14px 14px 14px 44px", color: text, fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none" }}
                 />
               </div>
               {error && <p style={{ color: "#ef4444", fontSize: 12, marginTop: 8 }}>{error}</p>}
@@ -703,7 +703,7 @@ function ForgotPasswordScreen({ onBack, darkMode = true, accentColor = "#3b82f6"
               <div style={{ display: "flex", gap: 12, justifyContent: "center", marginBottom: 12 }}>
                 {code.map((c, i) => (
                   <input key={i} ref={codeRefs[i]} value={c} onChange={e => handleCodeInput(i, e.target.value)} onKeyDown={e => handleCodeKey(i, e)}
-                    style={{ width: 56, height: 64, borderRadius: 14, textAlign: "center", fontSize: 28, fontWeight: 700, fontFamily: "'Syne',sans-serif", color: c ? accentColor : text, background: c ? (accentColor === "#f59e0b" ? "#f59e0b10" : "#3b82f610") : inputBg, border: "2px solid " + (c? accentColor : border), outline: "none", transition: "all .2s" }}
+                    style={{ width: 56, height: 64, borderRadius: 14, textAlign: "center", fontSize: 28, fontWeight: 700, fontFamily: "'Syne',sans-serif", color: c ? accentColor : text, background: c ? (accentColor === "#f59e0b" ? "#f59e0b10" : "#3b82f610") : inputBg, border: "2px solid " + c ? accentColor : border, outline: "none", transition: "all .2s" }}
                     maxLength={1} inputMode="numeric"
                   />
                 ))}
@@ -745,7 +745,7 @@ function ForgotPasswordScreen({ onBack, darkMode = true, accentColor = "#3b82f6"
               {/* New password */}
               <div style={{ position: "relative", marginBottom: 8 }}>
                 <input placeholder="Nueva contraseña" type={showNew ? "text" : "password"} value={newPass} onChange={e => { setNewPass(e.target.value); setError(""); }}
-                  style={{ display: "block", width: "100%", background: inputBg, border: "1px solid " + (newPass ? (strength >= 2 ? "#10b98150" : "#f59e0b50") : border), borderRadius: 12, padding: "14px 60px 14px 14px", color: text, fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none" }}
+                  style={{ display: "block", width: "100%", background: inputBg, border: "1px solid " + newPass ? (strength >= 2 ? "#10b98150" : "#f59e0b50") : border, borderRadius: 12, padding: "14px 60px 14px 14px", color: text, fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none" }}
                 />
                 <button onClick={() => setShowNew(v => !v)} style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: textSub, fontSize: 12, cursor: "pointer" }}>
                   {showNew ? "Ocultar" : "Ver"}
@@ -767,7 +767,7 @@ function ForgotPasswordScreen({ onBack, darkMode = true, accentColor = "#3b82f6"
               {/* Confirm password */}
               <div style={{ position: "relative", marginBottom: 8 }}>
                 <input placeholder="Confirmar nueva contraseña" type={showConfirm ? "text" : "password"} value={confirm} onChange={e => { setConfirm(e.target.value); setError(""); }}
-                  style={{ display: "block", width: "100%", background: inputBg, border: "1px solid " + (!confirm ? border : (passwordsMatch ? "#10b98150" : "#ef444450")), borderRadius: 12, padding: "14px 60px 14px 14px", color: text, fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none" }}
+                  style={{ display: "block", width: "100%", background: inputBg, border: "1px solid " + !confirm ? border : passwordsMatch ? "#10b98150" : "#ef444450", borderRadius: 12, padding: "14px 60px 14px 14px", color: text, fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none" }}
                 />
                 <button onClick={() => setShowConfirm(v => !v)} style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: textSub, fontSize: 12, cursor: "pointer" }}>
                   {showConfirm ? "Ocultar" : "Ver"}
@@ -951,7 +951,7 @@ function LoginScreen({ onBack, onLogin, onMasterLogin, onRegister, darkMode = tr
   return (
     <div style={{ minHeight: "100vh", background: bg, display: "flex", flexDirection: "column", transition: "background .3s" }}>
       {/* Header */}
-      <div style={{ background: navBg, padding: "48px 24px 32px", borderBottom: "1px solid " + (darkMode? "#ffffff08" : "#e2e8f0"), transition: "background .3s" }}>
+      <div style={{ background: navBg, padding: "48px 24px 32px", borderBottom: "1px solid " + darkMode ? "#ffffff08" : "#e2e8f0", transition: "background .3s" }}>
         <button onClick={onBack} style={{ background: "none", border: "none", color: "#64748b", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontSize: 14, marginBottom: 24, fontFamily: "'DM Sans',sans-serif" }}>
           <Icon name="back" size={16} /> Regresar
         </button>
@@ -977,7 +977,7 @@ function LoginScreen({ onBack, onLogin, onMasterLogin, onRegister, darkMode = tr
             onChange={e => { setEmail(e.target.value); setError(false); }}
             style={{
               display: "block", width: "100%", background: "#ffffff08",
-              border: "1px solid " + (error? errBdr : border(email)),
+              border: "1px solid " + error ? errBdr : border(email),
               borderRadius: 14, padding: "16px 16px 16px 46px", color: text, fontSize: 15,
               fontFamily: "'DM Sans',sans-serif", outline: "none", transition: "border .2s, background .3s, color .3s",
             }}
@@ -994,7 +994,7 @@ function LoginScreen({ onBack, onLogin, onMasterLogin, onRegister, darkMode = tr
             onChange={e => { setPassword(e.target.value); setError(false); }}
             style={{
               display: "block", width: "100%", background: "#ffffff08",
-              border: "1px solid " + (error? errBdr : border(password)),
+              border: "1px solid " + error ? errBdr : border(password),
               borderRadius: 14, padding: "16px 56px 16px 46px", color: text, fontSize: 15,
               fontFamily: "'DM Sans',sans-serif", outline: "none", transition: "border .2s, background .3s, color .3s",
             }}
@@ -1132,7 +1132,7 @@ function FilterSlide({ step, stepIndex, total, filters, onAnswer, onNext, onBack
             <button key={opt} onClick={() => setSelected(opt)}
               style={{
                 background: selected === opt ? "linear-gradient(135deg, #3b82f6, #6366f1)" : cardBg,
-                border: "1px solid " + (selected === opt? "transparent" : border),
+                border: "1px solid " + selected === opt ? "transparent" : border,
                 borderRadius: 16, padding: "16px 20px", cursor: "pointer",
                 color: selected === opt ? "white" : text,
                 fontSize: 15, textAlign: "left", fontFamily: "'DM Sans', sans-serif",
@@ -1160,7 +1160,7 @@ function FilterSlide({ step, stepIndex, total, filters, onAnswer, onNext, onBack
           style={{
             flex: 2,
             background: canAdvance ? "linear-gradient(135deg, #3b82f6, #6366f1)" : inactiveBg,
-            border: "1px solid " + (canAdvance? "transparent" : border2),
+            border: "1px solid " + canAdvance ? "transparent" : border2,
             borderRadius: 16, padding: "16px", color: canAdvance ? "white" : inactiveText,
             cursor: canAdvance ? "pointer" : "not-allowed",
             fontSize: 15, fontWeight: 600, fontFamily: "'DM Sans', sans-serif",
@@ -1393,12 +1393,12 @@ function HelpScreen({ onBack, darkMode = true }) {
               </div>
             ) : filtered.map((f, i) => (
               <div key={i} style={{ background: cardBg, border: "1px solid " + border, borderRadius: 16, marginBottom: 10, overflow: "hidden" }}>
-                <button onClick={() => setOpenIdx(openIdx === "s" + (i? null : "s" + i))} style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "16px", background: "none", border: "none", cursor: "pointer", textAlign: "left", gap: 12 }}>
+                <button onClick={() => setOpenIdx(openIdx === "s" + i ? null : "s" + i)} style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "16px", background: "none", border: "none", cursor: "pointer", textAlign: "left", gap: 12 }}>
                   <div>
                     <p style={{ color: "#3b82f6", fontSize: 10, fontWeight: 700, marginBottom: 4 }}>{f.cat}</p>
                     <p style={{ color: text, fontSize: 14, fontWeight: 600, lineHeight: 1.4 }}>{f.q}</p>
                   </div>
-                  <span style={{ color: "#64748b", fontSize: 18, flexShrink: 0, transform: openIdx === "s" + (i? "rotate(180deg)" : "none"), transition: "transform .2s" }}>⌄</span>
+                  <span style={{ color: "#64748b", fontSize: 18, flexShrink: 0, transform: openIdx === "s" + i ? "rotate(180deg)" : "none", transition: "transform .2s" }}>⌄</span>
                 </button>
                 {openIdx === "s" + i && (
                   <div style={{ padding: "0 16px 16px", borderTop: "1px solid " + border }}>
@@ -1438,7 +1438,7 @@ function HelpScreen({ onBack, darkMode = true }) {
         {/* Contact tab */}
         {!search && activeTab === "contact" && (
           <div>
-            <div style={{ background: "linear-gradient(135deg, #3b82f615, #6366f115)", border: "1px solid " + (darkMode? "#3b82f630" : "#bfdbfe"), borderRadius: 20, padding: "24px", marginBottom: 16, textAlign: "center" }}>
+            <div style={{ background: "linear-gradient(135deg, #3b82f615, #6366f115)", border: "1px solid " + darkMode ? "#3b82f630" : "#bfdbfe", borderRadius: 20, padding: "24px", marginBottom: 16, textAlign: "center" }}>
               <p style={{ fontSize: 36, marginBottom: 10 }}>💬</p>
               <h3 style={{ color: text, fontSize: 18, fontWeight: 700, marginBottom: 6 }}>¿No encontraste lo que buscabas?</h3>
               <p style={{ color: "#64748b", fontSize: 14, lineHeight: 1.6 }}>Nuestro equipo de soporte está disponible para ayudarte</p>
@@ -1547,7 +1547,7 @@ function ChangePasswordScreen({ onBack, darkMode = true }) {
   return (
     <div style={{ minHeight: "100vh", background: bg, display: "flex", flexDirection: "column", transition: "background .3s" }}>
       {/* Header */}
-      <div style={{ background: navBg, padding: "48px 24px 28px", borderBottom: "1px solid " + (darkMode? "#ffffff08" : "#e2e8f0" )}}>
+      <div style={{ background: navBg, padding: "48px 24px 28px", borderBottom: "1px solid " + darkMode ? "#ffffff08" : "#e2e8f0" }}>
         <button onClick={onBack} style={{ background: "none", border: "none", color: "#64748b", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontSize: 14, marginBottom: 20, fontFamily: "'DM Sans',sans-serif" }}>
           <Icon name="back" size={16} /> Regresar
         </button>
@@ -1592,7 +1592,7 @@ function ChangePasswordScreen({ onBack, darkMode = true }) {
             type={showNew ? "text" : "password"}
             value={newPass}
             onChange={e => { setNewPass(e.target.value); setError(""); }}
-            style={{ display: "block", width: "100%", background: "#ffffff08", border: "1px solid " + (newPass? strengthColor + "60" : bdr(false)), borderRadius: 14, padding: "16px 56px 16px 46px", color: text, fontSize: 15, fontFamily: "'DM Sans',sans-serif", outline: "none", transition: "all .2s" }}
+            style={{ display: "block", width: "100%", background: "#ffffff08", border: "1px solid " + newPass ? strengthColor + "60" : bdr(false), borderRadius: 14, padding: "16px 56px 16px 46px", color: text, fontSize: 15, fontFamily: "'DM Sans',sans-serif", outline: "none", transition: "all .2s" }}
           />
           <button onClick={() => setShowNew(v => !v)} style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "#64748b", fontSize: 12, cursor: "pointer" }}>
             {showNew ? "Ocultar" : "Ver"}
@@ -1616,7 +1616,7 @@ function ChangePasswordScreen({ onBack, darkMode = true }) {
           <div style={{ background: cardBg, border: "1px solid " + border, borderRadius: 14, padding: "14px 16px", marginBottom: 16 }}>
             {requirements.map((r, i) => (
               <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "4px 0" }}>
-                <div style={{ width: 18, height: 18, borderRadius: "50%", background: r.met ? "#10b98120" : (darkMode ? "#ffffff10" : "#f1f5f9"), border: "1px solid " + (r.met? "#10b98150" : (darkMode ? "#ffffff15" : "#e2e8f0")), display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all .3s" }}>
+                <div style={{ width: 18, height: 18, borderRadius: "50%", background: r.met ? "#10b98120" : (darkMode ? "#ffffff10" : "#f1f5f9"), border: "1px solid " + r.met ? "#10b98150" : (darkMode ? "#ffffff15" : "#e2e8f0"), display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all .3s" }}>
                   {r.met && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>}
                 </div>
                 <p style={{ color: r.met ? "#10b981" : "#64748b", fontSize: 12, transition: "color .3s" }}>{r.label}</p>
@@ -1633,7 +1633,7 @@ function ChangePasswordScreen({ onBack, darkMode = true }) {
             type={showConfirm ? "text" : "password"}
             value={confirm}
             onChange={e => { setConfirm(e.target.value); setError(""); }}
-            style={{ display: "block", width: "100%", background: "#ffffff08", border: "1px solid " + (confirm ? (matches ? "#10b98150" : "#ef444450") : bdr(false)), borderRadius: 14, padding: "16px 56px 16px 46px", color: text, fontSize: 15, fontFamily: "'DM Sans',sans-serif", outline: "none", transition: "all .2s" }}
+            style={{ display: "block", width: "100%", background: "#ffffff08", border: "1px solid " + confirm ? (matches ? "#10b98150" : "#ef444450") : bdr(false), borderRadius: 14, padding: "16px 56px 16px 46px", color: text, fontSize: 15, fontFamily: "'DM Sans',sans-serif", outline: "none", transition: "all .2s" }}
           />
           <button onClick={() => setShowConfirm(v => !v)} style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "#64748b", fontSize: 12, cursor: "pointer" }}>
             {showConfirm ? "Ocultar" : "Ver"}
@@ -1654,7 +1654,7 @@ function ChangePasswordScreen({ onBack, darkMode = true }) {
         )}
 
         {/* Security tips */}
-        <div style={{ background: darkMode ? "#3b82f608" : "#eff6ff", border: "1px solid " + (darkMode? "#3b82f620" : "#bfdbfe"), borderRadius: 14, padding: "14px 16px", marginBottom: 24, marginTop: 8 }}>
+        <div style={{ background: darkMode ? "#3b82f608" : "#eff6ff", border: "1px solid " + darkMode ? "#3b82f620" : "#bfdbfe", borderRadius: 14, padding: "14px 16px", marginBottom: 24, marginTop: 8 }}>
           <p style={{ color: "#3b82f6", fontSize: 12, fontWeight: 700, marginBottom: 8 }}>💡 Consejos de seguridad</p>
           {["No uses la misma contraseña en otros servicios", "Evita información personal como fechas de nacimiento", "Usa un gestor de contraseñas para recordarla"].map((t, i) => (
             <p key={i} style={{ color: "#64748b", fontSize: 12, marginBottom: i < 2 ? 4 : 0 }}>· {t}</p>
@@ -1855,7 +1855,7 @@ function SettingsScreen({ onBack, onSignOut, darkModeProp, onToggleTheme, onChan
               <p style={{ color: "#64748b", fontSize: 13, textAlign: "center", lineHeight: 1.7, marginBottom: 16 }}>
                 Para eliminar tu cuenta envía un correo a:
               </p>
-              <div style={{ background: darkMode ? "#ffffff08" : "#f1f5f9", border: "1px solid " + (darkMode? "#3b82f630" : "#bfdbfe"), borderRadius: 12, padding: "12px 16px", marginBottom: 16, textAlign: "center" }}>
+              <div style={{ background: darkMode ? "#ffffff08" : "#f1f5f9", border: "1px solid " + darkMode ? "#3b82f630" : "#bfdbfe", borderRadius: 12, padding: "12px 16px", marginBottom: 16, textAlign: "center" }}>
                 <p style={{ color: "#3b82f6", fontSize: 14, fontWeight: 700 }}>servicio@bajarenta.com</p>
               </div>
               <p style={{ color: "#64748b", fontSize: 12, textAlign: "center", lineHeight: 1.7, marginBottom: 24 }}>
@@ -2165,7 +2165,7 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
                   onChange={e => setRef(i, "name", e.target.value)}
                   style={{
                     display: "block", width: "100%", background: "#ffffff08",
-                    border: "1px solid " + (r.name? "#3b82f650" : border),
+                    border: "1px solid " + r.name ? "#3b82f650" : border,
                     borderRadius: 10, padding: "11px 14px 11px 36px", color: text, fontSize: 13,
                     fontFamily: "'DM Sans',sans-serif", outline: "none",
                   }}
@@ -2181,7 +2181,7 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
                   onChange={e => setRef(i, "phone", e.target.value)}
                   style={{
                     display: "block", width: "100%", background: "#ffffff08",
-                    border: "1px solid " + (r.phone? "#3b82f650" : border),
+                    border: "1px solid " + r.phone ? "#3b82f650" : border,
                     borderRadius: 10, padding: "11px 14px 11px 36px", color: text, fontSize: 13,
                     fontFamily: "'DM Sans',sans-serif", outline: "none",
                   }}
@@ -2197,7 +2197,7 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
                   onChange={e => setRef(i, "relation", e.target.value)}
                   style={{
                     display: "block", width: "100%", background: "#ffffff08",
-                    border: "1px solid " + (r.relation? "#3b82f650" : border),
+                    border: "1px solid " + r.relation ? "#3b82f650" : border,
                     borderRadius: 10, padding: "11px 14px 11px 36px", color: text, fontSize: 13,
                     fontFamily: "'DM Sans',sans-serif", outline: "none",
                   }}
@@ -2219,7 +2219,7 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
               <label key={doc.key} htmlFor={"doc-" + doc.key} style={{
                 display: "flex", alignItems: "center", justifyContent: "space-between",
                 background: uploaded ? "#3b82f610" : "#ffffff06",
-                border: "1px solid " + (uploaded? "#3b82f640" : "#3b82f620"),
+                border: "1px solid " + uploaded ? "#3b82f640" : "#3b82f620",
                 borderRadius: 14, padding: "13px 16px", marginBottom: 8, cursor: "pointer",
                 transition: "all .2s",
               }}>
@@ -2469,14 +2469,14 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
         }} />
 
         <input placeholder="Número de tarjeta" value={cardNum} onChange={e => setCardNum(formatCard(e.target.value))} inputMode="numeric" style={{
-          display: "block", width: "100%", background: "#ffffff08", border: "1px solid " + (cardNum.replace(/\s/g,"").length===16?"#3b82f650":border),
+          display: "block", width: "100%", background: "#ffffff08", border: "1px solid " + cardNum.replace(/\s/g,"").length===16?"#3b82f650":border,
           borderRadius: 12, padding: "14px 16px", color: text, fontSize: 14,
           fontFamily: "'DM Sans',sans-serif", outline: "none", marginBottom: 10, letterSpacing: 2,
         }} />
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 24 }}>
           <input placeholder="MM/AA" value={expiry} onChange={e => setExpiry(formatExpiry(e.target.value))} inputMode="numeric" style={{
-            display: "block", width: "100%", background: "#ffffff08", border: "1px solid " + (expiry.length===5?"#3b82f650":border),
+            display: "block", width: "100%", background: "#ffffff08", border: "1px solid " + expiry.length===5?"#3b82f650":border,
             borderRadius: 12, padding: "14px 16px", color: text, fontSize: 14,
             fontFamily: "'DM Sans',sans-serif", outline: "none",
           }} />
@@ -2662,7 +2662,7 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
               <button key={val} onClick={() => setContract(val)} style={{
                 flex: 1, padding: "10px", borderRadius: 12, cursor: "pointer", fontSize: 13, fontWeight: 600,
                 background: contract === val ? "linear-gradient(135deg, #3b82f6, #6366f1)" : "#ffffff10",
-                border: "1px solid " + (contract === val ? "transparent" : border),
+                border: "1px solid " + contract === val ? "transparent" : border,
                 color: text, fontFamily: "'DM Sans',sans-serif", transition: "all .2s",
               }}>{label}</button>
             ))}
@@ -2925,7 +2925,7 @@ function SelfRegisterScreen({ onBack, onComplete, onLogin, darkMode = true }) {
             onChange={e => { setL("email", e.target.value); setLoginError(false); }}
             style={{
               display: "block", width: "100%", background: inputBg,
-              border: "1px solid " + (loginError? "#ef444450" : loginForm.email ? "#f59e0b50" : border),
+              border: "1px solid " + loginError ? "#ef444450" : loginForm.email ? "#f59e0b50" : border,
               borderRadius: 12, padding: "14px 16px 14px 44px", color: text, fontSize: 14,
               fontFamily: "'DM Sans',sans-serif", outline: "none", transition: "border .2s",
             }}
@@ -2942,7 +2942,7 @@ function SelfRegisterScreen({ onBack, onComplete, onLogin, darkMode = true }) {
             onChange={e => { setL("password", e.target.value); setLoginError(false); }}
             style={{
               display: "block", width: "100%", background: inputBg,
-              border: "1px solid " + (loginError? "#ef444450" : loginForm.password ? "#f59e0b50" : border),
+              border: "1px solid " + loginError ? "#ef444450" : loginForm.password ? "#f59e0b50" : border,
               borderRadius: 12, padding: "14px 60px 14px 44px", color: text, fontSize: 14,
               fontFamily: "'DM Sans',sans-serif", outline: "none", transition: "border .2s",
             }}
@@ -3022,7 +3022,7 @@ function SelfRegisterScreen({ onBack, onComplete, onLogin, darkMode = true }) {
                   width: 56, height: 64, borderRadius: 14, textAlign: "center",
                   fontSize: 26, fontWeight: 700, color: text,
                   background: codeBg(c),
-                  border: "2px solid " + (c? "#f59e0b" : border),
+                  border: "2px solid " + c ? "#f59e0b" : border,
                   outline: "none", transition: "all .2s", fontFamily: "'Syne',sans-serif",
                 }} />
             ))}
@@ -3205,7 +3205,7 @@ function SelfRegisterScreen({ onBack, onComplete, onLogin, darkMode = true }) {
         <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 16 }}>🔒</span>
         <input placeholder="Contraseña" type={showPass ? "text" : "password"} value={form.password} onChange={e => setF("password", e.target.value)} style={{
           display: "block", width: "100%", background: inputBg,
-          border: "1px solid " + (form.password? "#f59e0b50" : border),
+          border: "1px solid " + form.password ? "#f59e0b50" : border,
           borderRadius: 12, padding: "14px 60px 14px 44px", color: text, fontSize: 14,
           fontFamily: "'DM Sans',sans-serif", outline: "none", transition: "border .2s",
         }} />
@@ -3238,7 +3238,7 @@ function SelfRegisterScreen({ onBack, onComplete, onLogin, darkMode = true }) {
           onChange={e => setF("confirmPassword", e.target.value)}
           style={{
             display: "block", width: "100%", background: inputBg,
-            border: "1px solid " + (!form.confirmPassword ? border : (passwordsMatch ? "#10b98150" : "#ef444450")),
+            border: "1px solid " + !form.confirmPassword ? border : passwordsMatch ? "#10b98150" : "#ef444450",
             borderRadius: 12, padding: "14px 60px 14px 44px", color: text, fontSize: 14,
             fontFamily: "'DM Sans',sans-serif", outline: "none", transition: "border .2s",
           }}
@@ -3731,7 +3731,7 @@ function ApplicantDetail({ applicant, onBack, isApproved, isRejected, onApprove,
               return (
                 <div key={d.key} style={{
                   background: cardBg,
-                  border: "1px solid " + (verified? "#10b98140" : received ? "#f59e0b30" : "#ffffff15"),
+                  border: "1px solid " + verified ? "#10b98140" : received ? "#f59e0b30" : "#ffffff15",
                   borderRadius: 16, padding: "16px", marginBottom: 12,
                   transition: "border .2s",
                 }}>
@@ -3747,7 +3747,7 @@ function ApplicantDetail({ applicant, onBack, isApproved, isRejected, onApprove,
                     </div>
                     <span style={{
                       background: verified ? "#10b98115" : received ? "#f59e0b15" : "#ffffff08",
-                      border: "1px solid " + (verified? "#10b98140" : received ? "#f59e0b40" : "#ffffff15"),
+                      border: "1px solid " + verified ? "#10b98140" : received ? "#f59e0b40" : "#ffffff15",
                       borderRadius: 99, padding: "4px 12px",
                       color: verified ? "#10b981" : received ? "#f59e0b" : "#475569",
                       fontSize: 10, fontWeight: 700, flexShrink: 0,
@@ -4058,7 +4058,7 @@ function OwnerSettingsScreen({ onBack, onSignOut, darkModeProp, onToggleTheme, c
               <p style={{ color: "#64748b", fontSize: 13, textAlign: "center", lineHeight: 1.7, marginBottom: 16 }}>
                 Para eliminar tu cuenta envía un correo a:
               </p>
-              <div style={{ background: darkMode ? "#ffffff08" : "#f1f5f9", border: "1px solid " + (darkMode? "#f59e0b30" : "#fde68a"), borderRadius: 12, padding: "12px 16px", marginBottom: 16, textAlign: "center" }}>
+              <div style={{ background: darkMode ? "#ffffff08" : "#f1f5f9", border: "1px solid " + darkMode ? "#f59e0b30" : "#fde68a", borderRadius: 12, padding: "12px 16px", marginBottom: 16, textAlign: "center" }}>
                 <p style={{ color: "#f59e0b", fontSize: 14, fontWeight: 700 }}>servicio@bajarenta.com</p>
               </div>
               <p style={{ color: "#64748b", fontSize: 12, textAlign: "center", lineHeight: 1.7, marginBottom: 24 }}>
@@ -4125,22 +4125,16 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
           }) : [];
           var rawImgs = [];
           try { rawImgs = Array.isArray(p.images) ? p.images : (p.images ? JSON.parse(p.images) : []); } catch(e) { rawImgs = []; }
-          var fallbackImg = "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80";
-          var heroImg = (rawImgs.length > 0 && rawImgs[0]) ? rawImgs[0] : fallbackImg;
+          var fb = "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80";
           return {
             id: p.id, name: p.name, city: p.city, price: p.price, deposit: p.deposit,
             status: p.status === "approved" ? "aprobada" : p.status === "rejected" ? "rechazada" : "pendiente",
-            img: heroImg,
-            images: rawImgs.length > 0 ? rawImgs : [fallbackImg],
+            img: rawImgs.length > 0 ? rawImgs[0] : fb,
+            images: rawImgs.length > 0 ? rawImgs : [fb],
             bedrooms: p.bedrooms, bathrooms: p.bathrooms, _mode: p.management_mode || "self",
-            views: p.views || 0, applicants: applicants, isMock: false,
             owner_email: p.owner_email || "",
             description: p.description || "",
-            address: p.address || "",
-            amenities: p.amenities || [],
-            pet_policy: p.pet_policy || "",
-            furnished: p.furnished || false,
-            sqm: p.sqm || 0,
+            views: 0, applicants: applicants, isMock: false,
           };
         });
       });
@@ -4188,12 +4182,8 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
       owner_email: String(sp.owner_email || ""),
       description: String(sp.description || ""),
       address: String(sp.address || ""),
-      amenities: Array.isArray(sp.amenities) ? sp.amenities : [],
-      pet_policy: String(sp.pet_policy || ""),
-      furnished: Boolean(sp.furnished),
-      sqm: Number(sp.sqm) || 0,
       _mode: String(sp._mode || "self"),
-      isMock: false,
+      isMock: Boolean(sp.isMock),
     };
     return <OwnerPropertyDetail
       property={spSafe}
@@ -4508,7 +4498,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
     return (
       <div style={{ minHeight: "100vh", background: bg, display: "flex", flexDirection: "column" }}>
         {/* Header */}
-        <div style={{ background: navBgOP, padding: "48px 24px 28px", borderBottom: "1px solid " + (darkMode ? "#ffffff15" : "#e2e8f0"), transition: "background .3s" }}>
+        <div style={{ background: navBgOP, padding: "48px 24px 28px", borderBottom: "1px solid " + darkMode ? "#ffffff15" : "#e2e8f0", transition: "background .3s" }}>
           <button onClick={() => setMode(null)} style={{ background: "none", border: "none", color: darkMode ? "#64748b" : "#475569", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontSize: 14, marginBottom: 28, fontFamily: "'DM Sans',sans-serif" }}>
             <Icon name="back" size={16} color={darkMode ? "#64748b" : "#475569"} /> Regresar
           </button>
@@ -4553,7 +4543,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
               { icon: "📱", text: "Publicidad de tu propiedad dentro de la app Baja Renta" },
               { icon: "📞", text: "Soporte y acompañamiento durante todo el proceso" },
             ].map((item, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 12, background: cardBgOP, border: "1px solid " + (darkMode? "#3b82f620" : "#bfdbfe"), borderRadius: 14, padding: "12px 14px", transition: "background .3s" }}>
+              <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 12, background: cardBgOP, border: "1px solid " + darkMode ? "#3b82f620" : "#bfdbfe", borderRadius: 14, padding: "12px 14px", transition: "background .3s" }}>
                 <span style={{ fontSize: 18, flexShrink: 0 }}>{item.icon}</span>
                 <p style={{ color: textOP, fontSize: 13, lineHeight: 1.4, transition: "color .3s" }}>{item.text}</p>
               </div>
@@ -4561,8 +4551,8 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
           </div>
 
           {/* Agreement checkbox */}
-          <label style={{ display: "flex", alignItems: "flex-start", gap: 12, cursor: "pointer", marginBottom: 28, background: managed_agreed ? "#f59e0b15" : (darkMode ? "#ffffff06" : "#fff8ed"), border: "2px solid " + (managed_agreed? "#f59e0b" : (darkMode ? "#ffffff10" : "#f59e0b40")), borderRadius: 16, padding: "16px", transition: "all .2s" }}>
-            <div style={{ width: 22, height: 22, borderRadius: 6, background: managed_agreed ? "#f59e0b" : (darkMode ? "#ffffff10" : "#f59e0b20"), border: "2px solid " + (managed_agreed? "transparent" : (darkMode ? "#ffffff20" : "#f59e0b60")), display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1, transition: "all .2s" }}>
+          <label style={{ display: "flex", alignItems: "flex-start", gap: 12, cursor: "pointer", marginBottom: 28, background: managed_agreed ? "#f59e0b15" : (darkMode ? "#ffffff06" : "#fff8ed"), border: "2px solid " + managed_agreed ? "#f59e0b" : (darkMode ? "#ffffff10" : "#f59e0b40"), borderRadius: 16, padding: "16px", transition: "all .2s" }}>
+            <div style={{ width: 22, height: 22, borderRadius: 6, background: managed_agreed ? "#f59e0b" : (darkMode ? "#ffffff10" : "#f59e0b20"), border: "2px solid " + managed_agreed ? "transparent" : (darkMode ? "#ffffff20" : "#f59e0b60"), display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1, transition: "all .2s" }}>
               {managed_agreed && <Icon name="check" size={13} color="#000" />}
             </div>
             <input type="checkbox" checked={managed_agreed} onChange={e => setManaged_agreed(e.target.checked)} style={{ display: "none" }} />
@@ -4586,7 +4576,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
 
           <button onClick={() => setMode(null)} style={{
             width: "100%", background: darkMode ? "transparent" : "#f1f5f9",
-            border: "1px solid " + (darkMode? "#ffffff15" : "#cbd5e1"),
+            border: "1px solid " + darkMode ? "#ffffff15" : "#cbd5e1",
             borderRadius: 16, padding: "16px", color: "#64748b",
             fontSize: 15, fontWeight: 600, cursor: "pointer",
             fontFamily: "'DM Sans',sans-serif", transition: "all .2s",
@@ -4830,20 +4820,20 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
           {/* Card inputs */}
           <div style={{ position: "relative", marginBottom: 10 }}>
             <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 15 }}>👤</span>
-            <input placeholder="Nombre en la tarjeta" value={cardName} onChange={e => setCardName(e.target.value)} style={{ display: "block", width: "100%", background: cardBgOP, border: "1px solid " + (cardName? accent+"50" : "#ffffff10"), borderRadius: 12, padding: "13px 16px 13px 42px", color: textOP, fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none" }} />
+            <input placeholder="Nombre en la tarjeta" value={cardName} onChange={e => setCardName(e.target.value)} style={{ display: "block", width: "100%", background: cardBgOP, border: "1px solid " + cardName ? accent+"50" : "#ffffff10", borderRadius: 12, padding: "13px 16px 13px 42px", color: textOP, fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none" }} />
           </div>
           <div style={{ position: "relative", marginBottom: 10 }}>
             <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 15 }}>💳</span>
-            <input placeholder="Número de tarjeta" value={cardNum} onChange={e => setCardNum(formatCard(e.target.value))} inputMode="numeric" style={{ display: "block", width: "100%", background: cardBgOP, border: "1px solid " + (cardNum? accent+"50" : "#ffffff10"), borderRadius: 12, padding: "13px 16px 13px 42px", color: textOP, fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none", letterSpacing: 2 }} />
+            <input placeholder="Número de tarjeta" value={cardNum} onChange={e => setCardNum(formatCard(e.target.value))} inputMode="numeric" style={{ display: "block", width: "100%", background: cardBgOP, border: "1px solid " + cardNum ? accent+"50" : "#ffffff10", borderRadius: 12, padding: "13px 16px 13px 42px", color: textOP, fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none", letterSpacing: 2 }} />
           </div>
           <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>
             <div style={{ position: "relative", flex: 1 }}>
               <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", fontSize: 13 }}>📅</span>
-              <input placeholder="MM/AA" value={expiry} onChange={e => setExpiry(formatExp(e.target.value))} inputMode="numeric" maxLength={5} style={{ display: "block", width: "100%", background: cardBgOP, border: "1px solid " + (expiry? accent+"50" : "#ffffff10"), borderRadius: 12, padding: "13px 12px 13px 38px", color: textOP, fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none" }} />
+              <input placeholder="MM/AA" value={expiry} onChange={e => setExpiry(formatExp(e.target.value))} inputMode="numeric" maxLength={5} style={{ display: "block", width: "100%", background: cardBgOP, border: "1px solid " + expiry ? accent+"50" : "#ffffff10", borderRadius: 12, padding: "13px 12px 13px 38px", color: textOP, fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none" }} />
             </div>
             <div style={{ position: "relative", flex: 1 }}>
               <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", fontSize: 13 }}>🔒</span>
-              <input placeholder="CVV" value={cvv} onChange={e => setCvv(e.target.value.replace(/\D/g,"").slice(0,4))} inputMode="numeric" style={{ display: "block", width: "100%", background: cardBgOP, border: "1px solid " + (cvv? accent+"50" : "#ffffff10"), borderRadius: 12, padding: "13px 12px 13px 38px", color: textOP, fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none" }} />
+              <input placeholder="CVV" value={cvv} onChange={e => setCvv(e.target.value.replace(/\D/g,"").slice(0,4))} inputMode="numeric" style={{ display: "block", width: "100%", background: cardBgOP, border: "1px solid " + cvv ? accent+"50" : "#ffffff10", borderRadius: 12, padding: "13px 12px 13px 38px", color: textOP, fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none" }} />
             </div>
           </div>
 
@@ -4869,7 +4859,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
       </button>
       <div style={{
         background: mode === "managed" ? "linear-gradient(135deg, #3b82f620, #6366f120)" : "linear-gradient(135deg, #f59e0b20, #d9770620)",
-        border: "1px solid " + (mode === "managed"? "#3b82f640" : "#f59e0b40"),
+        border: "1px solid " + mode === "managed" ? "#3b82f640" : "#f59e0b40",
         borderRadius: 14, padding: "12px 16px", marginBottom: 28,
         display: "flex", alignItems: "center", gap: 10,
       }}>
@@ -4910,7 +4900,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
         </div>
         <input placeholder="Ej. Casa en Fraccionamiento Las Palmas" value={propForm.name} onChange={e => setPF("name", e.target.value)} style={{
           display: "block", width: "100%", background: cardBgOP,
-          border: "1px solid " + (propForm.name? accent+"50" : "#ffffff10"),
+          border: "1px solid " + propForm.name ? accent+"50" : "#ffffff10",
           borderRadius: 12, padding: "14px 16px", color: textOP, fontSize: 14,
           fontFamily: "'DM Sans',sans-serif", outline: "none",
         }} />
@@ -4919,7 +4909,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
       {/* Estado — fixed dropdown */}
       <select value={propForm.state} onChange={e => setPF("state", e.target.value)} style={{
         display: "block", width: "100%", background: cardBgOP,
-        border: "1px solid " + (propForm.state? accent+"50" : "#ffffff10"),
+        border: "1px solid " + propForm.state ? accent+"50" : "#ffffff10",
         borderRadius: 12, padding: "14px 16px", color: propForm.state ? textOP : "#64748b",
         fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none",
         marginBottom: 10, cursor: "pointer",
@@ -4931,7 +4921,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
       {/* Ciudad — dropdown */}
       <select value={propForm.city} onChange={e => setPF("city", e.target.value)} style={{
         display: "block", width: "100%", background: cardBgOP,
-        border: "1px solid " + (propForm.city? accent+"50" : "#ffffff10"),
+        border: "1px solid " + propForm.city ? accent+"50" : "#ffffff10",
         borderRadius: 12, padding: "14px 16px", color: propForm.city ? textOP : "#64748b",
         fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none",
         marginBottom: 10, cursor: "pointer",
@@ -4983,7 +4973,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
         <p style={{ color: textSubOP, fontSize: 14, fontWeight: 600, marginBottom: 8 }}>🏠 Número de pisos</p>
         <div style={{ display: "flex", gap: 8 }}>
           {[{ label: "🏠 1 piso", val: "1" }, { label: "🏠 2 o más pisos", val: "2+" }].map(opt => (
-            <label key={opt.val} onClick={() => setPF("floors", opt.val)} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, background: propForm.floors === opt.val ? accent+"20" : "#ffffff06", border: "1px solid " + (propForm.floors === opt.val? accent+"50" : "#ffffff10"), borderRadius: 10, padding: "14px 8px", cursor: "pointer", color: propForm.floors === opt.val ? "white" : "#94a3b8", fontSize: 15, fontWeight: 700, transition: "all .2s" }}>
+            <label key={opt.val} onClick={() => setPF("floors", opt.val)} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, background: propForm.floors === opt.val ? accent+"20" : "#ffffff06", border: "1px solid " + propForm.floors === opt.val ? accent+"50" : "#ffffff10", borderRadius: 10, padding: "14px 8px", cursor: "pointer", color: propForm.floors === opt.val ? "white" : "#94a3b8", fontSize: 15, fontWeight: 700, transition: "all .2s" }}>
               {opt.label}
             </label>
           ))}
@@ -5000,7 +4990,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
           onChange={e => setPF("mapsUrl", e.target.value)}
           style={{
             display: "block", width: "100%", background: cardBgOP,
-            border: "1px solid " + (propForm.mapsUrl? "#3b82f650" : "#ffffff10"),
+            border: "1px solid " + propForm.mapsUrl ? "#3b82f650" : "#ffffff10",
             borderRadius: 12, padding: "14px 16px", color: textOP, fontSize: 14,
             fontFamily: "'DM Sans',sans-serif", outline: "none",
           }}
@@ -5016,7 +5006,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
           <p style={{ color: textSubOP, fontSize: 14, fontWeight: 600, marginBottom: 8 }}>🛏️ No. de recámaras</p>
           <div style={{ display: "flex", gap: 6 }}>
             {[1,2,3,4,"5+"].map(n => (
-              <label key={n} onClick={() => setPF("bedrooms", String(n))} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", background: propForm.bedrooms === String(n) ? accent+"20" : "#ffffff06", border: "1px solid " + (propForm.bedrooms === String(n) ? accent+"60" : "#ffffff10"), borderRadius: 8, padding: "11px 4px", cursor: "pointer", color: propForm.bedrooms === String(n) ? "white" : "#94a3b8", fontSize: 15, fontWeight: 800, transition: "all .2s" }}>
+              <label key={n} onClick={() => setPF("bedrooms", String(n))} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", background: propForm.bedrooms === String(n) ? accent+"20" : "#ffffff06", border: "1px solid " + propForm.bedrooms === String(n) ? accent+"60" : "#ffffff10", borderRadius: 8, padding: "11px 4px", cursor: "pointer", color: propForm.bedrooms === String(n) ? "white" : "#94a3b8", fontSize: 15, fontWeight: 800, transition: "all .2s" }}>
                 {n}
               </label>
             ))}
@@ -5026,7 +5016,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
           <p style={{ color: textSubOP, fontSize: 14, fontWeight: 600, marginBottom: 8 }}>🚿 No. de baños</p>
           <div style={{ display: "flex", gap: 6 }}>
             {[1,2,3,4,"4+"].map(n => (
-              <label key={n} onClick={() => setPF("bathrooms", String(n))} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", background: propForm.bathrooms === String(n) ? accent+"20" : "#ffffff06", border: "1px solid " + (propForm.bathrooms === String(n) ? accent+"60" : "#ffffff10"), borderRadius: 8, padding: "11px 4px", cursor: "pointer", color: propForm.bathrooms === String(n) ? "white" : "#94a3b8", fontSize: 15, fontWeight: 800, transition: "all .2s" }}>
+              <label key={n} onClick={() => setPF("bathrooms", String(n))} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", background: propForm.bathrooms === String(n) ? accent+"20" : "#ffffff06", border: "1px solid " + propForm.bathrooms === String(n) ? accent+"60" : "#ffffff10", borderRadius: 8, padding: "11px 4px", cursor: "pointer", color: propForm.bathrooms === String(n) ? "white" : "#94a3b8", fontSize: 15, fontWeight: 800, transition: "all .2s" }}>
                 {n}
               </label>
             ))}
@@ -5039,7 +5029,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
         <p style={{ color: textSubOP, fontSize: 14, fontWeight: 600, marginBottom: 8 }}>🚗 Tipo de estacionamiento {!propForm.parkingIncluded && <span style={{ fontSize: 11, fontWeight: 400, color: "#64748b" }}>— activa "Estacionamiento" primero</span>}</p>
         <div style={{ display: "flex", gap: 8 }}>
           {["Privado", "Público"].map(opt => (
-            <label key={opt} onClick={() => propForm.parkingIncluded && setPF("parking", opt)} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, background: propForm.parking === opt ? accent+"20" : "#ffffff06", border: "1px solid " + (propForm.parking === opt? accent+"50" : "#ffffff10"), borderRadius: 10, padding: "14px 8px", cursor: propForm.parkingIncluded ? "pointer" : "not-allowed", color: propForm.parking === opt ? "white" : "#94a3b8", fontSize: 15, fontWeight: 700, textAlign: "center", transition: "all .2s" }}>
+            <label key={opt} onClick={() => propForm.parkingIncluded && setPF("parking", opt)} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, background: propForm.parking === opt ? accent+"20" : "#ffffff06", border: "1px solid " + propForm.parking === opt ? accent+"50" : "#ffffff10", borderRadius: 10, padding: "14px 8px", cursor: propForm.parkingIncluded ? "pointer" : "not-allowed", color: propForm.parking === opt ? "white" : "#94a3b8", fontSize: 15, fontWeight: 700, textAlign: "center", transition: "all .2s" }}>
               {opt}
             </label>
           ))}
@@ -5071,7 +5061,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
               <label key={doc.key} htmlFor={"doc-" + doc.key} style={{
                 display: "flex", alignItems: "center", justifyContent: "space-between",
                 background: uploaded ? "#10b98115" : "#ffffff06",
-                border: "1px solid " + (uploaded? "#10b98140" : accent + "20"),
+                border: "1px solid " + uploaded ? "#10b98140" : accent + "20",
                 borderRadius: 14, padding: "14px 16px", cursor: "pointer", transition: "all .2s",
               }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, minWidth: 0 }}>
@@ -5083,7 +5073,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0, marginLeft: 8 }}>
                   <span style={{ color: uploaded ? "#10b981" : accent, fontSize: 11, fontWeight: 600 }}>{uploaded ? "Cambiar" : "Subir"}</span>
-                  <div style={{ width: 28, height: 28, borderRadius: "50%", background: uploaded ? "#10b98120" : accent + "20", border: "1px solid " + (uploaded? "#10b98140" : accent + "40"), display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <div style={{ width: 28, height: 28, borderRadius: "50%", background: uploaded ? "#10b98120" : accent + "20", border: "1px solid " + uploaded ? "#10b98140" : accent + "40", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     {uploaded ? <Icon name="check" size={13} color="#10b981" /> : <Icon name="upload" size={13} color={accent} />}
                   </div>
                 </div>
@@ -5295,7 +5285,7 @@ function GuestPropertyDetail({ p, onBack, onRegister }) {
             {p.images.map((img, i) => (
               <button key={i} onClick={() => setImgIdx(i)} style={{
                 width: i === imgIdx ? 52 : 44, height: 44, borderRadius: 10, overflow: "hidden",
-                border: "2px solid " + (i === imgIdx? "#3b82f6" : "transparent"),
+                border: "2px solid " + i === imgIdx ? "#3b82f6" : "transparent",
                 padding: 0, cursor: "pointer", transition: "all .2s", flexShrink: 0,
               }}>
                 <img src={img} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -5661,7 +5651,7 @@ function VisitorRegister({ onBack, onComplete, onLogin, darkMode = true }) {
         <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 16 }}>🔒</span>
         <input placeholder="Contraseña" type={showPass ? "text" : "password"} value={form.password} onChange={e => setF("password", e.target.value)} style={{
           display: "block", width: "100%", background: "#ffffff06",
-          border: "1px solid " + (form.password? "#3b82f650" : "#ffffff10"),
+          border: "1px solid " + form.password ? "#3b82f650" : "#ffffff10",
           borderRadius: 12, padding: "14px 60px 14px 44px", color: text, fontSize: 14,
           fontFamily: "'DM Sans',sans-serif", outline: "none", transition: "border .2s, background .3s, color .3s",
         }} />
@@ -5695,7 +5685,7 @@ function VisitorRegister({ onBack, onComplete, onLogin, darkMode = true }) {
           onChange={e => setF("confirmPassword", e.target.value)}
           style={{
             display: "block", width: "100%", background: inputBg,
-            border: "1px solid " + (!form.confirmPassword ? border : (passwordsMatch ? "#10b98150" : "#ef444450")),
+            border: "1px solid " + !form.confirmPassword ? border : passwordsMatch ? "#10b98150" : "#ef444450",
             borderRadius: 12, padding: "14px 60px 14px 44px", color: text, fontSize: 14,
             fontFamily: "'DM Sans',sans-serif", outline: "none", transition: "border .2s, background .3s, color .3s",
           }}
@@ -5774,7 +5764,7 @@ function DrumPicker({ items, selected, onSelect, color = "#3b82f6" }) {
               height: itemH, display: "flex", alignItems: "center", justifyContent: "center",
               cursor: "pointer", transition: "all .3s",
               opacity: dist === 0 ? 1 : dist === 1 ? 0.5 : 0.2,
-              transform: "scale(" + (dist === 0? 1 : 0.85 + ")"),
+              transform: "scale(" + dist === 0 ? 1 : 0.85 + ")",
             }}>
               <span style={{
                 fontFamily: "'DM Sans',sans-serif",
@@ -6073,7 +6063,7 @@ function MasterLogin({ onBack, onLogin }) {
           <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 16 }}>👤</span>
           <input placeholder="Usuario" value={user} onChange={e => { setUser(e.target.value); setError(false); }} style={{
             display: "block", width: "100%", background: cardBgOP,
-            border: "1px solid " + (error? "#ef444450" : user ? "#8b5cf650" : "#ffffff10"),
+            border: "1px solid " + error ? "#ef444450" : user ? "#8b5cf650" : "#ffffff10",
             borderRadius: 14, padding: "16px 16px 16px 46px", color: textOP, fontSize: 15,
             fontFamily: "'DM Sans',sans-serif", outline: "none",
           }} />
@@ -6082,7 +6072,7 @@ function MasterLogin({ onBack, onLogin }) {
           <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 16 }}>🔒</span>
           <input placeholder="Contraseña" type={showPass ? "text" : "password"} value={pass} onChange={e => { setPass(e.target.value); setError(false); }} style={{
             display: "block", width: "100%", background: cardBgOP,
-            border: "1px solid " + (error? "#ef444450" : pass ? "#8b5cf650" : "#ffffff10"),
+            border: "1px solid " + error ? "#ef444450" : pass ? "#8b5cf650" : "#ffffff10",
             borderRadius: 14, padding: "16px 56px 16px 46px", color: textOP, fontSize: 15,
             fontFamily: "'DM Sans',sans-serif", outline: "none",
           }} />
@@ -6315,7 +6305,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
           <p style={{ color: "#64748b", fontSize: 13, marginBottom: 4 }}>👤 {p.owner} · {p.city}{p.state ? ", " + p.state : ""}</p>
           <p style={{ color: "#64748b", fontSize: 12, marginBottom: 4 }}>📅 Enviado: {p.submitted}</p>
           {isNew && p._mode && (
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: p._mode === "managed" ? "#3b82f615" : "#f59e0b15", border: "1px solid " + (p._mode === "managed"? "#3b82f630" : "#f59e0b30"), borderRadius: 99, padding: "3px 12px", marginBottom: 16 }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: p._mode === "managed" ? "#3b82f615" : "#f59e0b15", border: "1px solid " + p._mode === "managed" ? "#3b82f630" : "#f59e0b30", borderRadius: 99, padding: "3px 12px", marginBottom: 16 }}>
               <p style={{ color: p._mode === "managed" ? "#3b82f6" : "#f59e0b", fontSize: 11, fontWeight: 700 }}>
                 {p._mode === "managed" ? "🛎️ Gestión Baja Renta" : "🔑 Autogestión propietario"}
               </p>
@@ -6370,7 +6360,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
               { label: "🐾 Pet Friendly", val: p.petFriendly },
               { label: "👶 Niños OK", val: p.kidsAllowed },
             ].map((f, i) => (
-              <span key={i} style={{ background: f.val ? "#10b98115" : "#ffffff06", border: "1px solid " + (f.val? "#10b98130" : "#ffffff15"), borderRadius: 99, padding: "4px 12px", color: f.val ? "#10b981" : "#475569", fontSize: 12 }}>
+              <span key={i} style={{ background: f.val ? "#10b98115" : "#ffffff06", border: "1px solid " + f.val ? "#10b98130" : "#ffffff15", borderRadius: 99, padding: "4px 12px", color: f.val ? "#10b981" : "#475569", fontSize: 12 }}>
                 {f.val ? "✓" : "✗"} {f.label}
               </span>
             ))}
@@ -6414,7 +6404,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
                   const isPdf = uploaded && uploaded.type === "application/pdf";
                   const isImg = uploaded && uploaded.type && uploaded.type.startsWith("image/");
                   return (
-                    <div key={doc.key} style={{ background: uploaded ? "#10b98112" : "#ffffff06", border: "1px solid " + (uploaded? "#10b98130" : "#ffffff15"), borderRadius: 14, padding: "12px 14px" }}>
+                    <div key={doc.key} style={{ background: uploaded ? "#10b98112" : "#ffffff06", border: "1px solid " + uploaded ? "#10b98130" : "#ffffff15", borderRadius: 14, padding: "12px 14px" }}>
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: uploaded && isImg ? 10 : 0 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                           <span style={{ fontSize: 18 }}>{doc.icon}</span>
@@ -6423,7 +6413,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
                             {uploaded && <p style={{ color: "#64748b", fontSize: 11, marginTop: 1 }}>📎 {uploaded.name}</p>}
                           </div>
                         </div>
-                        <span style={{ background: uploaded ? "#10b98120" : "#ffffff10", border: "1px solid " + (uploaded? "#10b98140" : "#ffffff15"), borderRadius: 99, padding: "3px 10px", color: uploaded ? "#10b981" : "#475569", fontSize: 10, fontWeight: 700 }}>
+                        <span style={{ background: uploaded ? "#10b98120" : "#ffffff10", border: "1px solid " + uploaded ? "#10b98140" : "#ffffff15", borderRadius: 99, padding: "3px 10px", color: uploaded ? "#10b981" : "#475569", fontSize: 10, fontWeight: 700 }}>
                           {uploaded ? "✓ Recibido" : "✗ No subido"}
                         </span>
                       </div>
@@ -6660,7 +6650,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
             {[["todas","Todas"],["pendiente","Pendientes"],["aprobada","Aprobadas"],["rechazada","Rechazadas"]].map(function(pair) { var key = pair[0], label = pair[1]; return  (
               <button key={key} onClick={() => setFilter(key)} style={{
                 flex: 1, minWidth: 70, padding: "12px 0", background: "none", border: "none",
-                borderBottom: "2px solid " + (filter === key? "#8b5cf6" : "transparent"),
+                borderBottom: "2px solid " + filter === key ? "#8b5cf6" : "transparent",
                 color: filter === key ? "#8b5cf6" : "#64748b",
                 fontSize: 11, fontWeight: filter === key ? 700 : 400,
                 cursor: "pointer", fontFamily: "'DM Sans',sans-serif", transition: "all .2s",
@@ -6672,7 +6662,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
         {filtered.map(p => (
           <button key={p.id} onClick={() => setSelected(p)} style={{
             width: "100%", background: "#ffffff06",
-            border: "1px solid " + (p.status === "aprobada"? "#10b98120" : "#f59e0b20"),
+            border: "1px solid " + p.status === "aprobada" ? "#10b98120" : "#f59e0b20",
             borderRadius: 20, overflow: "hidden", marginBottom: 14,
             display: "flex", cursor: "pointer", textAlign: "left",
           }}>
@@ -6682,7 +6672,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
                 <p style={{ fontFamily: "'Syne',sans-serif", color: "white", fontSize: 14, fontWeight: 700, lineHeight: 1.2, flex: 1, marginRight: 8 }}>{p.name}</p>
                 <span style={{
                   background: p.status === "aprobada" ? "#10b98115" : p.status === "rechazada" ? "#ef444415" : "#f59e0b15",
-                  border: "1px solid " + (p.status === "aprobada"? "#10b98140" : p.status === "rechazada" ? "#ef444440" : "#f59e0b40"),
+                  border: "1px solid " + p.status === "aprobada" ? "#10b98140" : p.status === "rechazada" ? "#ef444440" : "#f59e0b40",
                   borderRadius: 99, padding: "2px 8px",
                   color: p.status === "aprobada" ? "#10b981" : p.status === "rechazada" ? "#ef4444" : "#f59e0b",
                   fontSize: 10, fontWeight: 700, flexShrink: 0,
@@ -6782,8 +6772,8 @@ function App() {
           kitchen: p.kitchen !== false,
           laundry: p.laundry || false,
           patio: p.patio || false,
-          img: (function(){ try{ var imgs = Array.isArray(p.images)?p.images:JSON.parse(p.images||"[]"); return imgs[0]||"https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80"; }catch(e){ return "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80"; } })(),
-          images: (function(){ try{ var imgs = Array.isArray(p.images)?p.images:JSON.parse(p.images||"[]"); return imgs.length>0?imgs:["https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80"]; }catch(e){ return ["https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80"]; } })(),
+          img: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80",
+          images: ["https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80"],
           owner: "Propietario",
           ownerPhone: "",
           ownerEmail: p.owner_email || "",
