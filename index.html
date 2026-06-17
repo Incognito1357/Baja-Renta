@@ -2655,14 +2655,12 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
           </div>
           <p style={{ color: "#94a3b8", fontSize: 13, marginBottom: 10 }}>Duración del contrato</p>
           <div style={{ display: "flex", gap: 8 }}>
-            {[["12", "1 año"]].map(function(pair) { var val = pair[0], label = pair[1]; return  (
-              <button key={val} onClick={() => setContract(val)} style={{
-                flex: 1, padding: "10px", borderRadius: 12, cursor: "pointer", fontSize: 13, fontWeight: 600,
-                background: contract === val ? "linear-gradient(135deg, #3b82f6, #6366f1)" : "#ffffff10",
-                border: "1px solid " + (contract === val ? "transparent" : border),
-                color: text, fontFamily: "'DM Sans',sans-serif", transition: "all .2s",
-              }}>{label}</button>
-            ))}
+            <button onClick={() => setContract("12")} style={{
+              flex: 1, padding: "10px", borderRadius: 12, cursor: "pointer", fontSize: 13, fontWeight: 600,
+              background: "linear-gradient(135deg, #3b82f6, #6366f1)",
+              border: "1px solid transparent",
+              color: text, fontFamily: "'DM Sans',sans-serif", transition: "all .2s",
+            }}>1 año</button>
           </div>
         </div>
       </div>
