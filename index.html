@@ -652,7 +652,7 @@ function ForgotPasswordScreen({ onBack, darkMode = true, accentColor = "#3b82f6"
         <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 32 }}>
           {["email","code","newpass"].map((s, i) => (
             <div key={s} style={{ width: step === s ? 24 : 8, height: 8, borderRadius: 99, transition: "all .3s", background: ["email","code","newpass"].indexOf(step) >= i ? accentColor : (darkMode ? "#ffffff15" : "#e2e8f0") }} />
-          ))
+          ))}
         </div>
 
         {/* STEP 1: Email */}
@@ -923,7 +923,7 @@ function LoginScreen({ onBack, onLogin, onMasterLogin, onRegister, darkMode = tr
                   outline: "none", transition: "all .2s",
                   fontFamily: "'DM Sans',sans-serif",
                 }} />
-            ))
+            ))}
           </div>
           {codeComplete && !codeCorrect && (
             <p style={{ color: "#ef4444", fontSize: 13, marginBottom: 12 }}>⚠️ Código incorrecto. Intenta de nuevo.</p>
@@ -1083,7 +1083,7 @@ function FilterSlide({ step, stepIndex, total, filters, onAnswer, onNext, onBack
             background: i <= stepIndex ? "linear-gradient(90deg, #3b82f6, #6366f1)" : trackBg,
             transition: "background .4s",
           }} />
-        ))
+        ))}
       </div>
 
       <p style={{ color: "#64748b", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }}>
@@ -1123,7 +1123,7 @@ function FilterSlide({ step, stepIndex, total, filters, onAnswer, onNext, onBack
                   onChange={e => s.set(Number(e.target.value))}
                   style={{ width: "100%", accentColor: s.color }} />
               </div>
-            ))
+            ))}
           </div>
         </div>
       ) : (
@@ -1141,7 +1141,7 @@ function FilterSlide({ step, stepIndex, total, filters, onAnswer, onNext, onBack
               {opt}
               {selected === opt && <Icon name="check" size={16} color="white" />}
             </button>
-          ))
+          ))}
         </div>
       )}
 
@@ -1373,7 +1373,7 @@ function HelpScreen({ onBack, darkMode = true }) {
             }}>
               {tab.label}
             </button>
-          ))
+          ))}
         </div>
       )}
 
@@ -1406,7 +1406,7 @@ function HelpScreen({ onBack, darkMode = true }) {
                   </div>
                 )}
               </div>
-            ))
+            ))}
           </>
         )}
 
@@ -1621,7 +1621,7 @@ function ChangePasswordScreen({ onBack, darkMode = true }) {
                 </div>
                 <p style={{ color: r.met ? "#10b981" : "#64748b", fontSize: 12, transition: "color .3s" }}>{r.label}</p>
               </div>
-            ))
+            ))}
           </div>
         )}
 
@@ -1658,7 +1658,7 @@ function ChangePasswordScreen({ onBack, darkMode = true }) {
           <p style={{ color: "#3b82f6", fontSize: 12, fontWeight: 700, marginBottom: 8 }}>💡 Consejos de seguridad</p>
           {["No uses la misma contraseña en otros servicios", "Evita información personal como fechas de nacimiento", "Usa un gestor de contraseñas para recordarla"].map((t, i) => (
             <p key={i} style={{ color: "#64748b", fontSize: 12, marginBottom: i < 2 ? 4 : 0 }}>· {t}</p>
-          ))
+          ))}
         </div>
 
         <button onClick={handleSubmit} style={{
@@ -1739,7 +1739,7 @@ function SettingsScreen({ onBack, onSignOut, darkModeProp, onToggleTheme, onChan
               <span style={{ color: "#64748b", fontSize: 13 }}>{r.label}</span>
               <span style={{ color: "#94a3b8", fontSize: 13 }}>{r.val}</span>
             </div>
-          ))
+          ))}
         </div>
 
         {/* Notifications */}
@@ -1791,7 +1791,7 @@ function SettingsScreen({ onBack, onSignOut, darkModeProp, onToggleTheme, onChan
                 </div>
               </div>
             </div>
-          ))
+          ))}
         </div>
 
         {/* Account */}
@@ -1820,7 +1820,7 @@ function SettingsScreen({ onBack, onSignOut, darkModeProp, onToggleTheme, onChan
                 <Icon name="arrow" size={14} color="#64748b" />
               </button>
             )
-          ))
+          ))}
         </div>
 
         {/* Sign out */}
@@ -1968,7 +1968,7 @@ function PropertyCard({ property, onLike, onDislike, onSettings, onFilter, darkM
         <div style={{ position: "absolute", bottom: 16, left: 0, right: 0, display: "flex", justifyContent: "center", gap: 6, zIndex: 3, pointerEvents: "none" }}>
           {property.images.map((_, i) => (
             <div key={i} style={{ width: i === imgIdx ? 20 : 6, height: 6, borderRadius: 99, background: i === imgIdx ? "#3b82f6" : "#ffffff50", transition: "all .3s" }} />
-          ))
+          ))}
         </div>
         {/* Mock watermark */}
         {property.isMock && (
@@ -2038,7 +2038,7 @@ function PropertyCard({ property, onLike, onDislike, onSettings, onFilter, darkM
             }}>
               <Icon name={f.icon} size={11} color="#3b82f6" /> {f.val}
             </span>
-          ))
+          ))}
         </div>
       </div>
 
@@ -2590,7 +2590,7 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
               width: i === imgIdx ? 20 : 6, height: 6, borderRadius: 99,
               background: i === imgIdx ? "#3b82f6" : "#ffffff50", transition: "all .3s",
             }} />
-          ))
+          ))}
         </div>
       </div>
 
@@ -2624,7 +2624,7 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
               </p>
               <p style={{ color: text, fontWeight: 600, fontSize: 14 }}>{f.val}</p>
             </div>
-          ))
+          ))}
         </div>
 
         {/* Google Maps link */}
@@ -2742,7 +2742,7 @@ function PhotoUploader({ mode, photos, setPhotos }) {
             }}>
               <span style={{ color: "#94a3b8", fontSize: 18 }}>+</span>
             </div>
-          ))
+          ))}
         </div>
       )}
 
@@ -3020,7 +3020,7 @@ function SelfRegisterScreen({ onBack, onComplete, onLogin, darkMode = true }) {
                   border: "2px solid " + (c ? "#f59e0b" : border),
                   outline: "none", transition: "all .2s", fontFamily: "'Syne',sans-serif",
                 }} />
-            ))
+            ))}
           </div>
           <button onClick={function() {
             if (!codeComplete || otpLoading) return;
@@ -3215,7 +3215,7 @@ function SelfRegisterScreen({ onBack, onComplete, onLogin, darkMode = true }) {
             {[1,2,3,4].map(i => (
               <div key={i} style={{ flex: 1, height: 3, borderRadius: 99, transition: "background .3s",
                 background: form.password.length >= i * 3 ? (i <= 2 ? "#f59e0b" : "#10b981") : border }} />
-            ))
+            ))}
           </div>
           <p style={{ color: textSub, fontSize: 11 }}>
             {form.password.length < 6 ? "Contraseña débil" : form.password.length < 10 ? "Contraseña moderada" : "Contraseña fuerte ✓"}
@@ -3511,7 +3511,7 @@ function ApplicantDetail({ applicant, onBack, isApproved, isRejected, onApprove,
               color: docTab === k ? "#000" : textSub,
               fontSize: 12, fontWeight: 700, fontFamily: "'DM Sans',sans-serif", transition: "all .2s",
             }}>{l}</button>
-          ))
+          ))}
         </div>
       </div>
 
@@ -3706,7 +3706,7 @@ function ApplicantDetail({ applicant, onBack, isApproved, isRejected, onApprove,
                   {refVerified[i] ? "✓ Verificada — toca para revertir" : "Marcar como verificada"}
                 </button>
               </div>
-            ))
+            ))}
             {/* Summary */}
             <div style={{ background: cardBg, border: "1px solid " + border, borderRadius: 14, padding: "14px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <p style={{ color: textSub, fontSize: 13 }}>Referencias verificadas</p>
@@ -3948,7 +3948,7 @@ function OwnerSettingsScreen({ onBack, onSignOut, darkModeProp, onToggleTheme, c
               <span style={{ color: textSub, fontSize: 13 }}>{r.label}</span>
               <span style={{ color: "#94a3b8", fontSize: 13 }}>{r.val}</span>
             </div>
-          ))
+          ))}
         </div>
         {sections.map((sec, si) => (
           <div key={si} style={{ marginBottom: 24 }}>
@@ -4240,7 +4240,7 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
               <p style={{ fontFamily: "'DM Sans',sans-serif", color: text, fontSize: 22, fontWeight: 700 }}>{s.val}</p>
               <p style={{ color: textSub, fontSize: 11, marginTop: 2 }}>{s.label}</p>
             </div>
-          ))
+          ))}
         </div>
       </div>
 
@@ -4542,7 +4542,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
                 <span style={{ fontSize: 18, flexShrink: 0 }}>{item.icon}</span>
                 <p style={{ color: textOP, fontSize: 13, lineHeight: 1.4, transition: "color .3s" }}>{item.text}</p>
               </div>
-            ))
+            ))}
           </div>
 
           {/* Agreement checkbox */}
@@ -4780,7 +4780,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
                 <p style={{ color: textOP, fontSize: 12, fontWeight: 700, marginTop: 6, marginBottom: 2 }}>{b.label}</p>
                 <p style={{ color: textSubOP, fontSize: 10, lineHeight: 1.4 }}>{b.desc}</p>
               </div>
-            ))
+            ))}
           </div>
 
           <div style={{ height: 1, background: cardBgOP, marginBottom: 20 }} />
@@ -4960,7 +4960,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
             <input type="checkbox" checked={!!propForm[f.key]} onChange={() => togglePF(f.key)} style={{ accentColor: accent, width: 15, height: 15, flexShrink: 0 }} />
             {f.label}
           </label>
-        ))
+        ))}
       </div>
 
       {/* Floors — exclusive */}
@@ -4971,7 +4971,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
             <label key={opt.val} onClick={() => setPF("floors", opt.val)} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, background: propForm.floors === opt.val ? accent+"20" : "#ffffff06", border: "1px solid " + (propForm.floors === opt.val ? accent+"50" : "#ffffff10"), borderRadius: 10, padding: "14px 8px", cursor: "pointer", color: propForm.floors === opt.val ? "white" : "#94a3b8", fontSize: 15, fontWeight: 700, transition: "all .2s" }}>
               {opt.label}
             </label>
-          ))
+          ))}
         </div>
       </div>
 
@@ -5004,7 +5004,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
               <label key={n} onClick={() => setPF("bedrooms", String(n))} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", background: propForm.bedrooms === String(n) ? accent+"20" : "#ffffff06", border: "1px solid " + (propForm.bedrooms === String(n) ? accent+"60" : "#ffffff10"), borderRadius: 8, padding: "11px 4px", cursor: "pointer", color: propForm.bedrooms === String(n) ? "white" : "#94a3b8", fontSize: 15, fontWeight: 800, transition: "all .2s" }}>
                 {n}
               </label>
-            ))
+            ))}
           </div>
         </div>
         <div>
@@ -5014,7 +5014,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
               <label key={n} onClick={() => setPF("bathrooms", String(n))} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", background: propForm.bathrooms === String(n) ? accent+"20" : "#ffffff06", border: "1px solid " + (propForm.bathrooms === String(n) ? accent+"60" : "#ffffff10"), borderRadius: 8, padding: "11px 4px", cursor: "pointer", color: propForm.bathrooms === String(n) ? "white" : "#94a3b8", fontSize: 15, fontWeight: 800, transition: "all .2s" }}>
                 {n}
               </label>
-            ))
+            ))}
           </div>
         </div>
       </div>
@@ -5027,7 +5027,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
             <label key={opt} onClick={() => propForm.parkingIncluded && setPF("parking", opt)} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, background: propForm.parking === opt ? accent+"20" : "#ffffff06", border: "1px solid " + (propForm.parking === opt ? accent+"50" : "#ffffff10"), borderRadius: 10, padding: "14px 8px", cursor: propForm.parkingIncluded ? "pointer" : "not-allowed", color: propForm.parking === opt ? "white" : "#94a3b8", fontSize: 15, fontWeight: 700, textAlign: "center", transition: "all .2s" }}>
               {opt}
             </label>
-          ))
+          ))}
         </div>
       </div>
       <div style={{ marginTop: 8, marginBottom: 8 }}>
@@ -5285,7 +5285,7 @@ function GuestPropertyDetail({ p, onBack, onRegister }) {
               }}>
                 <img src={img} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               </button>
-            ))
+            ))}
           </div>
         </div>
       )}
@@ -5318,7 +5318,7 @@ function GuestPropertyDetail({ p, onBack, onRegister }) {
         <div style={{ position: "absolute", bottom: 60, left: 0, right: 0, display: "flex", justifyContent: "center", gap: 6, zIndex: 3 }}>
           {p.images.map((_, i) => (
             <button key={i} onClick={() => setImgIdx(i)} style={{ width: i === imgIdx ? 20 : 6, height: 6, borderRadius: 99, background: i === imgIdx ? "#3b82f6" : "#ffffff50", border: "none", cursor: "pointer", transition: "all .3s" }} />
-          ))
+          ))}
         </div>
       </div>
 
@@ -5467,7 +5467,7 @@ function VisitorRegister({ onBack, onComplete, onLogin, darkMode = true }) {
                   border: "2px solid " + codeBdr(c),
                   outline: "none", transition: "all .2s", fontFamily: "'DM Sans',sans-serif",
                 }} />
-            ))
+            ))}
           </div>
           {otpError && (
             <p style={{ color: "#ef4444", fontSize: 13, marginBottom: 12 }}>{otpError}</p>
@@ -5662,7 +5662,7 @@ function VisitorRegister({ onBack, onComplete, onLogin, darkMode = true }) {
             {[1,2,3,4].map(i => (
               <div key={i} style={{ flex: 1, height: 3, borderRadius: 99, transition: "background .3s",
                 background: form.password.length >= i * 3 ? (i <= 2 ? "#f59e0b" : "#10b981") : (darkMode ? border : "#e2e8f0") }} />
-            ))
+            ))}
           </div>
           <p style={{ color: textSub, fontSize: 11 }}>
             {form.password.length < 6 ? "Contraseña débil" : form.password.length < 10 ? "Contraseña moderada" : "Contraseña fuerte ✓"}
@@ -5919,7 +5919,7 @@ function GuestCatalog({ onBack, filters = {}, onRegister, properties: propList }
               </div>
             </div>
           </button>
-        ))
+        ))}
       </div>
     </div>
   );
@@ -6324,7 +6324,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
                 <p style={{ color: "#64748b", fontSize: 10 }}>{r.icon} {r.label}</p>
                 <p style={{ color: "white", fontSize: 13, fontWeight: 600, marginTop: 2 }}>{r.val}</p>
               </div>
-            ))
+            ))}
           </div>
 
           {/* Address */}
@@ -6358,7 +6358,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
               <span key={i} style={{ background: f.val ? "#10b98115" : "#ffffff06", border: "1px solid " + (f.val ? "#10b98130" : "#ffffff15"), borderRadius: 99, padding: "4px 12px", color: f.val ? "#10b981" : "#475569", fontSize: 12 }}>
                 {f.val ? "✓" : "✗"} {f.label}
               </span>
-            ))
+            ))}
           </div>
 
           {/* Photos */}
@@ -6518,7 +6518,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
               <p style={{ fontFamily: "'DM Sans',sans-serif", color: s.color, fontSize: 20, fontWeight: 800 }}>{s.val}</p>
               <p style={{ color: "#64748b", fontSize: 10, marginTop: 2 }}>{s.label}</p>
             </div>
-          ))
+          ))}
         </div>
       </div>
 
@@ -6650,7 +6650,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
                 fontSize: 11, fontWeight: filter === key ? 700 : 400,
                 cursor: "pointer", fontFamily: "'DM Sans',sans-serif", transition: "all .2s",
               }}>{label}</button>
-            ))
+            ))}
           </div>
           {/* Property list */}
           <div style={{ padding: "20px 24px" }}>
