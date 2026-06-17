@@ -554,7 +554,7 @@ function ProfileSelect({ onSelect, darkMode = true }) {
               <div style={{ color: descClr, fontSize: 13, marginTop: 2 }}>{p.desc}</div>
             </div>
           </button>
-        ))
+        ))}
         <button onClick={() => onSelect("guest")} style={{
           background: "transparent", border: "none", color: "#64748b", fontSize: 13,
           cursor: "pointer", padding: "12px", textDecoration: "underline", fontFamily: "'DM Sans', sans-serif",
