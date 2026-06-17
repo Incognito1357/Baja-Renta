@@ -2628,22 +2628,19 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
         </div>
 
         {/* Google Maps link */}
-        <a
-          href={property.mapsUrl || "https://www.google.com/maps/search/?api=1&amp;query=" + encodeURIComponent((property.address || "") + " " + (property.city || "") + " " + (property.state || "") + " México")}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-            background: "#ffffff06", border: "1px solid #3b82f630",
-            borderRadius: 14, padding: "14px 20px", marginBottom: 24,
-            color: "#3b82f6", fontSize: 14, fontWeight: 600,
-            fontFamily: "'DM Sans',sans-serif", textDecoration: "none",
-            WebkitTapHighlightColor: "transparent",
-            transition: "all .2s",
-          }}
-        >
-          Ver ubicación en Maps 📍
-        </a>
+        {(() => {
+          var mapsHref = property.mapsUrl || ("https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent((property.address || "") + " " + (property.city || "") + " " + (property.state || "") + " México"));
+          return (
+            <a href={mapsHref} target="_blank" rel="noopener noreferrer" style={{
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+              background: "#ffffff06", border: "1px solid #3b82f630",
+              borderRadius: 14, padding: "14px 20px", marginBottom: 24,
+              color: "#3b82f6", fontSize: 14, fontWeight: 600,
+              fontFamily: "'DM Sans',sans-serif", textDecoration: "none",
+              WebkitTapHighlightColor: "transparent", transition: "all .2s",
+            }}>Ver ubicación en Maps 📍</a>
+          );
+        })()}
         <h3 style={{ color: text, fontSize: 15, fontWeight: 700, marginBottom: 12, fontFamily: "'DM Sans',sans-serif" }}>Condiciones de renta</h3>
         <div style={{ background: "#ffffff06", borderRadius: 20, padding: 20, border: "1px solid #ffffff10", marginBottom: 16 }}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
