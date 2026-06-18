@@ -2659,14 +2659,14 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
           </div>
           <p style={{ color: "#94a3b8", fontSize: 13, marginBottom: 10 }}>Duración del contrato</p>
           <div style={{ display: "flex", gap: 8 }}>
-            {[["12", "1 año"]].map(function(pair) { var val = pair[0], label = pair[1]; return  (
+            {[["12", "1 año"]].map(([val, label]) => (
               <button key={val} onClick={() => setContract(val)} style={{
                 flex: 1, padding: "10px", borderRadius: 12, cursor: "pointer", fontSize: 13, fontWeight: 600,
                 background: contract === val ? "linear-gradient(135deg, #3b82f6, #6366f1)" : "#ffffff10",
                 border: "1px solid " + contract === val ? "transparent" : border,
                 color: text, fontFamily: "'DM Sans',sans-serif", transition: "all .2s",
               }}>{label}</button>
-            ))
+            ))}
           </div>
         </div>
       </div>
@@ -6387,7 +6387,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
                 fontSize: 11, fontWeight: filter === key ? 700 : 400,
                 cursor: "pointer", fontFamily: "'DM Sans',sans-serif", transition: "all .2s",
               }}>{label}</button>
-            ))
+            ))}
           </div>
           {/* Property list */}
           <div style={{ padding: "20px 24px" }}>
