@@ -30,8 +30,9 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
-  <script type="text/babel">
+  <script src="https://unpkg.com/@babel/standalone@7.23.10/babel.min.js"></script>
+  <script type="text/babel" data-presets="react">
+/* @jsx React.createElement */
     const { useState, useEffect, useRef } = React;
 
 
@@ -657,7 +658,7 @@ function ForgotPasswordScreen({ onBack, darkMode = true, accentColor = "#3b82f6"
 
         {/* STEP 1: Email */}
         {step === "email" && (
-          <>
+          <React.Fragment>
             <div style={{ background: cardBg, border: "1px solid " + border, borderRadius: 20, padding: "24px", marginBottom: 24 }}>
               <p style={{ color: text, fontSize: 14, lineHeight: 1.7, marginBottom: 16 }}>
                 Te enviaremos un código de 4 dígitos para restablecer tu contraseña.
@@ -686,12 +687,12 @@ function ForgotPasswordScreen({ onBack, darkMode = true, accentColor = "#3b82f6"
             }} className="btn-glow" style={{ width: "100%", background: email ? accentGrad : (darkMode ? "#ffffff10" : "#e2e8f0"), border: "none", borderRadius: 16, padding: "18px", color: email ? "white" : textSub, fontSize: 16, fontWeight: 700, cursor: email ? "pointer" : "not-allowed", fontFamily: "'DM Sans',sans-serif", transition: "all .3s" }}>
               Enviar código →
             </button>
-          </>
+          </React.Fragment>
         )}
 
         {/* STEP 2: Code verification */}
         {step === "code" && (
-          <>
+          <React.Fragment>
             <div style={{ background: cardBg, border: "1px solid " + border, borderRadius: 20, padding: "24px", marginBottom: 24, textAlign: "center" }}>
               <div style={{ fontSize: 40, marginBottom: 12 }}>📬</div>
               <p style={{ color: text, fontSize: 15, fontWeight: 700, marginBottom: 6 }}>Código enviado</p>
@@ -733,12 +734,12 @@ function ForgotPasswordScreen({ onBack, darkMode = true, accentColor = "#3b82f6"
             }} className="btn-glow" style={{ width: "100%", background: codeStr.length === 4 ? accentGrad : (darkMode ? "#ffffff10" : "#e2e8f0"), border: "none", borderRadius: 16, padding: "18px", color: codeStr.length === 4 ? "white" : textSub, fontSize: 16, fontWeight: 700, cursor: codeStr.length === 4 ? "pointer" : "not-allowed", fontFamily: "'DM Sans',sans-serif", transition: "all .3s" }}>
               Verificar código →
             </button>
-          </>
+          </React.Fragment>
         )}
 
         {/* STEP 3: New password */}
         {step === "newpass" && (
-          <>
+          <React.Fragment>
             <div style={{ background: cardBg, border: "1px solid " + border, borderRadius: 20, padding: "24px", marginBottom: 24 }}>
               <p style={{ color: text, fontSize: 14, fontWeight: 600, marginBottom: 16 }}>🔒 Crea tu nueva contraseña</p>
 
@@ -799,7 +800,7 @@ function ForgotPasswordScreen({ onBack, darkMode = true, accentColor = "#3b82f6"
             }} className="btn-glow" style={{ width: "100%", background: (newPass && passwordsMatch) ? accentGrad : (darkMode ? "#ffffff10" : "#e2e8f0"), border: "none", borderRadius: 16, padding: "18px", color: (newPass && passwordsMatch) ? "white" : textSub, fontSize: 16, fontWeight: 700, cursor: (newPass && passwordsMatch) ? "pointer" : "not-allowed", fontFamily: "'DM Sans',sans-serif", transition: "all .3s" }}>
               Restablecer contraseña
             </button>
-          </>
+          </React.Fragment>
         )}
       </div>
     </div>
@@ -1381,7 +1382,7 @@ function HelpScreen({ onBack, darkMode = true }) {
 
         {/* Search results */}
         {search && (
-          <>
+          <React.Fragment>
             <p style={{ color: "#64748b", fontSize: 13, marginBottom: 16 }}>
               {filtered.length} resultado{filtered.length !== 1 ? "s" : ""} para "{search}"
             </p>
@@ -1407,7 +1408,7 @@ function HelpScreen({ onBack, darkMode = true }) {
                 )}
               </div>
             ))}
-          </>
+          </React.Fragment>
         )}
 
         {/* FAQ tab */}
@@ -2303,7 +2304,7 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
       <div style={{ minHeight: "100vh", background: bg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 32, textAlign: "center" }}>
 
         {applicationStatus === "approved" ? (
-          <>
+          <React.Fragment>
             <div style={{ width: 90, height: 90, borderRadius: "50%", background: "linear-gradient(135deg, #10b981, #059669)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 24, boxShadow: "0 0 40px #10b98150" }}>
               <Icon name="check" size={42} color="white" />
             </div>
@@ -2313,7 +2314,7 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
             </div>
 
             {property._mode === "managed" ? (
-              <>
+              <React.Fragment>
                 <p style={{ color: "#64748b", fontSize: 14, marginBottom: 32, maxWidth: 300, lineHeight: 1.6 }}>
                   El propietario ha aprobado tu solicitud. Ya puedes proceder con el pago de la primera mensualidad.
                 </p>
@@ -2325,9 +2326,9 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
                 }}>
                   <Icon name="card" size={18} color="white" /> Realizar pago de 1ª mensualidad
                 </button>
-              </>
+              </React.Fragment>
             ) : (
-              <>
+              <React.Fragment>
                 <p style={{ color: "#64748b", fontSize: 14, marginBottom: 24, maxWidth: 300, lineHeight: 1.6 }}>
                   ¡Felicidades! El propietario ha aceptado tu solicitud. Coordina directamente con él los detalles del contrato y pago.
                 </p>
@@ -2343,11 +2344,11 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
                 }}>
                   🏠 Regresar a propiedades
                 </button>
-              </>
+              </React.Fragment>
             )}
-          </>
+          </React.Fragment>
         ) : (
-          <>
+          <React.Fragment>
             <div style={{ width: 90, height: 90, borderRadius: "50%", background: "#f59e0b15", border: "2px solid #f59e0b", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 24 }}>
               <span style={{ fontSize: 40 }}>⏳</span>
             </div>
@@ -2375,7 +2376,7 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
             }}>
               🏠 Regresar a propiedades
             </button>
-          </>
+          </React.Fragment>
         )}
       </div>
     );
@@ -2747,7 +2748,7 @@ function PhotoUploader({ mode, photos, setPhotos }) {
       )}
 
       {photos.length < 5 && (
-        <>
+        <React.Fragment>
           <input
             ref={inputRef}
             type="file"
@@ -2771,7 +2772,7 @@ function PhotoUploader({ mode, photos, setPhotos }) {
             </span>
             <span style={{ color: "#64748b", fontSize: 12 }}>Toca para abrir galería o cámara</span>
           </label>
-        </>
+        </React.Fragment>
       )}
 
       {photos.length === 5 && (
@@ -3517,7 +3518,7 @@ function ApplicantDetail({ applicant, onBack, isApproved, isRejected, onApprove,
 
       <div style={{ padding: "20px 24px" }}>
         {docTab === "profile" && (
-          <>
+          <React.Fragment>
             {/* Personal info section */}
             <p style={{ color: textSub, fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", marginBottom: 10 }}>Información personal</p>
 
@@ -3601,7 +3602,7 @@ function ApplicantDetail({ applicant, onBack, isApproved, isRejected, onApprove,
               {(() => {
                 const allDocsVerified = docsMap.every(d => docVerified[d.key]) && refVerified.every(Boolean);
                 return (
-                  <>
+                  <React.Fragment>
                     {!allDocsVerified && !isApproved && (
                       <div style={{ width: "100%", background: "#f59e0b10", border: "1px solid #f59e0b30", borderRadius: 12, padding: "10px 14px", display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
                         <span style={{ fontSize: 14 }}>🔒</span>
@@ -3621,7 +3622,7 @@ function ApplicantDetail({ applicant, onBack, isApproved, isRejected, onApprove,
                         <p style={{ color: "#ef4444", fontSize: 15, fontWeight: 700 }}>Candidato rechazado automáticamente</p>
                       </div>
                     ) : (
-                      <>
+                      <React.Fragment>
                         <button
                           onClick={() => allDocsVerified && setConfirmApprove(true)}
                           disabled={!allDocsVerified}
@@ -3656,17 +3657,17 @@ function ApplicantDetail({ applicant, onBack, isApproved, isRejected, onApprove,
                           }}>
                           {"✗ Rechazar"}
                         </button>
-                      </>
+                      </React.Fragment>
                     )}
-                  </>
+                  </React.Fragment>
                 );
               })()}
             </div>
-          </>
+          </React.Fragment>
         )}
 
         {docTab === "refs" && (
-          <>
+          <React.Fragment>
             <p style={{ color: textSub, fontSize: 13, marginBottom: 16 }}>3 referencias personales proporcionadas</p>
             {applicant.refs.map((r, i) => (
               <div key={i} style={{ background: cardBg, border: "1px solid " + (refVerified[i] ? "#10b98130" : "#f59e0b30"), borderRadius: 16, padding: "16px", marginBottom: 12 }}>
@@ -3714,11 +3715,11 @@ function ApplicantDetail({ applicant, onBack, isApproved, isRejected, onApprove,
                 {refVerified.filter(Boolean).length} / {applicant.refs.length}
               </p>
             </div>
-          </>
+          </React.Fragment>
         )}
 
         {docTab === "docs" && (
-          <>
+          <React.Fragment>
             <p style={{ color: textSub, fontSize: 13, marginBottom: 16 }}>Revisa y verifica los documentos del candidato</p>
             {docsMap.map(d => {
               const received = applicant.docs[d.key];
@@ -3798,7 +3799,7 @@ function ApplicantDetail({ applicant, onBack, isApproved, isRejected, onApprove,
                 {Object.values(docVerified).filter(Boolean).length} / {docsMap.length}
               </p>
             </div>
-          </>
+          </React.Fragment>
         )}
       </div>
     </div>
