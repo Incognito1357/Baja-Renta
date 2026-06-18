@@ -2666,7 +2666,7 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
                 border: "1px solid " + contract === val ? "transparent" : border,
                 color: text, fontFamily: "'DM Sans',sans-serif", transition: "all .2s",
               }}>{label}</button>
-            ))}
+            ))
           </div>
         </div>
       </div>
@@ -3510,14 +3510,14 @@ function ApplicantDetail({ applicant, onBack, isApproved, isRejected, onApprove,
 
         {/* Sub tabs */}
         <div style={{ display: "flex", gap: 8 }}>
-          {[["profile","Perfil"],["refs","Referencias"],["docs","Documentos"]].map(function(pair) { var k = pair[0], l = pair[1]; return  (
+          {[["profile","Perfil"],["refs","Referencias"],["docs","Documentos"]].map(([k, l]) => (
             <button key={k} onClick={() => setDocTab(k)} style={{
               flex: 1, padding: "8px 0", borderRadius: 10, border: "none", cursor: "pointer",
               background: docTab === k ? "#f59e0b" : (darkMode ? "#ffffff08" : "#e2e8f0"),
               color: docTab === k ? "#000" : textSub,
               fontSize: 12, fontWeight: 700, fontFamily: "'DM Sans',sans-serif", transition: "all .2s",
             }}>{l}</button>
-          ))}
+          ))
         </div>
       </div>
 
@@ -6379,7 +6379,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
         <div>
           {/* Filter tabs */}
           <div style={{ display: "flex", padding: "0 24px", borderBottom: "1px solid #ffffff10", overflowX: "auto" }}>
-            {[["todas","Todas"],["pendiente","Pendientes"],["aprobada","Aprobadas"],["rechazada","Rechazadas"]].map(function(pair) { var key = pair[0], label = pair[1]; return  (
+            {[["todas","Todas"],["pendiente","Pendientes"],["aprobada","Aprobadas"],["rechazada","Rechazadas"]].map(([key, label]) => (
               <button key={key} onClick={() => setFilter(key)} style={{
                 flex: 1, minWidth: 70, padding: "12px 0", background: "none", border: "none",
                 borderBottom: "2px solid " + filter === key ? "#8b5cf6" : "transparent",
@@ -6387,7 +6387,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
                 fontSize: 11, fontWeight: filter === key ? 700 : 400,
                 cursor: "pointer", fontFamily: "'DM Sans',sans-serif", transition: "all .2s",
               }}>{label}</button>
-            ))}
+            ))
           </div>
           {/* Property list */}
           <div style={{ padding: "20px 24px" }}>
