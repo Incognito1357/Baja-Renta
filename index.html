@@ -5377,56 +5377,55 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
           </div>
           {/* Property list */}
           <div style={{ padding: "20px 24px" }}>
-        {filtered.map(p => (
-          <button key={p.id} onClick={() => setSelected(p)} style={{
-            width: "100%", background: "#ffffff06",
-            border: "1px solid " + (p.status === "aprobada" ? "#10b98120" : "#f59e0b20"),
-            borderRadius: 20, overflow: "hidden", marginBottom: 14,
-            display: "flex", cursor: "pointer", textAlign: "left",
-          }}>
-            <img src={p.img} alt={p.name} style={{ width: 100, height: 100, objectFit: "cover", flexShrink: 0 }} />
-            <div style={{ padding: "12px 14px", flex: 1, minWidth: 0 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 3 }}>
-                <p style={{ fontFamily: "'Syne',sans-serif", color: "white", fontSize: 14, fontWeight: 700, lineHeight: 1.2, flex: 1, marginRight: 8 }}>{p.name}</p>
+          {filtered.map(p => (
+            <button key={p.id} onClick={() => setSelected(p)} style={{
+              width: "100%", background: "#ffffff06",
+              border: "1px solid " + (p.status === "aprobada" ? "#10b98120" : "#f59e0b20"),
+              borderRadius: 20, overflow: "hidden", marginBottom: 14,
+              display: "flex", cursor: "pointer", textAlign: "left",
+            }}>
+              <img src={p.img} alt={p.name} style={{ width: 100, height: 100, objectFit: "cover", flexShrink: 0 }} />
+              <div style={{ padding: "12px 14px", flex: 1, minWidth: 0 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 3 }}>
+                  <p style={{ fontFamily: "'Syne',sans-serif", color: "white", fontSize: 14, fontWeight: 700, lineHeight: 1.2, flex: 1, marginRight: 8 }}>{p.name}</p>
+                  <span style={{
+                    background: p.status === "aprobada" ? "#10b98115" : p.status === "rechazada" ? "#ef444415" : "#f59e0b15",
+                    border: "1px solid " + (p.status === "aprobada" ? "#10b98140" : p.status === "rechazada" ? "#ef444440" : "#f59e0b40"),
+                    borderRadius: 99, padding: "2px 8px",
+                    color: p.status === "aprobada" ? "#10b981" : p.status === "rechazada" ? "#ef4444" : "#f59e0b",
+                    fontSize: 10, fontWeight: 700, flexShrink: 0,
+                  }}>
+                    {p.status === "aprobada" ? "Aprobada" : p.status === "rechazada" ? "Rechazada" : "Pendiente"}
+                  </span>
+                </div>
+                <p style={{ color: "#64748b", fontSize: 12, marginBottom: 4 }}>👤 {p.owner}</p>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                  <p style={{ fontFamily: "'Syne',sans-serif", color: "#8b5cf6", fontSize: 14, fontWeight: 700 }}>
+                    {"$" + p.price.toLocaleString()}<span style={{ color: "#64748b", fontSize: 10, fontWeight: 400 }}>/mes</span>
+                  </p>
+                  <span style={{ color: "#64748b", fontSize: 11 }}>{p.city}</span>
+                </div>
+                {/* Gestión badge */}
                 <span style={{
-                  background: p.status === "aprobada" ? "#10b98115" : p.status === "rechazada" ? "#ef444415" : "#f59e0b15",
-                  border: "1px solid " + (p.status === "aprobada" ? "#10b98140" : p.status === "rechazada" ? "#ef444440" : "#f59e0b40"),
+                  display: "inline-flex", alignItems: "center", gap: 4,
+                  background: p._mode === "managed" ? "#3b82f615" : "#f59e0b15",
+                  border: "1px solid " + (p._mode === "managed" ? "#3b82f640" : "#f59e0b40"),
                   borderRadius: 99, padding: "2px 8px",
-                  color: p.status === "aprobada" ? "#10b981" : p.status === "rechazada" ? "#ef4444" : "#f59e0b",
-                  fontSize: 10, fontWeight: 700, flexShrink: 0,
+                  color: p._mode === "managed" ? "#3b82f6" : "#f59e0b",
+                  fontSize: 9, fontWeight: 700,
                 }}>
-                  {p.status === "aprobada" ? "Aprobada" : p.status === "rechazada" ? "Rechazada" : "Pendiente"}
+                  {p._mode === "managed" ? "🛎️ Gestión Baja Renta" : "👤 Autogestión"}
                 </span>
               </div>
-              <p style={{ color: "#64748b", fontSize: 12, marginBottom: 4 }}>👤 {p.owner}</p>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                <p style={{ fontFamily: "'Syne',sans-serif", color: "#8b5cf6", fontSize: 14, fontWeight: 700 }}>
-                  {"$" + p.price.toLocaleString()}<span style={{ color: "#64748b", fontSize: 10, fontWeight: 400 }}>/mes</span>
-                </p>
-                <span style={{ color: "#64748b", fontSize: 11 }}>{p.city}</span>
-              </div>
-              {/* Gestión badge */}
-              <span style={{
-                display: "inline-flex", alignItems: "center", gap: 4,
-                background: p._mode === "managed" ? "#3b82f615" : "#f59e0b15",
-                border: "1px solid " + (p._mode === "managed" ? "#3b82f640" : "#f59e0b40"),
-                borderRadius: 99, padding: "2px 8px",
-                color: p._mode === "managed" ? "#3b82f6" : "#f59e0b",
-                fontSize: 9, fontWeight: 700,
-              }}>
-                {p._mode === "managed" ? "🛎️ Gestión Baja Renta" : "👤 Autogestión"}
-              </span>
+            </button>
+          ))}
+          {filtered.length === 0 && (
+            <div style={{ textAlign: "center", padding: "48px 0" }}>
+              <p style={{ fontSize: 32, marginBottom: 8 }}>🏠</p>
+              <p style={{ color: "#64748b", fontSize: 14 }}>Sin propiedades en esta categoría</p>
             </div>
-          </button>
-        ))}
-        {filtered.length === 0 && (
-          <div style={{ textAlign: "center", padding: "48px 0" }}>
-            <p style={{ fontSize: 32, marginBottom: 8 }}>🏠</p>
-            <p style={{ color: "#64748b", fontSize: 14 }}>Sin propiedades en esta categoría</p>
+          )}
           </div>
-        )}
-          </div>
-        </div>
       )}
     </div>
   );
