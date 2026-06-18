@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BAJA RENTA v2.2 -->
+<!-- BAJA RENTA v3.0 CLEAN -->
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -658,7 +658,7 @@ function ForgotPasswordScreen({ onBack, darkMode = true, accentColor = "#3b82f6"
 
         {/* STEP 1: Email */}
         {step === "email" && (
-          <React.Fragment>
+          <>
             <div style={{ background: cardBg, border: "1px solid " + border, borderRadius: 20, padding: "24px", marginBottom: 24 }}>
               <p style={{ color: text, fontSize: 14, lineHeight: 1.7, marginBottom: 16 }}>
                 Te enviaremos un código de 4 dígitos para restablecer tu contraseña.
@@ -670,7 +670,7 @@ function ForgotPasswordScreen({ onBack, darkMode = true, accentColor = "#3b82f6"
                   type="email"
                   value={email}
                   onChange={e => { setEmail(e.target.value); setError(""); }}
-                  style={{ display: "block", width: "100%", background: inputBg, border: "1px solid " + (error ? "#ef444450" : border), borderRadius: 12, padding: "14px 14px 14px 44px", color: text, fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none" }}
+                  style={{ display: "block", width: "100%", background: inputBg, border: "1px solid " + error ? "#ef444450" : border, borderRadius: 12, padding: "14px 14px 14px 44px", color: text, fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none" }}
                 />
               </div>
               {error && <p style={{ color: "#ef4444", fontSize: 12, marginTop: 8 }}>{error}</p>}
@@ -687,12 +687,12 @@ function ForgotPasswordScreen({ onBack, darkMode = true, accentColor = "#3b82f6"
             }} className="btn-glow" style={{ width: "100%", background: email ? accentGrad : (darkMode ? "#ffffff10" : "#e2e8f0"), border: "none", borderRadius: 16, padding: "18px", color: email ? "white" : textSub, fontSize: 16, fontWeight: 700, cursor: email ? "pointer" : "not-allowed", fontFamily: "'DM Sans',sans-serif", transition: "all .3s" }}>
               Enviar código →
             </button>
-          </React.Fragment>
+          </>
         )}
 
         {/* STEP 2: Code verification */}
         {step === "code" && (
-          <React.Fragment>
+          <>
             <div style={{ background: cardBg, border: "1px solid " + border, borderRadius: 20, padding: "24px", marginBottom: 24, textAlign: "center" }}>
               <div style={{ fontSize: 40, marginBottom: 12 }}>📬</div>
               <p style={{ color: text, fontSize: 15, fontWeight: 700, marginBottom: 6 }}>Código enviado</p>
@@ -704,7 +704,7 @@ function ForgotPasswordScreen({ onBack, darkMode = true, accentColor = "#3b82f6"
               <div style={{ display: "flex", gap: 12, justifyContent: "center", marginBottom: 12 }}>
                 {code.map((c, i) => (
                   <input key={i} ref={codeRefs[i]} value={c} onChange={e => handleCodeInput(i, e.target.value)} onKeyDown={e => handleCodeKey(i, e)}
-                    style={{ width: 56, height: 64, borderRadius: 14, textAlign: "center", fontSize: 28, fontWeight: 700, fontFamily: "'Syne',sans-serif", color: c ? accentColor : text, background: c ? (accentColor === "#f59e0b" ? "#f59e0b10" : "#3b82f610") : inputBg, border: "2px solid " + (c ? accentColor : border), outline: "none", transition: "all .2s" }}
+                    style={{ width: 56, height: 64, borderRadius: 14, textAlign: "center", fontSize: 28, fontWeight: 700, fontFamily: "'Syne',sans-serif", color: c ? accentColor : text, background: c ? (accentColor === "#f59e0b" ? "#f59e0b10" : "#3b82f610") : inputBg, border: "2px solid " + c ? accentColor : border, outline: "none", transition: "all .2s" }}
                     maxLength={1} inputMode="numeric"
                   />
                 ))}
@@ -734,19 +734,19 @@ function ForgotPasswordScreen({ onBack, darkMode = true, accentColor = "#3b82f6"
             }} className="btn-glow" style={{ width: "100%", background: codeStr.length === 4 ? accentGrad : (darkMode ? "#ffffff10" : "#e2e8f0"), border: "none", borderRadius: 16, padding: "18px", color: codeStr.length === 4 ? "white" : textSub, fontSize: 16, fontWeight: 700, cursor: codeStr.length === 4 ? "pointer" : "not-allowed", fontFamily: "'DM Sans',sans-serif", transition: "all .3s" }}>
               Verificar código →
             </button>
-          </React.Fragment>
+          </>
         )}
 
         {/* STEP 3: New password */}
         {step === "newpass" && (
-          <React.Fragment>
+          <>
             <div style={{ background: cardBg, border: "1px solid " + border, borderRadius: 20, padding: "24px", marginBottom: 24 }}>
               <p style={{ color: text, fontSize: 14, fontWeight: 600, marginBottom: 16 }}>🔒 Crea tu nueva contraseña</p>
 
               {/* New password */}
               <div style={{ position: "relative", marginBottom: 8 }}>
                 <input placeholder="Nueva contraseña" type={showNew ? "text" : "password"} value={newPass} onChange={e => { setNewPass(e.target.value); setError(""); }}
-                  style={{ display: "block", width: "100%", background: inputBg, border: "1px solid " + (newPass ? (strength >= 2 ? "#10b98150" : "#f59e0b50") : border), borderRadius: 12, padding: "14px 60px 14px 14px", color: text, fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none" }}
+                  style={{ display: "block", width: "100%", background: inputBg, border: "1px solid " + newPass ? (strength >= 2 ? "#10b98150" : "#f59e0b50") : border, borderRadius: 12, padding: "14px 60px 14px 14px", color: text, fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none" }}
                 />
                 <button onClick={() => setShowNew(v => !v)} style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: textSub, fontSize: 12, cursor: "pointer" }}>
                   {showNew ? "Ocultar" : "Ver"}
@@ -768,7 +768,7 @@ function ForgotPasswordScreen({ onBack, darkMode = true, accentColor = "#3b82f6"
               {/* Confirm password */}
               <div style={{ position: "relative", marginBottom: 8 }}>
                 <input placeholder="Confirmar nueva contraseña" type={showConfirm ? "text" : "password"} value={confirm} onChange={e => { setConfirm(e.target.value); setError(""); }}
-                  style={{ display: "block", width: "100%", background: inputBg, border: "1px solid " + (!confirm ? border : passwordsMatch ? "#10b98150" : "#ef444450"), borderRadius: 12, padding: "14px 60px 14px 14px", color: text, fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none" }}
+                  style={{ display: "block", width: "100%", background: inputBg, border: "1px solid " + !confirm ? border : passwordsMatch ? "#10b98150" : "#ef444450", borderRadius: 12, padding: "14px 60px 14px 14px", color: text, fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none" }}
                 />
                 <button onClick={() => setShowConfirm(v => !v)} style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: textSub, fontSize: 12, cursor: "pointer" }}>
                   {showConfirm ? "Ocultar" : "Ver"}
@@ -800,7 +800,7 @@ function ForgotPasswordScreen({ onBack, darkMode = true, accentColor = "#3b82f6"
             }} className="btn-glow" style={{ width: "100%", background: (newPass && passwordsMatch) ? accentGrad : (darkMode ? "#ffffff10" : "#e2e8f0"), border: "none", borderRadius: 16, padding: "18px", color: (newPass && passwordsMatch) ? "white" : textSub, fontSize: 16, fontWeight: 700, cursor: (newPass && passwordsMatch) ? "pointer" : "not-allowed", fontFamily: "'DM Sans',sans-serif", transition: "all .3s" }}>
               Restablecer contraseña
             </button>
-          </React.Fragment>
+          </>
         )}
       </div>
     </div>
@@ -952,7 +952,7 @@ function LoginScreen({ onBack, onLogin, onMasterLogin, onRegister, darkMode = tr
   return (
     <div style={{ minHeight: "100vh", background: bg, display: "flex", flexDirection: "column", transition: "background .3s" }}>
       {/* Header */}
-      <div style={{ background: navBg, padding: "48px 24px 32px", borderBottom: "1px solid " + (darkMode ? "#ffffff08" : "#e2e8f0"), transition: "background .3s" }}>
+      <div style={{ background: navBg, padding: "48px 24px 32px", borderBottom: "1px solid " + darkMode ? "#ffffff08" : "#e2e8f0", transition: "background .3s" }}>
         <button onClick={onBack} style={{ background: "none", border: "none", color: "#64748b", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontSize: 14, marginBottom: 24, fontFamily: "'DM Sans',sans-serif" }}>
           <Icon name="back" size={16} /> Regresar
         </button>
@@ -978,7 +978,7 @@ function LoginScreen({ onBack, onLogin, onMasterLogin, onRegister, darkMode = tr
             onChange={e => { setEmail(e.target.value); setError(false); }}
             style={{
               display: "block", width: "100%", background: "#ffffff08",
-              border: "1px solid " + (error ? errBdr : border(email)),
+              border: "1px solid " + error ? errBdr : border(email),
               borderRadius: 14, padding: "16px 16px 16px 46px", color: text, fontSize: 15,
               fontFamily: "'DM Sans',sans-serif", outline: "none", transition: "border .2s, background .3s, color .3s",
             }}
@@ -995,7 +995,7 @@ function LoginScreen({ onBack, onLogin, onMasterLogin, onRegister, darkMode = tr
             onChange={e => { setPassword(e.target.value); setError(false); }}
             style={{
               display: "block", width: "100%", background: "#ffffff08",
-              border: "1px solid " + (error ? errBdr : border(password)),
+              border: "1px solid " + error ? errBdr : border(password),
               borderRadius: 14, padding: "16px 56px 16px 46px", color: text, fontSize: 15,
               fontFamily: "'DM Sans',sans-serif", outline: "none", transition: "border .2s, background .3s, color .3s",
             }}
@@ -1133,7 +1133,7 @@ function FilterSlide({ step, stepIndex, total, filters, onAnswer, onNext, onBack
             <button key={opt} onClick={() => setSelected(opt)}
               style={{
                 background: selected === opt ? "linear-gradient(135deg, #3b82f6, #6366f1)" : cardBg,
-                border: "1px solid " + (selected === opt ? "transparent" : border),
+                border: "1px solid " + selected === opt ? "transparent" : border,
                 borderRadius: 16, padding: "16px 20px", cursor: "pointer",
                 color: selected === opt ? "white" : text,
                 fontSize: 15, textAlign: "left", fontFamily: "'DM Sans', sans-serif",
@@ -1161,7 +1161,7 @@ function FilterSlide({ step, stepIndex, total, filters, onAnswer, onNext, onBack
           style={{
             flex: 2,
             background: canAdvance ? "linear-gradient(135deg, #3b82f6, #6366f1)" : inactiveBg,
-            border: "1px solid " + (canAdvance ? "transparent" : border2),
+            border: "1px solid " + canAdvance ? "transparent" : border2,
             borderRadius: 16, padding: "16px", color: canAdvance ? "white" : inactiveText,
             cursor: canAdvance ? "pointer" : "not-allowed",
             fontSize: 15, fontWeight: 600, fontFamily: "'DM Sans', sans-serif",
@@ -1382,7 +1382,7 @@ function HelpScreen({ onBack, darkMode = true }) {
 
         {/* Search results */}
         {search && (
-          <React.Fragment>
+          <>
             <p style={{ color: "#64748b", fontSize: 13, marginBottom: 16 }}>
               {filtered.length} resultado{filtered.length !== 1 ? "s" : ""} para "{search}"
             </p>
@@ -1394,12 +1394,12 @@ function HelpScreen({ onBack, darkMode = true }) {
               </div>
             ) : filtered.map((f, i) => (
               <div key={i} style={{ background: cardBg, border: "1px solid " + border, borderRadius: 16, marginBottom: 10, overflow: "hidden" }}>
-                <button onClick={() => setOpenIdx(openIdx === "s" + (i ? null : "s" + i))} style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "16px", background: "none", border: "none", cursor: "pointer", textAlign: "left", gap: 12 }}>
+                <button onClick={() => setOpenIdx(openIdx === "s" + i ? null : "s" + i)} style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "16px", background: "none", border: "none", cursor: "pointer", textAlign: "left", gap: 12 }}>
                   <div>
                     <p style={{ color: "#3b82f6", fontSize: 10, fontWeight: 700, marginBottom: 4 }}>{f.cat}</p>
                     <p style={{ color: text, fontSize: 14, fontWeight: 600, lineHeight: 1.4 }}>{f.q}</p>
                   </div>
-                  <span style={{ color: "#64748b", fontSize: 18, flexShrink: 0, transform: openIdx === "s" + (i ? "rotate(180deg)" : "none"), transition: "transform .2s" }}>⌄</span>
+                  <span style={{ color: "#64748b", fontSize: 18, flexShrink: 0, transform: openIdx === "s" + i ? "rotate(180deg)" : "none", transition: "transform .2s" }}>⌄</span>
                 </button>
                 {openIdx === "s" + i && (
                   <div style={{ padding: "0 16px 16px", borderTop: "1px solid " + border }}>
@@ -1408,7 +1408,7 @@ function HelpScreen({ onBack, darkMode = true }) {
                 )}
               </div>
             ))}
-          </React.Fragment>
+          </>
         )}
 
         {/* FAQ tab */}
@@ -1439,7 +1439,7 @@ function HelpScreen({ onBack, darkMode = true }) {
         {/* Contact tab */}
         {!search && activeTab === "contact" && (
           <div>
-            <div style={{ background: "linear-gradient(135deg, #3b82f615, #6366f115)", border: "1px solid " + (darkMode ? "#3b82f630" : "#bfdbfe"), borderRadius: 20, padding: "24px", marginBottom: 16, textAlign: "center" }}>
+            <div style={{ background: "linear-gradient(135deg, #3b82f615, #6366f115)", border: "1px solid " + darkMode ? "#3b82f630" : "#bfdbfe", borderRadius: 20, padding: "24px", marginBottom: 16, textAlign: "center" }}>
               <p style={{ fontSize: 36, marginBottom: 10 }}>💬</p>
               <h3 style={{ color: text, fontSize: 18, fontWeight: 700, marginBottom: 6 }}>¿No encontraste lo que buscabas?</h3>
               <p style={{ color: "#64748b", fontSize: 14, lineHeight: 1.6 }}>Nuestro equipo de soporte está disponible para ayudarte</p>
@@ -1548,7 +1548,7 @@ function ChangePasswordScreen({ onBack, darkMode = true }) {
   return (
     <div style={{ minHeight: "100vh", background: bg, display: "flex", flexDirection: "column", transition: "background .3s" }}>
       {/* Header */}
-      <div style={{ background: navBg, padding: "48px 24px 28px", borderBottom: "1px solid " + (darkMode ? "#ffffff08" : "#e2e8f0")}}>
+      <div style={{ background: navBg, padding: "48px 24px 28px", borderBottom: "1px solid " + darkMode ? "#ffffff08" : "#e2e8f0" }}>
         <button onClick={onBack} style={{ background: "none", border: "none", color: "#64748b", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontSize: 14, marginBottom: 20, fontFamily: "'DM Sans',sans-serif" }}>
           <Icon name="back" size={16} /> Regresar
         </button>
@@ -1593,7 +1593,7 @@ function ChangePasswordScreen({ onBack, darkMode = true }) {
             type={showNew ? "text" : "password"}
             value={newPass}
             onChange={e => { setNewPass(e.target.value); setError(""); }}
-            style={{ display: "block", width: "100%", background: "#ffffff08", border: "1px solid " + (newPass ? strengthColor + "60" : bdr(false)), borderRadius: 14, padding: "16px 56px 16px 46px", color: text, fontSize: 15, fontFamily: "'DM Sans',sans-serif", outline: "none", transition: "all .2s" }}
+            style={{ display: "block", width: "100%", background: "#ffffff08", border: "1px solid " + newPass ? strengthColor + "60" : bdr(false), borderRadius: 14, padding: "16px 56px 16px 46px", color: text, fontSize: 15, fontFamily: "'DM Sans',sans-serif", outline: "none", transition: "all .2s" }}
           />
           <button onClick={() => setShowNew(v => !v)} style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "#64748b", fontSize: 12, cursor: "pointer" }}>
             {showNew ? "Ocultar" : "Ver"}
@@ -1617,7 +1617,7 @@ function ChangePasswordScreen({ onBack, darkMode = true }) {
           <div style={{ background: cardBg, border: "1px solid " + border, borderRadius: 14, padding: "14px 16px", marginBottom: 16 }}>
             {requirements.map((r, i) => (
               <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "4px 0" }}>
-                <div style={{ width: 18, height: 18, borderRadius: "50%", background: r.met ? "#10b98120" : (darkMode ? "#ffffff10" : "#f1f5f9"), border: "1px solid " + (r.met ? "#10b98150" : (darkMode ? "#ffffff15" : "#e2e8f0")), display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all .3s" }}>
+                <div style={{ width: 18, height: 18, borderRadius: "50%", background: r.met ? "#10b98120" : (darkMode ? "#ffffff10" : "#f1f5f9"), border: "1px solid " + r.met ? "#10b98150" : (darkMode ? "#ffffff15" : "#e2e8f0"), display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all .3s" }}>
                   {r.met && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>}
                 </div>
                 <p style={{ color: r.met ? "#10b981" : "#64748b", fontSize: 12, transition: "color .3s" }}>{r.label}</p>
@@ -1634,7 +1634,7 @@ function ChangePasswordScreen({ onBack, darkMode = true }) {
             type={showConfirm ? "text" : "password"}
             value={confirm}
             onChange={e => { setConfirm(e.target.value); setError(""); }}
-            style={{ display: "block", width: "100%", background: "#ffffff08", border: "1px solid " + (confirm ? (matches ? "#10b98150" : "#ef444450") : bdr(false)), borderRadius: 14, padding: "16px 56px 16px 46px", color: text, fontSize: 15, fontFamily: "'DM Sans',sans-serif", outline: "none", transition: "all .2s" }}
+            style={{ display: "block", width: "100%", background: "#ffffff08", border: "1px solid " + confirm ? (matches ? "#10b98150" : "#ef444450") : bdr(false), borderRadius: 14, padding: "16px 56px 16px 46px", color: text, fontSize: 15, fontFamily: "'DM Sans',sans-serif", outline: "none", transition: "all .2s" }}
           />
           <button onClick={() => setShowConfirm(v => !v)} style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "#64748b", fontSize: 12, cursor: "pointer" }}>
             {showConfirm ? "Ocultar" : "Ver"}
@@ -1655,7 +1655,7 @@ function ChangePasswordScreen({ onBack, darkMode = true }) {
         )}
 
         {/* Security tips */}
-        <div style={{ background: darkMode ? "#3b82f608" : "#eff6ff", border: "1px solid " + (darkMode ? "#3b82f620" : "#bfdbfe"), borderRadius: 14, padding: "14px 16px", marginBottom: 24, marginTop: 8 }}>
+        <div style={{ background: darkMode ? "#3b82f608" : "#eff6ff", border: "1px solid " + darkMode ? "#3b82f620" : "#bfdbfe", borderRadius: 14, padding: "14px 16px", marginBottom: 24, marginTop: 8 }}>
           <p style={{ color: "#3b82f6", fontSize: 12, fontWeight: 700, marginBottom: 8 }}>💡 Consejos de seguridad</p>
           {["No uses la misma contraseña en otros servicios", "Evita información personal como fechas de nacimiento", "Usa un gestor de contraseñas para recordarla"].map((t, i) => (
             <p key={i} style={{ color: "#64748b", fontSize: 12, marginBottom: i < 2 ? 4 : 0 }}>· {t}</p>
@@ -1856,7 +1856,7 @@ function SettingsScreen({ onBack, onSignOut, darkModeProp, onToggleTheme, onChan
               <p style={{ color: "#64748b", fontSize: 13, textAlign: "center", lineHeight: 1.7, marginBottom: 16 }}>
                 Para eliminar tu cuenta envía un correo a:
               </p>
-              <div style={{ background: darkMode ? "#ffffff08" : "#f1f5f9", border: "1px solid " + (darkMode ? "#3b82f630" : "#bfdbfe"), borderRadius: 12, padding: "12px 16px", marginBottom: 16, textAlign: "center" }}>
+              <div style={{ background: darkMode ? "#ffffff08" : "#f1f5f9", border: "1px solid " + darkMode ? "#3b82f630" : "#bfdbfe", borderRadius: 12, padding: "12px 16px", marginBottom: 16, textAlign: "center" }}>
                 <p style={{ color: "#3b82f6", fontSize: 14, fontWeight: 700 }}>servicio@bajarenta.com</p>
               </div>
               <p style={{ color: "#64748b", fontSize: 12, textAlign: "center", lineHeight: 1.7, marginBottom: 24 }}>
@@ -2144,7 +2144,7 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
               <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 15 }}>{f.icon}</span>
               <input placeholder={f.ph} type={f.type} value={appForm[f.key]} onChange={e => setF(f.key, e.target.value)} style={{
                 display: "block", width: "100%", background: "#ffffff08",
-                border: "1px solid " + (appForm[f.key] ? "#3b82f650" : border),
+                border: "1px solid " + appForm[f.key] ? "#3b82f650" : border,
                 borderRadius: 12, padding: "13px 16px 13px 44px", color: text, fontSize: 14,
                 fontFamily: "'DM Sans',sans-serif", outline: "none",
               }} />
@@ -2155,7 +2155,7 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
           <h3 style={{ fontFamily: "'Syne',sans-serif", color: text, fontSize: 15, fontWeight: 700, marginBottom: 6, marginTop: 20 }}>📞 3 Referencias personales</h3>
           <p style={{ color: "#64748b", fontSize: 12, marginBottom: 12 }}>Nombre y teléfono de cada referencia</p>
           {appForm.refs.map((r, i) => (
-            <div key={i} style={{ background: "#ffffff06", border: "1px solid " + (((r.name && r.phone) ? "#3b82f640" : border2)), borderRadius: 14, padding: "14px", marginBottom: 12 }}>
+            <div key={i} style={{ background: "#ffffff06", border: "1px solid " + (r.name && r.phone) ? "#3b82f640" : border2, borderRadius: 14, padding: "14px", marginBottom: 12 }}>
               <p style={{ color: "#64748b", fontSize: 12, fontWeight: 700, marginBottom: 10 }}>Referencia {i + 1}</p>
               {/* Name field */}
               <div style={{ position: "relative", marginBottom: 8 }}>
@@ -2166,7 +2166,7 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
                   onChange={e => setRef(i, "name", e.target.value)}
                   style={{
                     display: "block", width: "100%", background: "#ffffff08",
-                    border: "1px solid " + (r.name ? "#3b82f650" : border),
+                    border: "1px solid " + r.name ? "#3b82f650" : border,
                     borderRadius: 10, padding: "11px 14px 11px 36px", color: text, fontSize: 13,
                     fontFamily: "'DM Sans',sans-serif", outline: "none",
                   }}
@@ -2182,7 +2182,7 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
                   onChange={e => setRef(i, "phone", e.target.value)}
                   style={{
                     display: "block", width: "100%", background: "#ffffff08",
-                    border: "1px solid " + (r.phone ? "#3b82f650" : border),
+                    border: "1px solid " + r.phone ? "#3b82f650" : border,
                     borderRadius: 10, padding: "11px 14px 11px 36px", color: text, fontSize: 13,
                     fontFamily: "'DM Sans',sans-serif", outline: "none",
                   }}
@@ -2198,7 +2198,7 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
                   onChange={e => setRef(i, "relation", e.target.value)}
                   style={{
                     display: "block", width: "100%", background: "#ffffff08",
-                    border: "1px solid " + (r.relation ? "#3b82f650" : border),
+                    border: "1px solid " + r.relation ? "#3b82f650" : border,
                     borderRadius: 10, padding: "11px 14px 11px 36px", color: text, fontSize: 13,
                     fontFamily: "'DM Sans',sans-serif", outline: "none",
                   }}
@@ -2220,7 +2220,7 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
               <label key={doc.key} htmlFor={"doc-" + doc.key} style={{
                 display: "flex", alignItems: "center", justifyContent: "space-between",
                 background: uploaded ? "#3b82f610" : "#ffffff06",
-                border: "1px solid " + (uploaded ? "#3b82f640" : "#3b82f620"),
+                border: "1px solid " + uploaded ? "#3b82f640" : "#3b82f620",
                 borderRadius: 14, padding: "13px 16px", marginBottom: 8, cursor: "pointer",
                 transition: "all .2s",
               }}>
@@ -2304,7 +2304,7 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
       <div style={{ minHeight: "100vh", background: bg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 32, textAlign: "center" }}>
 
         {applicationStatus === "approved" ? (
-          <React.Fragment>
+          <>
             <div style={{ width: 90, height: 90, borderRadius: "50%", background: "linear-gradient(135deg, #10b981, #059669)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 24, boxShadow: "0 0 40px #10b98150" }}>
               <Icon name="check" size={42} color="white" />
             </div>
@@ -2314,7 +2314,7 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
             </div>
 
             {property._mode === "managed" ? (
-              <React.Fragment>
+              <>
                 <p style={{ color: "#64748b", fontSize: 14, marginBottom: 32, maxWidth: 300, lineHeight: 1.6 }}>
                   El propietario ha aprobado tu solicitud. Ya puedes proceder con el pago de la primera mensualidad.
                 </p>
@@ -2326,9 +2326,9 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
                 }}>
                   <Icon name="card" size={18} color="white" /> Realizar pago de 1ª mensualidad
                 </button>
-              </React.Fragment>
+              </>
             ) : (
-              <React.Fragment>
+              <>
                 <p style={{ color: "#64748b", fontSize: 14, marginBottom: 24, maxWidth: 300, lineHeight: 1.6 }}>
                   ¡Felicidades! El propietario ha aceptado tu solicitud. Coordina directamente con él los detalles del contrato y pago.
                 </p>
@@ -2344,11 +2344,11 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
                 }}>
                   🏠 Regresar a propiedades
                 </button>
-              </React.Fragment>
+              </>
             )}
-          </React.Fragment>
+          </>
         ) : (
-          <React.Fragment>
+          <>
             <div style={{ width: 90, height: 90, borderRadius: "50%", background: "#f59e0b15", border: "2px solid #f59e0b", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 24 }}>
               <span style={{ fontSize: 40 }}>⏳</span>
             </div>
@@ -2376,7 +2376,7 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
             }}>
               🏠 Regresar a propiedades
             </button>
-          </React.Fragment>
+          </>
         )}
       </div>
     );
@@ -2629,19 +2629,22 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
         </div>
 
         {/* Google Maps link */}
-        {(() => {
-          var mapsHref = property.mapsUrl || ("https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent((property.address || "") + " " + (property.city || "") + " " + (property.state || "") + " México"));
-          return (
-            <a href={mapsHref} target="_blank" rel="noopener noreferrer" style={{
-              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-              background: "#ffffff06", border: "1px solid #3b82f630",
-              borderRadius: 14, padding: "14px 20px", marginBottom: 24,
-              color: "#3b82f6", fontSize: 14, fontWeight: 600,
-              fontFamily: "'DM Sans',sans-serif", textDecoration: "none",
-              WebkitTapHighlightColor: "transparent", transition: "all .2s",
-            }}>Ver ubicación en Maps 📍</a>
-          );
-        })()}
+        <a
+          href={property.mapsUrl || "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent((property.address || "") + " " + (property.city || "") + " " + (property.state || "") + " México")}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+            background: "#ffffff06", border: "1px solid #3b82f630",
+            borderRadius: 14, padding: "14px 20px", marginBottom: 24,
+            color: "#3b82f6", fontSize: 14, fontWeight: 600,
+            fontFamily: "'DM Sans',sans-serif", textDecoration: "none",
+            WebkitTapHighlightColor: "transparent",
+            transition: "all .2s",
+          }}
+        >
+          Ver ubicación en Maps 📍
+        </a>
         <h3 style={{ color: text, fontSize: 15, fontWeight: 700, marginBottom: 12, fontFamily: "'DM Sans',sans-serif" }}>Condiciones de renta</h3>
         <div style={{ background: "#ffffff06", borderRadius: 20, padding: 20, border: "1px solid #ffffff10", marginBottom: 16 }}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
@@ -2656,12 +2659,14 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
           </div>
           <p style={{ color: "#94a3b8", fontSize: 13, marginBottom: 10 }}>Duración del contrato</p>
           <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={() => setContract("12")} style={{
-              flex: 1, padding: "10px", borderRadius: 12, cursor: "pointer", fontSize: 13, fontWeight: 600,
-              background: "linear-gradient(135deg, #3b82f6, #6366f1)",
-              border: "1px solid transparent",
-              color: text, fontFamily: "'DM Sans',sans-serif", transition: "all .2s",
-            }}>1 año</button>
+            {[["12", "1 año"]].map(function(pair) { var val = pair[0], label = pair[1]; return  (
+              <button key={val} onClick={() => setContract(val)} style={{
+                flex: 1, padding: "10px", borderRadius: 12, cursor: "pointer", fontSize: 13, fontWeight: 600,
+                background: contract === val ? "linear-gradient(135deg, #3b82f6, #6366f1)" : "#ffffff10",
+                border: "1px solid " + contract === val ? "transparent" : border,
+                color: text, fontFamily: "'DM Sans',sans-serif", transition: "all .2s",
+              }}>{label}</button>
+            ))}
           </div>
         </div>
       </div>
@@ -2748,7 +2753,7 @@ function PhotoUploader({ mode, photos, setPhotos }) {
       )}
 
       {photos.length < 5 && (
-        <React.Fragment>
+        <>
           <input
             ref={inputRef}
             type="file"
@@ -2772,7 +2777,7 @@ function PhotoUploader({ mode, photos, setPhotos }) {
             </span>
             <span style={{ color: "#64748b", fontSize: 12 }}>Toca para abrir galería o cámara</span>
           </label>
-        </React.Fragment>
+        </>
       )}
 
       {photos.length === 5 && (
@@ -2921,7 +2926,7 @@ function SelfRegisterScreen({ onBack, onComplete, onLogin, darkMode = true }) {
             onChange={e => { setL("email", e.target.value); setLoginError(false); }}
             style={{
               display: "block", width: "100%", background: inputBg,
-              border: "1px solid " + (loginError ? "#ef444450" : loginForm.email ? "#f59e0b50" : border),
+              border: "1px solid " + loginError ? "#ef444450" : loginForm.email ? "#f59e0b50" : border,
               borderRadius: 12, padding: "14px 16px 14px 44px", color: text, fontSize: 14,
               fontFamily: "'DM Sans',sans-serif", outline: "none", transition: "border .2s",
             }}
@@ -2938,7 +2943,7 @@ function SelfRegisterScreen({ onBack, onComplete, onLogin, darkMode = true }) {
             onChange={e => { setL("password", e.target.value); setLoginError(false); }}
             style={{
               display: "block", width: "100%", background: inputBg,
-              border: "1px solid " + (loginError ? "#ef444450" : loginForm.password ? "#f59e0b50" : border),
+              border: "1px solid " + loginError ? "#ef444450" : loginForm.password ? "#f59e0b50" : border,
               borderRadius: 12, padding: "14px 60px 14px 44px", color: text, fontSize: 14,
               fontFamily: "'DM Sans',sans-serif", outline: "none", transition: "border .2s",
             }}
@@ -3018,7 +3023,7 @@ function SelfRegisterScreen({ onBack, onComplete, onLogin, darkMode = true }) {
                   width: 56, height: 64, borderRadius: 14, textAlign: "center",
                   fontSize: 26, fontWeight: 700, color: text,
                   background: codeBg(c),
-                  border: "2px solid " + (c ? "#f59e0b" : border),
+                  border: "2px solid " + c ? "#f59e0b" : border,
                   outline: "none", transition: "all .2s", fontFamily: "'Syne',sans-serif",
                 }} />
             ))}
@@ -3139,7 +3144,7 @@ function SelfRegisterScreen({ onBack, onComplete, onLogin, darkMode = true }) {
           <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 16 }}>{f.icon}</span>
           <input placeholder={f.ph} type={f.type} value={form[f.key]} onChange={e => setF(f.key, e.target.value)} style={{
             display: "block", width: "100%", background: inputBg,
-            border: "1px solid " + (form[f.key] ? "#f59e0b50" : border),
+            border: "1px solid " + form[f.key] ? "#f59e0b50" : border,
             borderRadius: 12, padding: "14px 16px 14px 44px", color: text, fontSize: 14,
             fontFamily: "'DM Sans',sans-serif", outline: "none", transition: "border .2s",
           }} />
@@ -3201,7 +3206,7 @@ function SelfRegisterScreen({ onBack, onComplete, onLogin, darkMode = true }) {
         <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 16 }}>🔒</span>
         <input placeholder="Contraseña" type={showPass ? "text" : "password"} value={form.password} onChange={e => setF("password", e.target.value)} style={{
           display: "block", width: "100%", background: inputBg,
-          border: "1px solid " + (form.password ? "#f59e0b50" : border),
+          border: "1px solid " + form.password ? "#f59e0b50" : border,
           borderRadius: 12, padding: "14px 60px 14px 44px", color: text, fontSize: 14,
           fontFamily: "'DM Sans',sans-serif", outline: "none", transition: "border .2s",
         }} />
@@ -3234,7 +3239,7 @@ function SelfRegisterScreen({ onBack, onComplete, onLogin, darkMode = true }) {
           onChange={e => setF("confirmPassword", e.target.value)}
           style={{
             display: "block", width: "100%", background: inputBg,
-            border: "1px solid " + (!form.confirmPassword ? border : passwordsMatch ? "#10b98150" : "#ef444450"),
+            border: "1px solid " + !form.confirmPassword ? border : passwordsMatch ? "#10b98150" : "#ef444450",
             borderRadius: 12, padding: "14px 60px 14px 44px", color: text, fontSize: 14,
             fontFamily: "'DM Sans',sans-serif", outline: "none", transition: "border .2s",
           }}
@@ -3505,7 +3510,7 @@ function ApplicantDetail({ applicant, onBack, isApproved, isRejected, onApprove,
 
         {/* Sub tabs */}
         <div style={{ display: "flex", gap: 8 }}>
-          {[["profile","Perfil"],["refs","Referencias"],["docs","Documentos"]].map(([k, l]) => (
+          {[["profile","Perfil"],["refs","Referencias"],["docs","Documentos"]].map(function(pair) { var k = pair[0], l = pair[1]; return  (
             <button key={k} onClick={() => setDocTab(k)} style={{
               flex: 1, padding: "8px 0", borderRadius: 10, border: "none", cursor: "pointer",
               background: docTab === k ? "#f59e0b" : (darkMode ? "#ffffff08" : "#e2e8f0"),
@@ -3518,7 +3523,7 @@ function ApplicantDetail({ applicant, onBack, isApproved, isRejected, onApprove,
 
       <div style={{ padding: "20px 24px" }}>
         {docTab === "profile" && (
-          <React.Fragment>
+          <>
             {/* Personal info section */}
             <p style={{ color: textSub, fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", marginBottom: 10 }}>Información personal</p>
 
@@ -3602,7 +3607,7 @@ function ApplicantDetail({ applicant, onBack, isApproved, isRejected, onApprove,
               {(() => {
                 const allDocsVerified = docsMap.every(d => docVerified[d.key]) && refVerified.every(Boolean);
                 return (
-                  <React.Fragment>
+                  <>
                     {!allDocsVerified && !isApproved && (
                       <div style={{ width: "100%", background: "#f59e0b10", border: "1px solid #f59e0b30", borderRadius: 12, padding: "10px 14px", display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
                         <span style={{ fontSize: 14 }}>🔒</span>
@@ -3622,7 +3627,7 @@ function ApplicantDetail({ applicant, onBack, isApproved, isRejected, onApprove,
                         <p style={{ color: "#ef4444", fontSize: 15, fontWeight: 700 }}>Candidato rechazado automáticamente</p>
                       </div>
                     ) : (
-                      <React.Fragment>
+                      <>
                         <button
                           onClick={() => allDocsVerified && setConfirmApprove(true)}
                           disabled={!allDocsVerified}
@@ -3657,26 +3662,26 @@ function ApplicantDetail({ applicant, onBack, isApproved, isRejected, onApprove,
                           }}>
                           {"✗ Rechazar"}
                         </button>
-                      </React.Fragment>
+                      </>
                     )}
-                  </React.Fragment>
+                  </>
                 );
               })()}
             </div>
-          </React.Fragment>
+          </>
         )}
 
         {docTab === "refs" && (
-          <React.Fragment>
+          <>
             <p style={{ color: textSub, fontSize: 13, marginBottom: 16 }}>3 referencias personales proporcionadas</p>
             {applicant.refs.map((r, i) => (
-              <div key={i} style={{ background: cardBg, border: "1px solid " + (refVerified[i] ? "#10b98130" : "#f59e0b30"), borderRadius: 16, padding: "16px", marginBottom: 12 }}>
+              <div key={i} style={{ background: cardBg, border: "1px solid " + refVerified[i] ? "#10b98130" : "#f59e0b30", borderRadius: 16, padding: "16px", marginBottom: 12 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
                   <div style={{ flex: 1 }}>
                     <p style={{ color: text, fontSize: 14, fontWeight: 700, marginBottom: 2 }}>Ref. {i + 1}: {r.name}</p>
                     <p style={{ color: textSub, fontSize: 12 }}>{r.relation}</p>
                   </div>
-                  <span style={{ background: refVerified[i] ? "#10b98115" : "#f59e0b15", border: "1px solid " + (refVerified[i] ? "#10b98140" : "#f59e0b40"), borderRadius: 99, padding: "3px 10px", color: refVerified[i] ? "#10b981" : "#f59e0b", fontSize: 10, fontWeight: 700, flexShrink: 0 }}>
+                  <span style={{ background: refVerified[i] ? "#10b98115" : "#f59e0b15", border: "1px solid " + refVerified[i] ? "#10b98140" : "#f59e0b40", borderRadius: 99, padding: "3px 10px", color: refVerified[i] ? "#10b981" : "#f59e0b", fontSize: 10, fontWeight: 700, flexShrink: 0 }}>
                     {refVerified[i] ? "✓ Verificada" : "⚠️ Pendiente"}
                   </span>
                 </div>
@@ -3715,11 +3720,11 @@ function ApplicantDetail({ applicant, onBack, isApproved, isRejected, onApprove,
                 {refVerified.filter(Boolean).length} / {applicant.refs.length}
               </p>
             </div>
-          </React.Fragment>
+          </>
         )}
 
         {docTab === "docs" && (
-          <React.Fragment>
+          <>
             <p style={{ color: textSub, fontSize: 13, marginBottom: 16 }}>Revisa y verifica los documentos del candidato</p>
             {docsMap.map(d => {
               const received = applicant.docs[d.key];
@@ -3727,7 +3732,7 @@ function ApplicantDetail({ applicant, onBack, isApproved, isRejected, onApprove,
               return (
                 <div key={d.key} style={{
                   background: cardBg,
-                  border: "1px solid " + (verified ? "#10b98140" : received ? "#f59e0b30" : "#ffffff15"),
+                  border: "1px solid " + verified ? "#10b98140" : received ? "#f59e0b30" : "#ffffff15",
                   borderRadius: 16, padding: "16px", marginBottom: 12,
                   transition: "border .2s",
                 }}>
@@ -3743,7 +3748,7 @@ function ApplicantDetail({ applicant, onBack, isApproved, isRejected, onApprove,
                     </div>
                     <span style={{
                       background: verified ? "#10b98115" : received ? "#f59e0b15" : "#ffffff08",
-                      border: "1px solid " + (verified ? "#10b98140" : received ? "#f59e0b40" : "#ffffff15"),
+                      border: "1px solid " + verified ? "#10b98140" : received ? "#f59e0b40" : "#ffffff15",
                       borderRadius: 99, padding: "4px 12px",
                       color: verified ? "#10b981" : received ? "#f59e0b" : "#475569",
                       fontSize: 10, fontWeight: 700, flexShrink: 0,
@@ -3799,7 +3804,7 @@ function ApplicantDetail({ applicant, onBack, isApproved, isRejected, onApprove,
                 {Object.values(docVerified).filter(Boolean).length} / {docsMap.length}
               </p>
             </div>
-          </React.Fragment>
+          </>
         )}
       </div>
     </div>
@@ -3856,7 +3861,6 @@ function OwnerPropertyDetail({ property, onBack, approvedApplicants, onApprove, 
           <div>
             <div style={{ background: "#f59e0b10", border: "1px solid #f59e0b30", borderRadius: 12, padding: "10px 16px", marginBottom: 10, textAlign: "center" }}>
               <p style={{ color: "#fcd34d", fontSize: 12, fontWeight: 600 }}>📅 Publicación activa por 90 días · Pago único $500 MXN</p>
-              <p style={{ color: "#78716c", fontSize: 11, marginTop: 3 }}>Tu propiedad visible en el catálogo de Baja Renta</p>
             </div>
             <button onClick={function() {
               fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/create-checkout", {
@@ -3878,7 +3882,7 @@ function OwnerPropertyDetail({ property, onBack, approvedApplicants, onApprove, 
               headers: { "Content-Type": "application/json", "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ", "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ" },
               body: JSON.stringify({ status: "revision" }),
             }).then(function() {
-              alert("¡Solicitud enviada! El equipo de Baja Renta revisará tu propiedad en 24-72 horas hábiles y recibirás un correo al ser aprobada.");
+              alert("Solicitud enviada. El equipo de Baja Renta revisará tu propiedad en 24-72 horas.");
             }).catch(function() { alert("Error de conexión."); });
           }} style={{ width: "100%", background: "linear-gradient(135deg, #3b82f6, #6366f1)", border: "none", borderRadius: 16, padding: 16, color: "white", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
             📤 Solicitar publicación
@@ -3886,7 +3890,7 @@ function OwnerPropertyDetail({ property, onBack, approvedApplicants, onApprove, 
         ) : (
           <div style={{ background: "#f59e0b10", border: "1px solid #f59e0b30", borderRadius: 14, padding: "14px 16px", textAlign: "center" }}>
             <p style={{ color: "#fcd34d", fontSize: 13, fontWeight: 700, marginBottom: 4 }}>⏳ En revisión</p>
-            <p style={{ color: "#78716c", fontSize: 12, lineHeight: 1.5 }}>El equipo de Baja Renta está revisando tu propiedad. Recibirás un correo cuando sea aprobada.</p>
+            <p style={{ color: "#78716c", fontSize: 12 }}>El equipo revisará tu propiedad en 24-72 hrs hábiles.</p>
           </div>
         )}
       </div>
@@ -4077,7 +4081,7 @@ function OwnerSettingsScreen({ onBack, onSignOut, darkModeProp, onToggleTheme, c
               <p style={{ color: "#64748b", fontSize: 13, textAlign: "center", lineHeight: 1.7, marginBottom: 16 }}>
                 Para eliminar tu cuenta envía un correo a:
               </p>
-              <div style={{ background: darkMode ? "#ffffff08" : "#f1f5f9", border: "1px solid " + (darkMode ? "#f59e0b30" : "#fde68a"), borderRadius: 12, padding: "12px 16px", marginBottom: 16, textAlign: "center" }}>
+              <div style={{ background: darkMode ? "#ffffff08" : "#f1f5f9", border: "1px solid " + darkMode ? "#f59e0b30" : "#fde68a", borderRadius: 12, padding: "12px 16px", marginBottom: 16, textAlign: "center" }}>
                 <p style={{ color: "#f59e0b", fontSize: 14, fontWeight: 700 }}>servicio@bajarenta.com</p>
               </div>
               <p style={{ color: "#64748b", fontSize: 12, textAlign: "center", lineHeight: 1.7, marginBottom: 24 }}>
@@ -4517,7 +4521,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
     return (
       <div style={{ minHeight: "100vh", background: bg, display: "flex", flexDirection: "column" }}>
         {/* Header */}
-        <div style={{ background: navBgOP, padding: "48px 24px 28px", borderBottom: "1px solid " + (darkMode ? "#ffffff15" : "#e2e8f0"), transition: "background .3s" }}>
+        <div style={{ background: navBgOP, padding: "48px 24px 28px", borderBottom: "1px solid " + darkMode ? "#ffffff15" : "#e2e8f0", transition: "background .3s" }}>
           <button onClick={() => setMode(null)} style={{ background: "none", border: "none", color: darkMode ? "#64748b" : "#475569", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontSize: 14, marginBottom: 28, fontFamily: "'DM Sans',sans-serif" }}>
             <Icon name="back" size={16} color={darkMode ? "#64748b" : "#475569"} /> Regresar
           </button>
@@ -4562,7 +4566,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
               { icon: "📱", text: "Publicidad de tu propiedad dentro de la app Baja Renta" },
               { icon: "📞", text: "Soporte y acompañamiento durante todo el proceso" },
             ].map((item, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 12, background: cardBgOP, border: "1px solid " + (darkMode ? "#3b82f620" : "#bfdbfe"), borderRadius: 14, padding: "12px 14px", transition: "background .3s" }}>
+              <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 12, background: cardBgOP, border: "1px solid " + darkMode ? "#3b82f620" : "#bfdbfe", borderRadius: 14, padding: "12px 14px", transition: "background .3s" }}>
                 <span style={{ fontSize: 18, flexShrink: 0 }}>{item.icon}</span>
                 <p style={{ color: textOP, fontSize: 13, lineHeight: 1.4, transition: "color .3s" }}>{item.text}</p>
               </div>
@@ -4570,8 +4574,8 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
           </div>
 
           {/* Agreement checkbox */}
-          <label style={{ display: "flex", alignItems: "flex-start", gap: 12, cursor: "pointer", marginBottom: 28, background: managed_agreed ? "#f59e0b15" : (darkMode ? "#ffffff06" : "#fff8ed"), border: "2px solid " + (managed_agreed ? "#f59e0b" : (darkMode ? "#ffffff10" : "#f59e0b40")), borderRadius: 16, padding: "16px", transition: "all .2s" }}>
-            <div style={{ width: 22, height: 22, borderRadius: 6, background: managed_agreed ? "#f59e0b" : (darkMode ? "#ffffff10" : "#f59e0b20"), border: "2px solid " + (managed_agreed ? "transparent" : (darkMode ? "#ffffff20" : "#f59e0b60")), display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1, transition: "all .2s" }}>
+          <label style={{ display: "flex", alignItems: "flex-start", gap: 12, cursor: "pointer", marginBottom: 28, background: managed_agreed ? "#f59e0b15" : (darkMode ? "#ffffff06" : "#fff8ed"), border: "2px solid " + managed_agreed ? "#f59e0b" : (darkMode ? "#ffffff10" : "#f59e0b40"), borderRadius: 16, padding: "16px", transition: "all .2s" }}>
+            <div style={{ width: 22, height: 22, borderRadius: 6, background: managed_agreed ? "#f59e0b" : (darkMode ? "#ffffff10" : "#f59e0b20"), border: "2px solid " + managed_agreed ? "transparent" : (darkMode ? "#ffffff20" : "#f59e0b60"), display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1, transition: "all .2s" }}>
               {managed_agreed && <Icon name="check" size={13} color="#000" />}
             </div>
             <input type="checkbox" checked={managed_agreed} onChange={e => setManaged_agreed(e.target.checked)} style={{ display: "none" }} />
@@ -4595,7 +4599,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
 
           <button onClick={() => setMode(null)} style={{
             width: "100%", background: darkMode ? "transparent" : "#f1f5f9",
-            border: "1px solid " + (darkMode ? "#ffffff15" : "#cbd5e1"),
+            border: "1px solid " + darkMode ? "#ffffff15" : "#cbd5e1",
             borderRadius: 16, padding: "16px", color: "#64748b",
             fontSize: 15, fontWeight: 600, cursor: "pointer",
             fontFamily: "'DM Sans',sans-serif", transition: "all .2s",
@@ -4839,20 +4843,20 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
           {/* Card inputs */}
           <div style={{ position: "relative", marginBottom: 10 }}>
             <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 15 }}>👤</span>
-            <input placeholder="Nombre en la tarjeta" value={cardName} onChange={e => setCardName(e.target.value)} style={{ display: "block", width: "100%", background: cardBgOP, border: "1px solid " + (cardName ? accent+"50" : "#ffffff10"), borderRadius: 12, padding: "13px 16px 13px 42px", color: textOP, fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none" }} />
+            <input placeholder="Nombre en la tarjeta" value={cardName} onChange={e => setCardName(e.target.value)} style={{ display: "block", width: "100%", background: cardBgOP, border: "1px solid " + cardName ? accent+"50" : "#ffffff10", borderRadius: 12, padding: "13px 16px 13px 42px", color: textOP, fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none" }} />
           </div>
           <div style={{ position: "relative", marginBottom: 10 }}>
             <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 15 }}>💳</span>
-            <input placeholder="Número de tarjeta" value={cardNum} onChange={e => setCardNum(formatCard(e.target.value))} inputMode="numeric" style={{ display: "block", width: "100%", background: cardBgOP, border: "1px solid " + (cardNum ? accent+"50" : "#ffffff10"), borderRadius: 12, padding: "13px 16px 13px 42px", color: textOP, fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none", letterSpacing: 2 }} />
+            <input placeholder="Número de tarjeta" value={cardNum} onChange={e => setCardNum(formatCard(e.target.value))} inputMode="numeric" style={{ display: "block", width: "100%", background: cardBgOP, border: "1px solid " + cardNum ? accent+"50" : "#ffffff10", borderRadius: 12, padding: "13px 16px 13px 42px", color: textOP, fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none", letterSpacing: 2 }} />
           </div>
           <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>
             <div style={{ position: "relative", flex: 1 }}>
               <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", fontSize: 13 }}>📅</span>
-              <input placeholder="MM/AA" value={expiry} onChange={e => setExpiry(formatExp(e.target.value))} inputMode="numeric" maxLength={5} style={{ display: "block", width: "100%", background: cardBgOP, border: "1px solid " + (expiry ? accent+"50" : "#ffffff10"), borderRadius: 12, padding: "13px 12px 13px 38px", color: textOP, fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none" }} />
+              <input placeholder="MM/AA" value={expiry} onChange={e => setExpiry(formatExp(e.target.value))} inputMode="numeric" maxLength={5} style={{ display: "block", width: "100%", background: cardBgOP, border: "1px solid " + expiry ? accent+"50" : "#ffffff10", borderRadius: 12, padding: "13px 12px 13px 38px", color: textOP, fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none" }} />
             </div>
             <div style={{ position: "relative", flex: 1 }}>
               <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", fontSize: 13 }}>🔒</span>
-              <input placeholder="CVV" value={cvv} onChange={e => setCvv(e.target.value.replace(/\D/g,"").slice(0,4))} inputMode="numeric" style={{ display: "block", width: "100%", background: cardBgOP, border: "1px solid " + (cvv ? accent+"50" : "#ffffff10"), borderRadius: 12, padding: "13px 12px 13px 38px", color: textOP, fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none" }} />
+              <input placeholder="CVV" value={cvv} onChange={e => setCvv(e.target.value.replace(/\D/g,"").slice(0,4))} inputMode="numeric" style={{ display: "block", width: "100%", background: cardBgOP, border: "1px solid " + cvv ? accent+"50" : "#ffffff10", borderRadius: 12, padding: "13px 12px 13px 38px", color: textOP, fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none" }} />
             </div>
           </div>
 
@@ -4878,7 +4882,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
       </button>
       <div style={{
         background: mode === "managed" ? "linear-gradient(135deg, #3b82f620, #6366f120)" : "linear-gradient(135deg, #f59e0b20, #d9770620)",
-        border: "1px solid " + (mode === "managed" ? "#3b82f640" : "#f59e0b40"),
+        border: "1px solid " + mode === "managed" ? "#3b82f640" : "#f59e0b40",
         borderRadius: 14, padding: "12px 16px", marginBottom: 28,
         display: "flex", alignItems: "center", gap: 10,
       }}>
@@ -4919,7 +4923,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
         </div>
         <input placeholder="Ej. Casa en Fraccionamiento Las Palmas" value={propForm.name} onChange={e => setPF("name", e.target.value)} style={{
           display: "block", width: "100%", background: cardBgOP,
-          border: "1px solid " + (propForm.name ? accent+"50" : "#ffffff10"),
+          border: "1px solid " + propForm.name ? accent+"50" : "#ffffff10",
           borderRadius: 12, padding: "14px 16px", color: textOP, fontSize: 14,
           fontFamily: "'DM Sans',sans-serif", outline: "none",
         }} />
@@ -4928,7 +4932,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
       {/* Estado — fixed dropdown */}
       <select value={propForm.state} onChange={e => setPF("state", e.target.value)} style={{
         display: "block", width: "100%", background: cardBgOP,
-        border: "1px solid " + (propForm.state ? accent+"50" : "#ffffff10"),
+        border: "1px solid " + propForm.state ? accent+"50" : "#ffffff10",
         borderRadius: 12, padding: "14px 16px", color: propForm.state ? textOP : "#64748b",
         fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none",
         marginBottom: 10, cursor: "pointer",
@@ -4940,7 +4944,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
       {/* Ciudad — dropdown */}
       <select value={propForm.city} onChange={e => setPF("city", e.target.value)} style={{
         display: "block", width: "100%", background: cardBgOP,
-        border: "1px solid " + (propForm.city ? accent+"50" : "#ffffff10"),
+        border: "1px solid " + propForm.city ? accent+"50" : "#ffffff10",
         borderRadius: 12, padding: "14px 16px", color: propForm.city ? textOP : "#64748b",
         fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none",
         marginBottom: 10, cursor: "pointer",
@@ -4959,7 +4963,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
       ].map((f, i) => (
         <input key={i} placeholder={f.ph} value={propForm[f.key]} onChange={e => setPF(f.key, e.target.value)} style={{
           display: "block", width: "100%", background: cardBgOP,
-          border: "1px solid " + (propForm[f.key] ? accent+"50" : "#ffffff10"),
+          border: "1px solid " + propForm[f.key] ? accent+"50" : "#ffffff10",
           borderRadius: 12, padding: "14px 16px", color: textOP, fontSize: 14,
           fontFamily: "'DM Sans',sans-serif", outline: "none", marginBottom: 10,
         }} />
@@ -4980,7 +4984,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
           { label: "🚗 Estacionamiento", key: "parkingIncluded" },
           { label: "👶 Se aceptan niños", key: "kidsAllowed" },
         ].map(f => (
-          <label key={f.key} onClick={() => togglePF(f.key)} style={{ display: "flex", alignItems: "center", gap: 8, color: propForm[f.key] ? "white" : "#94a3b8", fontSize: 13, cursor: "pointer", background: propForm[f.key] ? accent+"15" : "#ffffff06", border: "1px solid " + (propForm[f.key] ? accent+"40" : "#ffffff10"), borderRadius: 10, padding: "10px 12px", transition: "all .2s" }}>
+          <label key={f.key} onClick={() => togglePF(f.key)} style={{ display: "flex", alignItems: "center", gap: 8, color: propForm[f.key] ? "white" : "#94a3b8", fontSize: 13, cursor: "pointer", background: propForm[f.key] ? accent+"15" : "#ffffff06", border: "1px solid " + propForm[f.key] ? accent+"40" : "#ffffff10", borderRadius: 10, padding: "10px 12px", transition: "all .2s" }}>
             <input type="checkbox" checked={!!propForm[f.key]} onChange={() => togglePF(f.key)} style={{ accentColor: accent, width: 15, height: 15, flexShrink: 0 }} />
             {f.label}
           </label>
@@ -4992,7 +4996,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
         <p style={{ color: textSubOP, fontSize: 14, fontWeight: 600, marginBottom: 8 }}>🏠 Número de pisos</p>
         <div style={{ display: "flex", gap: 8 }}>
           {[{ label: "🏠 1 piso", val: "1" }, { label: "🏠 2 o más pisos", val: "2+" }].map(opt => (
-            <label key={opt.val} onClick={() => setPF("floors", opt.val)} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, background: propForm.floors === opt.val ? accent+"20" : "#ffffff06", border: "1px solid " + (propForm.floors === opt.val ? accent+"50" : "#ffffff10"), borderRadius: 10, padding: "14px 8px", cursor: "pointer", color: propForm.floors === opt.val ? "white" : "#94a3b8", fontSize: 15, fontWeight: 700, transition: "all .2s" }}>
+            <label key={opt.val} onClick={() => setPF("floors", opt.val)} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, background: propForm.floors === opt.val ? accent+"20" : "#ffffff06", border: "1px solid " + propForm.floors === opt.val ? accent+"50" : "#ffffff10", borderRadius: 10, padding: "14px 8px", cursor: "pointer", color: propForm.floors === opt.val ? "white" : "#94a3b8", fontSize: 15, fontWeight: 700, transition: "all .2s" }}>
               {opt.label}
             </label>
           ))}
@@ -5009,7 +5013,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
           onChange={e => setPF("mapsUrl", e.target.value)}
           style={{
             display: "block", width: "100%", background: cardBgOP,
-            border: "1px solid " + (propForm.mapsUrl ? "#3b82f650" : "#ffffff10"),
+            border: "1px solid " + propForm.mapsUrl ? "#3b82f650" : "#ffffff10",
             borderRadius: 12, padding: "14px 16px", color: textOP, fontSize: 14,
             fontFamily: "'DM Sans',sans-serif", outline: "none",
           }}
@@ -5025,7 +5029,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
           <p style={{ color: textSubOP, fontSize: 14, fontWeight: 600, marginBottom: 8 }}>🛏️ No. de recámaras</p>
           <div style={{ display: "flex", gap: 6 }}>
             {[1,2,3,4,"5+"].map(n => (
-              <label key={n} onClick={() => setPF("bedrooms", String(n))} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", background: propForm.bedrooms === String(n) ? accent+"20" : "#ffffff06", border: "1px solid " + (propForm.bedrooms === String(n) ? accent+"60" : "#ffffff10"), borderRadius: 8, padding: "11px 4px", cursor: "pointer", color: propForm.bedrooms === String(n) ? "white" : "#94a3b8", fontSize: 15, fontWeight: 800, transition: "all .2s" }}>
+              <label key={n} onClick={() => setPF("bedrooms", String(n))} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", background: propForm.bedrooms === String(n) ? accent+"20" : "#ffffff06", border: "1px solid " + propForm.bedrooms === String(n) ? accent+"60" : "#ffffff10", borderRadius: 8, padding: "11px 4px", cursor: "pointer", color: propForm.bedrooms === String(n) ? "white" : "#94a3b8", fontSize: 15, fontWeight: 800, transition: "all .2s" }}>
                 {n}
               </label>
             ))}
@@ -5035,7 +5039,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
           <p style={{ color: textSubOP, fontSize: 14, fontWeight: 600, marginBottom: 8 }}>🚿 No. de baños</p>
           <div style={{ display: "flex", gap: 6 }}>
             {[1,2,3,4,"4+"].map(n => (
-              <label key={n} onClick={() => setPF("bathrooms", String(n))} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", background: propForm.bathrooms === String(n) ? accent+"20" : "#ffffff06", border: "1px solid " + (propForm.bathrooms === String(n) ? accent+"60" : "#ffffff10"), borderRadius: 8, padding: "11px 4px", cursor: "pointer", color: propForm.bathrooms === String(n) ? "white" : "#94a3b8", fontSize: 15, fontWeight: 800, transition: "all .2s" }}>
+              <label key={n} onClick={() => setPF("bathrooms", String(n))} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", background: propForm.bathrooms === String(n) ? accent+"20" : "#ffffff06", border: "1px solid " + propForm.bathrooms === String(n) ? accent+"60" : "#ffffff10", borderRadius: 8, padding: "11px 4px", cursor: "pointer", color: propForm.bathrooms === String(n) ? "white" : "#94a3b8", fontSize: 15, fontWeight: 800, transition: "all .2s" }}>
                 {n}
               </label>
             ))}
@@ -5048,7 +5052,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
         <p style={{ color: textSubOP, fontSize: 14, fontWeight: 600, marginBottom: 8 }}>🚗 Tipo de estacionamiento {!propForm.parkingIncluded && <span style={{ fontSize: 11, fontWeight: 400, color: "#64748b" }}>— activa "Estacionamiento" primero</span>}</p>
         <div style={{ display: "flex", gap: 8 }}>
           {["Privado", "Público"].map(opt => (
-            <label key={opt} onClick={() => propForm.parkingIncluded && setPF("parking", opt)} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, background: propForm.parking === opt ? accent+"20" : "#ffffff06", border: "1px solid " + (propForm.parking === opt ? accent+"50" : "#ffffff10"), borderRadius: 10, padding: "14px 8px", cursor: propForm.parkingIncluded ? "pointer" : "not-allowed", color: propForm.parking === opt ? "white" : "#94a3b8", fontSize: 15, fontWeight: 700, textAlign: "center", transition: "all .2s" }}>
+            <label key={opt} onClick={() => propForm.parkingIncluded && setPF("parking", opt)} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, background: propForm.parking === opt ? accent+"20" : "#ffffff06", border: "1px solid " + propForm.parking === opt ? accent+"50" : "#ffffff10", borderRadius: 10, padding: "14px 8px", cursor: propForm.parkingIncluded ? "pointer" : "not-allowed", color: propForm.parking === opt ? "white" : "#94a3b8", fontSize: 15, fontWeight: 700, textAlign: "center", transition: "all .2s" }}>
               {opt}
             </label>
           ))}
@@ -5080,7 +5084,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
               <label key={doc.key} htmlFor={"doc-" + doc.key} style={{
                 display: "flex", alignItems: "center", justifyContent: "space-between",
                 background: uploaded ? "#10b98115" : "#ffffff06",
-                border: "1px solid " + (uploaded ? "#10b98140" : accent + "20"),
+                border: "1px solid " + uploaded ? "#10b98140" : accent + "20",
                 borderRadius: 14, padding: "14px 16px", cursor: "pointer", transition: "all .2s",
               }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, minWidth: 0 }}>
@@ -5092,7 +5096,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0, marginLeft: 8 }}>
                   <span style={{ color: uploaded ? "#10b981" : accent, fontSize: 11, fontWeight: 600 }}>{uploaded ? "Cambiar" : "Subir"}</span>
-                  <div style={{ width: 28, height: 28, borderRadius: "50%", background: uploaded ? "#10b98120" : accent + "20", border: "1px solid " + (uploaded ? "#10b98140" : accent + "40"), display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <div style={{ width: 28, height: 28, borderRadius: "50%", background: uploaded ? "#10b98120" : accent + "20", border: "1px solid " + uploaded ? "#10b98140" : accent + "40", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     {uploaded ? <Icon name="check" size={13} color="#10b981" /> : <Icon name="upload" size={13} color={accent} />}
                   </div>
                 </div>
@@ -5204,10 +5208,1020 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
               </div>
             );
           })()}
+          
+          <button onClick={function() {
+            if (!codeComplete || otpLoading) return;
+            setOtpLoading(true);
+            setOtpError("");
+            fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/verify-otp", {
+              method: "POST",
+              headers: { "Content-Type": "application/json", "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ" },
+              body: JSON.stringify({ email: form.email, code: code.join("") }),
+            }).then(function(r) { return r.json(); }).then(function(res) {
+              setOtpLoading(false);
+              if (res.valid) {
+                fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/register-user", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json", "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ" },
+                  body: JSON.stringify({ email: form.email, password: form.password, role: "visitor", full_name: form.name, phone: form.phone || null, date_of_birth: form.dob || null }),
+                }).then(function() {
+                  sendEmail('welcome_visitor', form.email, { name: form.name, email: form.email });
+                  setShowPushPrompt(true);
+                }).catch(function() {
+                  sendEmail('welcome_visitor', form.email, { name: form.name, email: form.email });
+                  onComplete({ name: form.name, email: form.email, phone: form.phone });
+                });
+              }
+              else { setOtpError("Código incorrecto o expirado. Intenta de nuevo."); setCode(["","","",""]); }
+            }).catch(function() {
+              setOtpLoading(false);
+              setOtpError("Error de conexión. Intenta de nuevo.");
+            });
+          }} disabled={!codeComplete || otpLoading} className="btn-glow" style={{
+            width: "100%", maxWidth: 320, marginBottom: 16,
+            background: codeComplete ? "linear-gradient(135deg, #3b82f6, #6366f1)" : "#ffffff10",
+            border: "none", borderRadius: 16, padding: "18px", color: text,
+            fontSize: 16, fontWeight: 700, cursor: codeComplete ? "pointer" : "not-allowed",
+            fontFamily: "'DM Sans',sans-serif", transition: "all .3s",
+          }}>
+            {otpLoading ? "Verificando..." : "Verificar y continuar →"}
+          </button>
+          <button onClick={function() {
+            setCode(["","","",""]);
+            setOtpError("");
+            fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/send-otp", {
+              method: "POST",
+              headers: { "Content-Type": "application/json", "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ" },
+              body: JSON.stringify({ email: form.email, name: form.name }),
+            }).catch(function(e) { console.log("resend error:", e); });
+          }} style={{ background: "none", border: "none", color: textSub, fontSize: 13, cursor: "pointer", textDecoration: "underline", fontFamily: "'DM Sans',sans-serif" }}>
+            Reenviar código
+          </button>
+        </div>
+      </div>
+      </div>
+    );
+  }
 
+
+  return (
+    <div style={{ minHeight: "100vh", background: bg, padding: "48px 24px 48px", transition: "background .3s" }}>
+      <button onClick={onBack} style={{ background: "none", border: "none", color: textSub, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontSize: 14, marginBottom: 24, fontFamily: "'DM Sans',sans-serif" }}>
+        <Icon name="back" size={16} /> Regresar
+      </button>
+
+      {/* Login CTA — very top */}
+      <button onClick={onLogin} style={{
+        width: "100%", marginBottom: 28,
+        background: darkMode
+          ? "linear-gradient(160deg, #1a1f4e 0%, #0d1235 40%, #0a0d28 100%)"
+          : "linear-gradient(160deg, #3b82f6 0%, #2563eb 60%, #1d4ed8 100%)",
+        border: darkMode ? "2px solid #00aaff" : "2px solid #60a5fa",
+        borderRadius: 99, padding: "20px 28px",
+        cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+        boxShadow: darkMode
+          ? "0 0 24px #00aaff80, 0 0 60px #0066ff40, inset 0 1px 0 rgba(0,200,255,0.3), 0 8px 32px rgba(0,0,0,0.6)"
+          : "0 0 20px #3b82f640, 0 4px 16px #3b82f630",
+        transition: "all .2s", position: "relative", overflow: "hidden",
+      }}>
+        <div style={{ position: "absolute", inset: 0, borderRadius: 99, background: "linear-gradient(160deg, rgba(255,255,255,0.15) 0%, transparent 60%)", pointerEvents: "none" }} />
+        <p style={{ fontFamily: "'DM Sans',sans-serif", color: "white", fontSize: 18, fontWeight: 700, lineHeight: 1, letterSpacing: 0, position: "relative", zIndex: 1 }}>
+          Iniciar sesión
+        </p>
+      </button>
+
+      {/* Divider */}
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
+        <div style={{ flex: 1, height: 1, background: darkMode ? border : "#e2e8f0" }} />
+        <span style={{ color: textSub, fontSize: 12 }}>o crea una cuenta nueva</span>
+        <div style={{ flex: 1, height: 1, background: darkMode ? border : "#e2e8f0" }} />
+      </div>
+
+      {/* Header */}
+      <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 8 }}>
+        <div style={{ width: 48, height: 48, borderRadius: 14, background: "linear-gradient(135deg, #3b82f6, #6366f1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <Icon name="user" size={22} color="white" />
+        </div>
+        <div>
+          <h2 style={{ fontFamily: "'DM Sans',sans-serif", color: text, fontSize: 22, fontWeight: 700, lineHeight: 1, transition: "color .3s" }}>Crear cuenta</h2>
+          <p style={{ color: "#3b82f6", fontSize: 12, marginTop: 3, fontWeight: 600 }}>🏠 Perfil Visitante</p>
+        </div>
+      </div>
+      <p style={{ color: textSub, fontSize: 13, marginBottom: 20, lineHeight: 1.5 }}>
+        Regístrate para buscar propiedades, dar like y solicitar rentas.
+      </p>
+
+      {/* Fields */}
+      {[
+        { key: "name",  ph: "Nombre completo",     type: "text",  icon: "👤" },
+        { key: "email", ph: "Correo electrónico",  type: "email", icon: "✉️" },
+        { key: "phone", ph: "Teléfono / WhatsApp", type: "tel",   icon: "📱" },
+      ].map(f => (
+        <div key={f.key} style={{ position: "relative", marginBottom: 12 }}>
+          <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 16 }}>{f.icon}</span>
+          <input placeholder={f.ph} type={f.type} value={form[f.key]} onChange={e => setF(f.key, e.target.value)} style={{
+            display: "block", width: "100%", background: "#ffffff06",
+            border: "1px solid " + form[f.key] ? "#3b82f650" : "#ffffff10",
+            borderRadius: 12, padding: "14px 16px 14px 44px", color: text, fontSize: 14,
+            fontFamily: "'DM Sans',sans-serif", outline: "none", transition: "border .2s, background .3s, color .3s",
+          }} />
+        </div>
+      ))}
+
+      {/* Date of birth */}
+      <div style={{ marginBottom: 12 }}>
+        <p style={{ color: textSub, fontSize: 12, fontWeight: 600, marginBottom: 6, paddingLeft: 2 }}>📅 Fecha de nacimiento</p>
+        <input
+          type="date"
+          value={form.dob}
+          max={new Date().toISOString().split("T")[0]}
+          onChange={e => { const v = e.target.value; setF("dob", v); const a = getAge(v); if (a !== null && a < 18) setShowMinorPopup(true); }}
+          style={{
+            display: "block", width: "100%", background: "#ffffff06",
+            border: "1px solid " + (!form.dob ? "#ffffff10" : isAdult ? "#10b98150" : "#ef444450"),
+            borderRadius: 12, padding: "14px 16px", color: form.dob ? text : textSub, fontSize: 14,
+            fontFamily: "'DM Sans',sans-serif", outline: "none", transition: "border .2s",
+            colorScheme: darkMode ? "dark" : "light",
+          }}
+        />
+        {form.dob && isAdult && (
+          <p style={{ color: "#10b981", fontSize: 12, marginTop: 6, paddingLeft: 4 }}>{"✓ Mayor de edad verificado (" + age + " años)"}</p>
+        )}
+        {form.dob && !isAdult && (
+          <p style={{ color: "#ef4444", fontSize: 12, marginTop: 6, paddingLeft: 4 }}>{"✗ No es posible registrar menores de 18 años"}</p>
+        )}
+      </div>
+
+      {/* Minor popup */}
+      {showMinorPopup && (
+        <div style={{ position: "fixed", inset: 0, background: "#00000090", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 300, padding: 24 }}>
+          <div style={{ background: darkMode ? "#0d1f3c" : "#ffffff", borderRadius: 24, padding: "32px 24px", width: "100%", maxWidth: 360, textAlign: "center", boxShadow: "0 8px 40px #00000080", animation: "fadeUp .25s ease" }}>
+            <div style={{ width: 64, height: 64, borderRadius: "50%", background: "#ef444420", border: "2px solid #ef444440", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 18px" }}>
+              <span style={{ fontSize: 28 }}>🔞</span>
+            </div>
+            <h3 style={{ color: darkMode ? "white" : "#0f172a", fontSize: 18, fontWeight: 700, marginBottom: 10, fontFamily: "'DM Sans',sans-serif" }}>Registro no permitido</h3>
+            <p style={{ color: "#64748b", fontSize: 14, lineHeight: 1.7, marginBottom: 8 }}>
+              El uso de <strong style={{ color: darkMode ? "white" : "#0f172a" }}>Baja Renta</strong> está restringido a personas mayores de <strong style={{ color: "#ef4444" }}>18 años</strong>.
+            </p>
+            <p style={{ color: "#64748b", fontSize: 13, lineHeight: 1.6, marginBottom: 24 }}>
+              Conforme a la legislación mexicana, los contratos de arrendamiento requieren plena capacidad jurídica, la cual se adquiere al cumplir la mayoría de edad.
+            </p>
+            <button onClick={() => { setShowMinorPopup(false); setF("dob", ""); }} style={{
+              width: "100%", background: "linear-gradient(135deg, #3b82f6, #6366f1)", border: "none",
+              borderRadius: 14, padding: "16px", color: "white", fontSize: 15, fontWeight: 700,
+              cursor: "pointer", fontFamily: "'DM Sans',sans-serif",
+            }}>
+              Entendido
+            </button>
+          </div>
         </div>
       )}
+
+
+      {/* Password */}
+      <div style={{ position: "relative", marginBottom: 8 }}>
+        <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 16 }}>🔒</span>
+        <input placeholder="Contraseña" type={showPass ? "text" : "password"} value={form.password} onChange={e => setF("password", e.target.value)} style={{
+          display: "block", width: "100%", background: "#ffffff06",
+          border: "1px solid " + form.password ? "#3b82f650" : "#ffffff10",
+          borderRadius: 12, padding: "14px 60px 14px 44px", color: text, fontSize: 14,
+          fontFamily: "'DM Sans',sans-serif", outline: "none", transition: "border .2s, background .3s, color .3s",
+        }} />
+        <button onClick={() => setShowPass(v => !v)} style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: textSub, fontSize: 12, cursor: "pointer" }}>
+          {showPass ? "Ocultar" : "Ver"}
+        </button>
+      </div>
+
+      {/* Password strength */}
+      {form.password && (
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ display: "flex", gap: 4, marginBottom: 4 }}>
+            {[1,2,3,4].map(i => (
+              <div key={i} style={{ flex: 1, height: 3, borderRadius: 99, transition: "background .3s",
+                background: form.password.length >= i * 3 ? (i <= 2 ? "#f59e0b" : "#10b981") : (darkMode ? border : "#e2e8f0") }} />
+            ))}
+          </div>
+          <p style={{ color: textSub, fontSize: 11 }}>
+            {form.password.length < 6 ? "Contraseña débil" : form.password.length < 10 ? "Contraseña moderada" : "Contraseña fuerte ✓"}
+          </p>
+        </div>
+      )}
+
+      {/* Confirm password */}
+      <div style={{ position: "relative", marginBottom: 8 }}>
+        <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 16 }}>🔒</span>
+        <input
+          placeholder="Confirmar contraseña"
+          type={showConfirmPass ? "text" : "password"}
+          value={form.confirmPassword}
+          onChange={e => setF("confirmPassword", e.target.value)}
+          style={{
+            display: "block", width: "100%", background: inputBg,
+            border: "1px solid " + !form.confirmPassword ? border : passwordsMatch ? "#10b98150" : "#ef444450",
+            borderRadius: 12, padding: "14px 60px 14px 44px", color: text, fontSize: 14,
+            fontFamily: "'DM Sans',sans-serif", outline: "none", transition: "border .2s, background .3s, color .3s",
+          }}
+        />
+        <button onClick={() => setShowConfirmPass(v => !v)} style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: textSub, fontSize: 12, cursor: "pointer" }}>
+          {showConfirmPass ? "Ocultar" : "Ver"}
+        </button>
+      </div>
+      {form.confirmPassword && (
+        <p style={{ color: passwordsMatch ? "#10b981" : "#ef4444", fontSize: 12, marginBottom: 14, paddingLeft: 4 }}>
+          {passwordsMatch ? "✓ Las contraseñas coinciden" : "✗ Las contraseñas no coinciden"}
+        </p>
+      )}
+
+      {/* Terms */}
+      <label style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 24, cursor: "pointer", marginTop: 8 }}>
+        <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} style={{ accentColor: "#3b82f6", width: 16, height: 16, marginTop: 2, flexShrink: 0 }} />
+        <span style={{ color: textSub, fontSize: 13, lineHeight: 1.5 }}>
+          Acepto los <a href="terminos.html" target="_blank" style={{ color: "#3b82f6", textDecoration: "underline", fontWeight: 600 }}>Términos de servicio</a> y la{" "}
+          <a href="politica-privacidad.html" target="_blank" style={{ color: "#3b82f6", textDecoration: "underline", fontWeight: 600 }}>Política de privacidad</a> de Baja Renta
+        </span>
+      </label>
+
+      {/* Submit */}
+      <button onClick={() => allFilled && !otpLoading && handleVisitorRegister()} className="btn-glow" style={{
+        display: "block", width: "100%", textAlign: "center",
+        background: allFilled ? "linear-gradient(135deg, #3b82f6, #6366f1)" : (darkMode ? border : "#e2e8f0"),
+        border: "none", borderRadius: 16, padding: "18px",
+        color: allFilled ? "white" : textSub,
+        fontSize: 16, fontWeight: 700, cursor: allFilled ? "pointer" : "not-allowed",
+        fontFamily: "'DM Sans',sans-serif", transition: "all .3s", marginBottom: 16,
+        letterSpacing: "normal", wordSpacing: "normal",
+      }}>
+        {otpLoading ? "Enviando código..." : "Crear cuenta"}
+      </button>
+
+    </div>
+  );
+}
+
+
+const GUEST_STATES = ["Baja California"];
+const GUEST_CITIES = ["Tijuana", "Mexicali", "Ensenada", "Rosarito"];
+
+function DrumPicker({ items, selected, onSelect, color = "#3b82f6" }) {
+  const itemH = 52;
+  const visibleCount = 5;
+  const containerH = itemH * visibleCount;
+  const selectedIdx = items.indexOf(selected);
+
+  const scroll = (dir) => {
+    const newIdx = Math.max(0, Math.min(items.length - 1, selectedIdx + dir));
+    onSelect(items[newIdx]);
+  };
+
+  return (
+    <div style={{ position: "relative", height: containerH, overflow: "hidden", userSelect: "none" }}>
+      {/* Selection highlight */}
+      <div style={{
+        position: "absolute", left: 0, right: 0,
+        top: "50%", transform: "translateY(-50%)",
+        height: itemH, background: color + "15",
+        border: "1px solid " + color + "40", borderRadius: 12, zIndex: 1, pointerEvents: "none",
+      }} />
+      {/* Fade top */}
+      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: itemH * 1.5, background: "linear-gradient(to bottom, #0a0f1e, transparent)", zIndex: 2, pointerEvents: "none" }} />
+      {/* Fade bottom */}
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: itemH * 1.5, background: "linear-gradient(to top, #0a0f1e, transparent)", zIndex: 2, pointerEvents: "none" }} />
+
+      {/* Items */}
+      <div style={{ display: "flex", flexDirection: "column", transform: "translateY(" + ((2 - selectedIdx) * itemH) + "px)", transition: "transform .3s cubic-bezier(.25,.46,.45,.94)" }}>
+        {items.map((item, i) => {
+          const dist = Math.abs(i - selectedIdx);
+          return (
+            <div key={item} onClick={() => onSelect(item)} style={{
+              height: itemH, display: "flex", alignItems: "center", justifyContent: "center",
+              cursor: "pointer", transition: "all .3s",
+              opacity: dist === 0 ? 1 : dist === 1 ? 0.5 : 0.2,
+              transform: "scale(" + dist === 0 ? 1 : 0.85 + ")",
+            }}>
+              <span style={{
+                fontFamily: "'DM Sans',sans-serif",
+                fontWeight: dist === 0 ? 800 : 400,
+                fontSize: dist === 0 ? 18 : 14,
+                color: dist === 0 ? "white" : "#64748b",
+                transition: "all .3s",
+              }}>{item}</span>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Up/Down buttons */}
+      <button onClick={() => scroll(-1)} style={{ position: "absolute", top: 0, right: 12, zIndex: 3, background: "none", border: "none", cursor: "pointer", padding: "8px", color: color }}>▲</button>
+      <button onClick={() => scroll(1)} style={{ position: "absolute", bottom: 0, right: 12, zIndex: 3, background: "none", border: "none", cursor: "pointer", padding: "8px", color: color }}>▼</button>
+    </div>
+  );
+}
+
+function GuestFilter({ onBack, onContinue }) {
+  const [state, setState] = useState("Baja California");
+  const [city, setCity] = useState("Tijuana");
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#0a0f1e", display: "flex", flexDirection: "column" }}>
+      {/* Header */}
+      <div style={{ background: "linear-gradient(135deg, #0d1f3c, #0a0f1e)", padding: "48px 24px 28px", borderBottom: "1px solid #ffffff15" }}>
+        <button onClick={onBack} style={{ background: "none", border: "none", color: "#64748b", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontSize: 14, marginBottom: 20, fontFamily: "'DM Sans',sans-serif" }}>
+          <Icon name="back" size={16} /> Regresar
+        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <svg width="36" height="24" viewBox="0 0 110 72" fill="none" style={{ filter: "drop-shadow(0 0 8px #3b82f650)" }}>
+            <path d="M10 18 C22 6,38 6,50 18 C62 30,78 30,100 18" stroke="#3b82f6" strokeWidth="9" strokeLinecap="round" fill="none"/>
+            <path d="M10 36 C22 24,38 24,50 36 C62 48,78 48,100 36" stroke="#3b82f6" strokeWidth="9" strokeLinecap="round" fill="none"/>
+            <path d="M10 54 C22 42,38 42,50 54 C62 66,78 66,100 54" stroke="#3b82f6" strokeWidth="9" strokeLinecap="round" fill="none"/>
+          </svg>
+          <div>
+            <h1 style={{ fontFamily: "'Dancing Script', cursive", color: "white", fontSize: 22, fontWeight: 700, lineHeight: 1 }}>Baja Renta</h1>
+            <p style={{ color: "#64748b", fontSize: 11, marginTop: 2 }}>Selecciona tu ubicación</p>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ flex: 1, padding: "32px 24px" }}>
+        {/* State picker */}
+        <div style={{ marginBottom: 32 }}>
+          <h3 style={{ fontFamily: "'DM Sans',sans-serif", color: "white", fontSize: 15, fontWeight: 700, marginBottom: 4 }}>Estado</h3>
+          <p style={{ color: "#64748b", fontSize: 12, marginBottom: 16 }}>Desliza para seleccionar</p>
+          <div style={{ background: "#ffffff06", border: "1px solid #ffffff15", borderRadius: 18, overflow: "hidden" }}>
+            <DrumPicker items={GUEST_STATES} selected={state} onSelect={setState} color="#3b82f6" />
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div style={{ height: 1, background: "#ffffff06", marginBottom: 32 }} />
+
+        {/* City picker */}
+        <div style={{ marginBottom: 40 }}>
+          <h3 style={{ fontFamily: "'DM Sans',sans-serif", color: "white", fontSize: 15, fontWeight: 700, marginBottom: 4 }}>Ciudad</h3>
+          <p style={{ color: "#64748b", fontSize: 12, marginBottom: 16 }}>Desliza para seleccionar</p>
+          <div style={{ background: "#ffffff06", border: "1px solid #ffffff15", borderRadius: 18, overflow: "hidden" }}>
+            <DrumPicker items={GUEST_CITIES} selected={city} onSelect={setCity} color="#6366f1" />
+          </div>
+        </div>
+
+        {/* Selected summary */}
+        <div style={{ background: "#3b82f610", border: "1px solid #3b82f630", borderRadius: 14, padding: "14px 18px", marginBottom: 24, display: "flex", alignItems: "center", gap: 10 }}>
+          <Icon name="map" size={16} color="#3b82f6" />
+          <p style={{ color: "#93c5fd", fontSize: 14, fontWeight: 600 }}>{city}, {state}</p>
+        </div>
+
+        <button onClick={() => onContinue({ state, city })} className="btn-glow" style={{
+          width: "100%", background: "linear-gradient(135deg, #3b82f6, #6366f1)",
+          border: "none", borderRadius: 16, padding: "18px", color: "white",
+          fontSize: 16, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif",
+          transition: "all .3s", display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+        }}>
+          Ver propiedades → 
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function GuestCatalog({ onBack, filters = {}, onRegister, properties: propList }) {
+  const [selected, setSelected] = useState(null);
+  const catalogProps = propList && propList.length > 0 ? propList : PROPERTIES;
+
+  if (selected) {
+    return <GuestPropertyDetail p={selected} onBack={() => setSelected(null)} onRegister={onRegister} />;
+  }
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#0a0f1e", paddingBottom: 32 }}>
+      <div style={{ background: "linear-gradient(135deg, #0d1f3c, #0a0f1e)", padding: "48px 24px 24px", borderBottom: "1px solid #ffffff15" }}>
+        <button onClick={onBack} style={{ background: "none", border: "none", color: "#64748b", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontSize: 14, marginBottom: 20, fontFamily: "'DM Sans',sans-serif" }}>
+          <Icon name="back" size={16} /> Regresar
+        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <svg width="36" height="24" viewBox="0 0 110 72" fill="none" style={{ filter: "drop-shadow(0 0 8px #3b82f650)" }}>
+            <path d="M10 18 C22 6,38 6,50 18 C62 30,78 30,100 18" stroke="#3b82f6" strokeWidth="9" strokeLinecap="round" fill="none"/>
+            <path d="M10 36 C22 24,38 24,50 36 C62 48,78 48,100 36" stroke="#3b82f6" strokeWidth="9" strokeLinecap="round" fill="none"/>
+            <path d="M10 54 C22 42,38 42,50 54 C62 66,78 66,100 54" stroke="#3b82f6" strokeWidth="9" strokeLinecap="round" fill="none"/>
+          </svg>
+          <div>
+            <h1 style={{ fontFamily: "'Dancing Script', cursive", color: "white", fontSize: 22, fontWeight: 700, lineHeight: 1 }}>Baja Renta</h1>
+            <p style={{ color: "#64748b", fontSize: 11, marginTop: 2 }}>Catálogo de propiedades</p>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ padding: "20px 24px" }}>
+        <p style={{ color: "#64748b", fontSize: 13, marginBottom: 20 }}>{catalogProps.length} propiedades disponibles</p>
+        {catalogProps.map(p => (
+          <button key={p.id} onClick={() => setSelected(p)} style={{
+            width: "100%", background: "#ffffff06", border: "1px solid #ffffff15",
+            borderRadius: 20, overflow: "hidden", marginBottom: 16, display: "flex", cursor: "pointer", textAlign: "left",
+          }}>
+            <div style={{ position: "relative", width: 110, height: 110, flexShrink: 0 }}>
+              <img src={p.images[0]} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              {p.isMock && (
+                <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
+                  <div style={{ position: "absolute", inset: -20, transform: "rotate(-35deg)", display: "flex", flexDirection: "column", gap: 14, alignItems: "center", justifyContent: "center" }}>
+                    {[0,1,2,3].map(row => (
+                      <div key={row} style={{ display: "flex", gap: 16 }}>
+                        {[0,1,2].map(col => (
+                          <span key={col} style={{ color: "white", fontSize: 7, fontWeight: 800, letterSpacing: 1.5, textTransform: "uppercase", opacity: 0.28, whiteSpace: "nowrap", textShadow: "0 1px 3px #000" }}>{"MUESTRA"}</span>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+            <div style={{ padding: "14px 14px", flex: 1, minWidth: 0 }}>
+              {p.isMock && (
+                <div style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "#f59e0b15", border: "1px solid #f59e0b40", borderRadius: 99, padding: "2px 8px", marginBottom: 4 }}>
+                  <span style={{ color: "#f59e0b", fontSize: 9, fontWeight: 700, letterSpacing: 0.5 }}>🏷️ DISEÑO DE MUESTRA</span>
+                </div>
+              )}
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                <span style={{ background: "#3b82f620", border: "1px solid #3b82f640", borderRadius: 99, padding: "2px 8px", color: "#93c5fd", fontSize: 10, fontWeight: 700 }}>{p.type}</span>
+              </div>
+              <p style={{ fontFamily: "'DM Sans',sans-serif", color: "white", fontSize: 14, fontWeight: 700, lineHeight: 1.2, marginBottom: 4 }}>{p.name}</p>
+              <p style={{ color: "#64748b", fontSize: 11, marginBottom: 8, display: "flex", alignItems: "center", gap: 3 }}>
+                <Icon name="map" size={10} color="#64748b" /> {p.city}, {p.state}
+              </p>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <p style={{ fontFamily: "'DM Sans',sans-serif", color: "#3b82f6", fontSize: 16, fontWeight: 700 }}>
+                  {"$" + p.price.toLocaleString()}<span style={{ color: "#64748b", fontSize: 10, fontWeight: 400 }}>/mes</span>
+                </p>
+                <div style={{ display: "flex", gap: 6 }}>
+                  <span style={{ color: "#64748b", fontSize: 11 }}>🛏️ {p.bedrooms}</span>
+                  <span style={{ color: "#64748b", fontSize: 11 }}>🚿 {p.bathrooms}</span>
+                </div>
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Credentials are stored as SHA-256 hashes — never as plaintext
+async function sha256(str) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,"0")).join("");
+}
+const H_USER = "9102717ca1df3bf76b1a7609670221a94c80e5380465328bd563663433d847de";
+const H_PASS = "8fd2fc02cd9301dcde43441500417e81c3faae139e827cdbc216af4da3b6f065";
+const H_2FA  = "df8c65d86a74b308aca7f124bb17e9a6cfbeaff79e832c1b06892d9d9c5fcbb6";
+
+// Pre-encoded document placeholder SVG
+const MOCK_DOC_IMG = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iJTIzMGQxZjNjIi8+PHJlY3QgeD0iNDAiIHk9IjMwIiB3aWR0aD0iMzIwIiBoZWlnaHQ9IjI0MCIgcng9IjgiIGZpbGw9IiUyMzBhMTYyOCIgc3Ryb2tlPSIlMjMzYjgyZjYiIHN0cm9rZS13aWR0aD0iMS41Ii8+PHJlY3QgeD0iNjAiIHk9IjU1IiB3aWR0aD0iMTgwIiBoZWlnaHQ9IjEyIiByeD0iNCIgZmlsbD0iJTIzMWUzYTVmIi8+PHJlY3QgeD0iNjAiIHk9IjgwIiB3aWR0aD0iMjgwIiBoZWlnaHQ9IjgiIHJ4PSI0IiBmaWxsPSIlMjMxZTNhNWYiLz48cmVjdCB4PSI2MCIgeT0iMTAwIiB3aWR0aD0iMjQwIiBoZWlnaHQ9IjgiIHJ4PSI0IiBmaWxsPSIlMjMxZTNhNWYiLz48cmVjdCB4PSI2MCIgeT0iMTIwIiB3aWR0aD0iMjYwIiBoZWlnaHQ9IjgiIHJ4PSI0IiBmaWxsPSIlMjMxZTNhNWYiLz48dGV4dCB4PSIyMDAiIHk9IjIzMCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjExIiBmaWxsPSIlMjM2NDc0OGIiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkRvY3VtZW50byBPZmljaWFsPC90ZXh0Pjwvc3ZnPg==";
+
+const MOCK_DOCS = {
+  escritura: { name: "escritura_propiedad.jpg", type: "image/jpeg", data: MOCK_DOC_IMG },
+  ine: { name: "ine_propietario.jpg", type: "image/jpeg", data: MOCK_DOC_IMG },
+  domicilio: { name: "comprobante_domicilio.jpg", type: "image/jpeg", data: MOCK_DOC_IMG },
+  predial: { name: "predial_2026.jpg", type: "image/jpeg", data: MOCK_DOC_IMG },
+};
+
+const ALL_PROPERTIES = [
+  {
+    id: 1, name: "Apartamento Zona Río", owner: "Carlos Ruiz", city: "Tijuana", state: "Baja California",
+    address: "Blvd. Agua Caliente 3200, Zona Río, Tijuana", type: "Apartamento", price: 14500, deposit: 29000,
+    bedrooms: 2, bathrooms: 2, floors: 1, parking: "Privado",
+    pool: true, petFriendly: true, kidsAllowed: true, livingRoom: true, diningRoom: true, kitchen: true, laundry: true, patio: false,
+    status: "pendiente", img: "https://images.unsplash.com/photo-1574362848149-11496d93a7c7?w=400&q=80",
+    submitted: "2026-05-20", _mode: "self",
+    _uploadedPhotos: [{ url: "https://images.unsplash.com/photo-1574362848149-11496d93a7c7?w=400&q=80", name: "foto1.jpg" }, { url: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&q=80", name: "foto2.jpg" }],
+    _uploadedDocs: MOCK_DOCS,
+  },
+  {
+    id: 2, name: "Casa Otay Constituyentes", owner: "Mariana López", city: "Tijuana", state: "Baja California",
+    address: "Calle Ciprés 145, Fracc. Otay Constituyentes, Tijuana", type: "Casa", price: 22000, deposit: 44000,
+    bedrooms: 3, bathrooms: 3, floors: 2, parking: "Privado",
+    pool: false, petFriendly: true, kidsAllowed: true, livingRoom: true, diningRoom: true, kitchen: true, laundry: true, patio: true,
+    status: "aprobada", img: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80",
+    submitted: "2026-05-18", _mode: "managed",
+    _uploadedPhotos: [{ url: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80", name: "foto1.jpg" }, { url: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80", name: "foto2.jpg" }],
+    _uploadedDocs: MOCK_DOCS,
+  },
+  {
+    id: 3, name: "Estudio Frente al Mar", owner: "Pedro Sánchez", city: "Rosarito", state: "Baja California",
+    address: "Blvd. Benito Juárez 720, Rosarito Centro", type: "Estudio", price: 9500, deposit: 19000,
+    bedrooms: 1, bathrooms: 1, floors: 1, parking: "Público",
+    pool: true, petFriendly: false, kidsAllowed: false, livingRoom: true, diningRoom: false, kitchen: true, laundry: false, patio: false,
+    status: "pendiente", img: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&q=80",
+    submitted: "2026-05-21", _mode: "self",
+    _uploadedPhotos: [{ url: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&q=80", name: "foto1.jpg" }],
+    _uploadedDocs: { escritura: MOCK_DOCS.escritura, ine: MOCK_DOCS.ine, domicilio: null, predial: null },
+  },
+  {
+    id: 4, name: "Penthouse Marina Ensenada", owner: "Ana Beltrán", city: "Ensenada", state: "Baja California",
+    address: "Av. Costero 890, Marina Ensenada", type: "Penthouse", price: 38000, deposit: 76000,
+    bedrooms: 3, bathrooms: 3, floors: 2, parking: "Privado",
+    pool: true, petFriendly: false, kidsAllowed: false, livingRoom: true, diningRoom: true, kitchen: true, laundry: true, patio: true,
+    status: "aprobada", img: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400&q=80",
+    submitted: "2026-05-15", _mode: "managed",
+    _uploadedPhotos: [{ url: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400&q=80", name: "foto1.jpg" }],
+    _uploadedDocs: MOCK_DOCS,
+  },
+  {
+    id: 5, name: "Casa Fracc. Las Fuentes", owner: "Jorge Medina", city: "Mexicali", state: "Baja California",
+    address: "Calle Álamo 234, Fracc. Las Fuentes, Mexicali", type: "Casa", price: 16000, deposit: 32000,
+    bedrooms: 3, bathrooms: 2, floors: 1, parking: "Privado",
+    pool: true, petFriendly: true, kidsAllowed: true, livingRoom: true, diningRoom: true, kitchen: true, laundry: true, patio: true,
+    status: "rechazada", img: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=400&q=80",
+    submitted: "2026-05-22", _mode: "self",
+    _uploadedPhotos: [{ url: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=400&q=80", name: "foto1.jpg" }, { url: "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=400&q=80", name: "foto2.jpg" }],
+    _uploadedDocs: { escritura: MOCK_DOCS.escritura, ine: MOCK_DOCS.ine, domicilio: MOCK_DOCS.domicilio, predial: null },
+  },
+];
+
+function MasterLogin({ onBack, onLogin }) {
+  const bg       = "#0a0f1e";
+  const text     = "white";
+  const textSubOP = "#64748b";
+  const textOP   = "white";
+  const border   = "#ffffff15";
+  const inputBg  = "#ffffff08";
+  const [user, setUser] = useState("");
+  const [pass, setPass] = useState("");
+  const [showPass, setShowPass] = useState(false);
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const canLogin = user && pass;
+
+  const handleLogin = function() {
+    if (!canLogin) return;
+    setLoading(true);
+    setError(false);
+    fetch("https://uwtclxtywhthwecsqeug.supabase.co/auth/v1/token?grant_type=password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ" },
+      body: JSON.stringify({ email: user, password: pass }),
+    }).then(function(r) { return r.json(); }).then(function(res) {
+      setLoading(false);
+      if (res.access_token) {
+        if (typeof Notification !== "undefined" && Notification.permission === "default") {
+          requestPushPermission(user, function(token) { console.log("visitor login push token:", token); });
+        }
+        onLogin();
+      } else {
+        setError(true);
+      }
+    }).catch(function() {
+      setLoading(false);
+      setError(true);
+    });
+  };
+
+  return (
+    <div style={{ minHeight: "100vh", background: bg, display: "flex", flexDirection: "column" }}>
+      <div style={{ background: "linear-gradient(135deg, #1e0a3c, #0a0f1e)", padding: "48px 24px 32px", borderBottom: "1px solid #8b5cf620" }}>
+        <button onClick={onBack} style={{ background: "none", border: "none", color: textSubOP, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontSize: 14, marginBottom: 24, fontFamily: "'DM Sans',sans-serif" }}>
+          <Icon name="back" size={16} /> Regresar
+        </button>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ width: 72, height: 72, borderRadius: 20, background: "linear-gradient(135deg, #8b5cf6, #6d28d9)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", boxShadow: "0 0 30px #8b5cf650" }}>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+            </svg>
+          </div>
+          <h2 style={{ fontFamily: "'Syne',sans-serif", color: textOP, fontSize: 24, fontWeight: 800 }}>Panel Maestro</h2>
+          <p style={{ color: textSubOP, fontSize: 13, marginTop: 4 }}>Baja Renta — Administrador</p>
+          <p style={{ color: "#f59e0b", fontSize: 11, marginTop: 4 }}>{fetchStatus}</p>
+        </div>
+      </div>
+
+      <div style={{ flex: 1, padding: "36px 24px" }}>
+        <div style={{ position: "relative", marginBottom: 14 }}>
+          <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 16 }}>👤</span>
+          <input placeholder="Usuario" value={user} onChange={e => { setUser(e.target.value); setError(false); }} style={{
+            display: "block", width: "100%", background: cardBgOP,
+            border: "1px solid " + error ? "#ef444450" : user ? "#8b5cf650" : "#ffffff10",
+            borderRadius: 14, padding: "16px 16px 16px 46px", color: textOP, fontSize: 15,
+            fontFamily: "'DM Sans',sans-serif", outline: "none",
+          }} />
+        </div>
+        <div style={{ position: "relative", marginBottom: error ? 8 : 32 }}>
+          <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 16 }}>🔒</span>
+          <input placeholder="Contraseña" type={showPass ? "text" : "password"} value={pass} onChange={e => { setPass(e.target.value); setError(false); }} style={{
+            display: "block", width: "100%", background: cardBgOP,
+            border: "1px solid " + error ? "#ef444450" : pass ? "#8b5cf650" : "#ffffff10",
+            borderRadius: 14, padding: "16px 56px 16px 46px", color: textOP, fontSize: 15,
+            fontFamily: "'DM Sans',sans-serif", outline: "none",
+          }} />
+          <button onClick={() => setShowPass(v => !v)} style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: textSubOP, fontSize: 12, cursor: "pointer" }}>
+            {showPass ? "Ocultar" : "Ver"}
+          </button>
+        </div>
+        {error && <p style={{ color: "#ef4444", fontSize: 13, marginBottom: 20 }}>⚠️ Credenciales incorrectas</p>}
+        <button onClick={handleLogin} style={{
+          width: "100%", background: canLogin ? "linear-gradient(135deg, #8b5cf6, #6d28d9)" : "#ffffff10",
+          border: "none", borderRadius: 16, padding: "18px", color: canLogin ? "white" : "#334155",
+          fontSize: 16, fontWeight: 700, cursor: canLogin ? "pointer" : "not-allowed",
+          fontFamily: "'DM Sans',sans-serif", transition: "all .3s", pointerEvents: canLogin ? "auto" : "none",
+          display: "flex", alignItems: "center", justifyContent: "center", gap: 10, opacity: canLogin ? 1 : 0.5,
+        }}>
+          {loading ? <><div style={{ width: 18, height: 18, borderRadius: "50%", border: "2px solid #ffffff50", borderTopColor: "white", animation: "pulse0 .8s linear infinite" }} /> Verificando...</> : "Acceder al panel →"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }) {
+  const buildList = () => [
+    ...ALL_PROPERTIES.map(function(p) { return Object.assign({}, p, { isNew: false }); }),
+    ...publishedProperties.map(p => ({
+      id: p.id,
+      name: p.name,
+      owner: p.ownerName || p._ownerName || "Propietario registrado",
+      ownerEmail: p.ownerEmail || p._ownerEmail || "",
+      city: p.city || "—",
+      state: p.state || "—",
+      address: p.address || "—",
+      type: p.type || "Casa",
+      price: p.price || 0,
+      deposit: p.deposit || 0,
+      bedrooms: p.bedrooms || 0,
+      bathrooms: p.bathrooms || 0,
+      floors: p.floors || 1,
+      parking: p.parking || "—",
+      pool: p.pool,
+      petFriendly: p.petFriendly,
+      kidsAllowed: p.kidsAllowed,
+      livingRoom: p.livingRoom,
+      diningRoom: p.diningRoom,
+      kitchen: p.kitchen,
+      laundry: p.laundry,
+      patio: p.patio,
+      mapsUrl: p.mapsUrl,
+      status: p._status || "pendiente",
+      img: (p.images && p.images[0]) || "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80",
+      images: p.images || [],
+      submitted: p._submittedAt || new Date().toISOString().slice(0, 10),
+      _uploadedPhotos: p._uploadedPhotos || [],
+      _uploadedDocs: p._uploadedDocs || {},
+      _mode: p._mode || "self",
+      isNew: true,
+    }))
+  ];
+
+  const [properties, setProperties] = useState(buildList);
+  const [filter, setFilter] = useState("todas");
+  const [selected, setSelected] = useState(null);
+  const [masterTab, setMasterTab] = useState("owners"); // owners | visitors
+  const [visitorSearch, setVisitorSearch] = useState("");
+  const [visitors, setVisitors] = useState([
+    { id: 1, name: "Carlos Mendoza", email: "carlos.mendoza@gmail.com", phone: "664-123-4567", city: "Tijuana", status: "verificado", joined: "12/03/2026", solicitudes: 2 },
+    { id: 2, name: "Ana Sofia Ruiz", email: "ana.ruiz@hotmail.com", phone: "664-987-6543", city: "Ensenada", status: "pendiente", joined: "05/04/2026", solicitudes: 1 },
+    { id: 3, name: "Jorge Hernandez", email: "jorge.h@gmail.com", phone: "646-555-0011", city: "Rosarito", status: "verificado", joined: "20/01/2026", solicitudes: 3 },
+    { id: 4, name: "Lucia Flores", email: "lucia.flores@outlook.com", phone: "664-222-3344", city: "Tijuana", status: "verificado", joined: "08/05/2026", solicitudes: 0 },
+    { id: 5, name: "Roberto Castillo", email: "rcastillo@yahoo.com", phone: "646-777-8899", city: "Ensenada", status: "inactivo", joined: "15/02/2026", solicitudes: 1 },
+    { id: 6, name: "Maria Gonzalez", email: "mgonzalez@gmail.com", phone: "664-444-5566", city: "Tecate", status: "verificado", joined: "30/04/2026", solicitudes: 4 },
+  ]);
+  const [confirmDeleteVisitor, setConfirmDeleteVisitor] = useState(null);
+
+  const MOCK_VISITORS = visitors;
+
+  const filteredVisitors = visitorSearch.trim()
+    ? visitors.filter(v => {
+        const q = visitorSearch.toLowerCase();
+        return v.name.toLowerCase().includes(q) || v.email.toLowerCase().includes(q) || v.city.toLowerCase().includes(q) || v.phone.includes(q);
+      })
+    : visitors;
+  useEffect(() => {
+    setProperties(buildList());
+  }, [JSON.stringify(publishedProperties)]);
+
+  const [fetchStatus, setFetchStatus] = useState("cargando...");
+
+  // Fetch properties from Supabase on mount
+  useEffect(function() {
+    setFetchStatus("cargando...");
+    fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties?select=*&order=created_at.desc", {
+      headers: {
+        "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+      },
+    }).then(function(r) { return r.json(); }).then(function(data) {
+      if (!Array.isArray(data)) {
+        setFetchStatus("Error: " + JSON.stringify(data).slice(0, 100));
+        return;
+      }
+      setFetchStatus("✅ " + data.length + " propiedades en BD");
+      if (data.length === 0) return;
+      var supaProps = data.map(function(p) {
+        return {
+          id: p.id,
+          name: p.name || "Propiedad",
+          owner: "Propietario registrado",
+          ownerEmail: "",
+          city: p.city || "—",
+          state: "Baja California",
+          address: p.address || "—",
+          type: p.type || "Casa",
+          price: p.price || 0,
+          deposit: p.deposit || 0,
+          bedrooms: p.bedrooms || 0,
+          bathrooms: p.bathrooms || 0,
+          floors: p.floors || 1,
+          parking: p.parking || "—",
+          pool: p.pool,
+          petFriendly: p.pet_friendly,
+          kidsAllowed: p.kids_allowed,
+          livingRoom: p.living_room,
+          diningRoom: p.dining_room,
+          kitchen: p.kitchen,
+          laundry: p.laundry,
+          patio: p.patio,
+          status: p.status === "pending" ? "pendiente" : p.status === "approved" ? "aprobada" : p.status === "rejected" ? "rechazada" : "pendiente",
+          img: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80",
+          images: ["https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80"],
+          submitted: p.created_at ? p.created_at.slice(0, 10) : "—",
+          _mode: p.management_mode || "self",
+          isNew: true,
+          isSupa: true,
+          isMock: false,
+        };
+      });
+      setProperties(function() {
+        var mocks = ALL_PROPERTIES.map(function(p) { return Object.assign({}, p, { isNew: false }); });
+        return mocks.concat(supaProps);
+      });
+    }).catch(function(e) {
+      setFetchStatus("❌ Error conexión: " + e.message);
+      console.log("Supabase fetch error:", e);
+    });
+  }, []);
+
+  const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ";
+  const SUPA_URL = "https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties";
+
+  const updatePropertyStatus = function(id, status, prop) {
+    // Update in Supabase (only real properties, not mocks)
+    if (prop && !prop.isMock) {
+      fetch(SUPA_URL + "?id=eq." + id, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": ANON_KEY,
+          "Authorization": "Bearer " + ANON_KEY,
+          "Prefer": "return=minimal",
+        },
+        body: JSON.stringify({ status: status === "aprobada" ? "approved" : status === "rechazada" ? "rejected" : "pending" }),
+      }).catch(function(e) { console.log("Supabase update error:", e); });
+    }
+    // Send email to owner
+    if (prop && prop.ownerEmail) {
+      if (status === "aprobada") {
+        sendEmail("property_published", prop.ownerEmail, {
+          property_name: prop.name,
+          city: prop.city || "",
+          price: prop.price ? "$" + prop.price.toLocaleString() : "",
+          mode: prop.mode || "self",
+        });
+      } else if (status === "rechazada") {
+        sendEmail("application_rejected", prop.ownerEmail, {
+          property_name: prop.name,
+          reason: "El equipo de Baja Renta ha revisado tu propiedad y no cumple con los requisitos actuales de publicación.",
+        });
+      }
+    }
+    // Notify master via email when property approved
+    if (status === "aprobada" && onApproveProperty) {
+      onApproveProperty(id);
+    }
+  };
+
+  const toggleStatus = function(id) {
+    const _foundProp = properties.find(function(p) { return p.id === id; });
+    const isNewProp = _foundProp ? _foundProp.isNew : false;
+    setProperties(function(prev) { return prev.map(function(p) {
+      if (p.id !== id) return p;
+      const newStatus = p.status === "pendiente" ? "aprobada" : "pendiente";
+      updatePropertyStatus(id, newStatus, p);
+      return Object.assign({}, p, { status: newStatus });
+    }); });
+  };
+
+  const rejectStatus = function(id) {
+    setProperties(function(prev) { return prev.map(function(p) {
+      if (p.id !== id) return p;
+      updatePropertyStatus(id, "rechazada", p);
+      return Object.assign({}, p, { status: "rechazada" });
+    }); });
+  };
+  const filtered = filter === "todas" ? properties : properties.filter(p => p.status === filter);
+  const pendingCount = properties.filter(p => p.status === "pendiente").length;
+  const approvedCount = properties.filter(p => p.status === "aprobada").length;
+  const rejectedCount = properties.filter(p => p.status === "rechazada").length;
+
+  if (selected) {
+    const p = properties.find(x => x.id === selected.id);
+    const isNew = !!p.isNew;
+    return (
+      <div style={{ minHeight: "100vh", background: "#0a0f1e", paddingBottom: 48 }}>
+        {/* Hero image */}
+        <div style={{ position: "relative", height: "35vh", overflow: "hidden" }}>
+          <img src={p.img} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, #00000050, #0a0f1e)" }} />
+          <button onClick={() => setSelected(null)} style={{ position: "absolute", top: 16, left: 16, background: "#000000a0", backdropFilter: "blur(8px)", border: "none", borderRadius: 99, width: 38, height: 38, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Icon name="back" size={16} color="white" />
+          </button>
+          <span style={{ position: "absolute", top: 16, right: 16, background: p.status === "aprobada" ? "#10b981" : p.status === "rechazada" ? "#ef4444" : "#f59e0b", borderRadius: 99, padding: "5px 14px", color: "white", fontSize: 12, fontWeight: 700 }}>
+            {p.status === "aprobada" ? "✓ Aprobada" : p.status === "rechazada" ? "✗ Rechazada" : "⚠️ Pendiente"}
+          </span>
+        </div>
+
+        <div style={{ padding: "20px 24px" }}>
+          <h2 style={{ fontFamily: "'DM Sans',sans-serif", color: "white", fontSize: 20, fontWeight: 700, marginBottom: 4 }}>{p.name}</h2>
+          <p style={{ color: "#64748b", fontSize: 13, marginBottom: 4 }}>👤 {p.owner} · {p.city}{p.state ? ", " + p.state : ""}</p>
+          <p style={{ color: "#64748b", fontSize: 12, marginBottom: 4 }}>📅 Enviado: {p.submitted}</p>
+          {isNew && p._mode && (
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: p._mode === "managed" ? "#3b82f615" : "#f59e0b15", border: "1px solid " + p._mode === "managed" ? "#3b82f630" : "#f59e0b30", borderRadius: 99, padding: "3px 12px", marginBottom: 16 }}>
+              <p style={{ color: p._mode === "managed" ? "#3b82f6" : "#f59e0b", fontSize: 11, fontWeight: 700 }}>
+                {p._mode === "managed" ? "🛎️ Gestión Baja Renta" : "🔑 Autogestión propietario"}
+              </p>
+            </div>
+          )}
+
+          {/* Basic info */}
+          <p style={{ color: "#64748b", fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", marginBottom: 10, marginTop: 8 }}>Información general</p>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 16 }}>
+            {[
+              { label: "Tipo", val: p.type, icon: "🏠" },
+              { label: "Precio mensual", val: "$" + (p.price||0).toLocaleString() + " MXN", icon: "💰" },
+              { label: "Depósito", val: p.deposit ? "$" + p.deposit.toLocaleString() + " MXN" : "—", icon: "🏦" },
+              { label: "Recámaras", val: p.bedrooms || "—", icon: "🛏️" },
+              { label: "Baños", val: p.bathrooms || "—", icon: "🚿" },
+              { label: "Pisos", val: p.floors || "—", icon: "🏢" },
+              { label: "Estacionamiento", val: p.parking || "—", icon: "🚗" },
+              { label: "Ciudad", val: (p.city||"—" || "—") + (p.state ? ", " + p.state : ""), icon: "📍" },
+            ].map((r, i) => (
+              <div key={i} style={{ background: "#ffffff06", border: "1px solid #ffffff15", borderRadius: 12, padding: "10px 12px" }}>
+                <p style={{ color: "#64748b", fontSize: 10 }}>{r.icon} {r.label}</p>
+                <p style={{ color: "white", fontSize: 13, fontWeight: 600, marginTop: 2 }}>{r.val}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Address */}
+          {p.address && (
+            <>
+              <p style={{ color: "#64748b", fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>Dirección</p>
+              <div style={{ background: "#ffffff06", border: "1px solid #ffffff15", borderRadius: 12, padding: "12px 16px", marginBottom: 16 }}>
+                <p style={{ color: "white", fontSize: 13 }}>{p.address}</p>
+                {p.mapsUrl && (
+                  <a href={p.mapsUrl} target="_blank" rel="noopener noreferrer" style={{ color: "#3b82f6", fontSize: 12, marginTop: 6, display: "inline-block", textDecoration: "none" }}>
+                    📍 Ver en Google Maps →
+                  </a>
+                )}
+              </div>
+            </>
+          )}
+
+          {/* Amenities */}
+          <p style={{ color: "#64748b", fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>Características y amenidades</p>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
+            {[
+              { label: "🛋️ Sala", val: p.livingRoom },
+              { label: "🍽️ Comedor", val: p.diningRoom },
+              { label: "🍳 Cocina equipada", val: p.kitchen },
+              { label: "🧺 Cuarto lavado", val: p.laundry },
+              { label: "🌿 Patio/jardín", val: p.patio },
+              { label: "🏊 Alberca", val: p.pool },
+              { label: "🐾 Pet Friendly", val: p.petFriendly },
+              { label: "👶 Niños OK", val: p.kidsAllowed },
+            ].map((f, i) => (
+              <span key={i} style={{ background: f.val ? "#10b98115" : "#ffffff06", border: "1px solid " + f.val ? "#10b98130" : "#ffffff15", borderRadius: 99, padding: "4px 12px", color: f.val ? "#10b981" : "#475569", fontSize: 12 }}>
+                {f.val ? "✓" : "✗"} {f.label}
+              </span>
+            ))}
+          </div>
+
+          {/* Photos */}
+          {p._uploadedPhotos && p._uploadedPhotos.length > 0 && (
+            <>
+              <p style={{ color: "#64748b", fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>{"Fotos subidas por el propietario ("}{p._uploadedPhotos.length}{")"}</p>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8, marginBottom: 16 }}>
+                {p._uploadedPhotos.map((photo, i) => (
+                  <div key={i} style={{ aspectRatio: "1", borderRadius: 12, overflow: "hidden", border: "1px solid #ffffff15", position: "relative" }}>
+                    <img src={photo.url} alt={photo.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    {i === 0 && (
+                      <div style={{ position: "absolute", top: 4, left: 4, background: "#f59e0b", borderRadius: 99, padding: "2px 7px", fontSize: 9, fontWeight: 700, color: "white" }}>Principal</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
+          {p._uploadedPhotos && p._uploadedPhotos.length === 0 && (
+            <div style={{ background: "#f59e0b10", border: "1px solid #f59e0b30", borderRadius: 12, padding: "10px 14px", marginBottom: 16 }}>
+              <p style={{ color: "#f59e0b", fontSize: 12 }}>⚠️ El propietario no subió fotos — se usarán imágenes de referencia</p>
+            </div>
+          )}
+
+          {/* Legal Documents */}
+          {p._uploadedDocs && (
+            <>
+              <p style={{ color: "#64748b", fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>Documentos legales</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 16 }}>
+                {[
+                  { key: "escritura", label: "Escritura / Título de propiedad", icon: "🏠" },
+                  { key: "ine", label: "Identificación oficial (INE)", icon: "🪪" },
+                  { key: "domicilio", label: "Comprobante de domicilio", icon: "📄" },
+                  { key: "predial", label: "Predial al corriente", icon: "📋" },
+                ].map(doc => {
+                  const uploaded = p._uploadedDocs && p._uploadedDocs[doc.key];
+                  const isPdf = uploaded && uploaded.type === "application/pdf";
+                  const isImg = uploaded && uploaded.type && uploaded.type.startsWith("image/");
+                  return (
+                    <div key={doc.key} style={{ background: uploaded ? "#10b98112" : "#ffffff06", border: "1px solid " + uploaded ? "#10b98130" : "#ffffff15", borderRadius: 14, padding: "12px 14px" }}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: uploaded && isImg ? 10 : 0 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                          <span style={{ fontSize: 18 }}>{doc.icon}</span>
+                          <div>
+                            <p style={{ color: uploaded ? "#10b981" : "#64748b", fontSize: 12, fontWeight: uploaded ? 600 : 400 }}>{doc.label}</p>
+                            {uploaded && <p style={{ color: "#64748b", fontSize: 11, marginTop: 1 }}>📎 {uploaded.name}</p>}
+                          </div>
+                        </div>
+                        <span style={{ background: uploaded ? "#10b98120" : "#ffffff10", border: "1px solid " + uploaded ? "#10b98140" : "#ffffff15", borderRadius: 99, padding: "3px 10px", color: uploaded ? "#10b981" : "#475569", fontSize: 10, fontWeight: 700 }}>
+                          {uploaded ? "✓ Recibido" : "✗ No subido"}
+                        </span>
+                      </div>
+                      {uploaded && isImg && (
+                        <img src={uploaded.data} alt={uploaded.name} style={{ width: "100%", maxHeight: 180, objectFit: "contain", borderRadius: 8, background: "#000000a0" }} />
+                      )}
+                      {uploaded && isPdf && (
+                        <a href={uploaded.data} download={uploaded.name} style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#3b82f615", border: "1px solid #3b82f630", borderRadius: 8, padding: "6px 12px", color: "#3b82f6", fontSize: 12, fontWeight: 600, textDecoration: "none", marginTop: 8 }}>
+                          📥 Descargar PDF
+                        </a>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              {p._uploadedDocs && !Object.values(p._uploadedDocs).some(Boolean) && (
+                <div style={{ background: "#ef444410", border: "1px solid #ef444430", borderRadius: 12, padding: "10px 14px", marginBottom: 16 }}>
+                  <p style={{ color: "#ef4444", fontSize: 12 }}>⚠️ El propietario no subió documentos legales todavía</p>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Approve / Reject */}
+          <div style={{ height: 1, background: "#ffffff06", marginBottom: 16 }} />
+          {p.status === "aprobada" ? (
+            <div>
+              <div style={{ background: "#10b98115", border: "1px solid #10b98130", borderRadius: 14, padding: "12px 16px", display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                <Icon name="check" size={18} color="#10b981" />
+                <p style={{ color: "#10b981", fontSize: 14, fontWeight: 700 }}>Propiedad aprobada y publicada</p>
+              </div>
+              <button onClick={() => { toggleStatus(p.id); setSelected(null); }} style={{
+                width: "100%", background: "#f59e0b15", border: "1px solid #f59e0b40",
+                borderRadius: 14, padding: "14px", color: "#f59e0b",
+                fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif",
+              }}>
+                ↩ Revocar aprobación
+              </button>
+            </div>
+          ) : p.status === "rechazada" ? (
+            <div>
+              <div style={{ background: "#ef444415", border: "1px solid #ef444430", borderRadius: 14, padding: "12px 16px", display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                <Icon name="x" size={18} color="#ef4444" />
+                <p style={{ color: "#ef4444", fontSize: 14, fontWeight: 700 }}>Propiedad rechazada</p>
+              </div>
+              <button onClick={() => { toggleStatus(p.id); setSelected(null); }} style={{
+                width: "100%", background: "linear-gradient(135deg, #10b981, #059669)",
+                border: "none", borderRadius: 14, padding: "14px", color: "white",
+                fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif",
+              }}>
+                {"✓ Aprobar propiedad"}
+              </button>
+            </div>
+          ) : (
+            <div style={{ display: "flex", gap: 12 }}>
+              <button onClick={() => { toggleStatus(p.id); setSelected(null); }} style={{
+                flex: 1, background: "linear-gradient(135deg, #10b981, #059669)",
+                border: "none", borderRadius: 16, padding: "18px", color: "white",
+                fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif",
+                boxShadow: "0 0 20px #10b98140",
+              }}>
+                {"✓ Aprobar"}
+              </button>
+              <button onClick={() => { rejectStatus(p.id); setSelected(null); }} style={{
+                flex: 1, background: "#ef444415", border: "1px solid #ef444430",
+                borderRadius: 16, padding: "18px", color: "#ef4444",
+                fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif",
+              }}>
+                {"✗ Rechazar"}
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
     );
+  }
 
   return (
     <div style={{ minHeight: "100vh", background: "#0a0f1e", paddingBottom: 48 }}>
@@ -5365,10 +6379,10 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
         <div>
           {/* Filter tabs */}
           <div style={{ display: "flex", padding: "0 24px", borderBottom: "1px solid #ffffff10", overflowX: "auto" }}>
-            {[["todas","Todas"],["pendiente","Pendientes"],["aprobada","Aprobadas"],["rechazada","Rechazadas"]].map(([key, label]) => (
+            {[["todas","Todas"],["pendiente","Pendientes"],["aprobada","Aprobadas"],["rechazada","Rechazadas"]].map(function(pair) { var key = pair[0], label = pair[1]; return  (
               <button key={key} onClick={() => setFilter(key)} style={{
                 flex: 1, minWidth: 70, padding: "12px 0", background: "none", border: "none",
-                borderBottom: "2px solid " + (filter === key ? "#8b5cf6" : "transparent"),
+                borderBottom: "2px solid " + filter === key ? "#8b5cf6" : "transparent",
                 color: filter === key ? "#8b5cf6" : "#64748b",
                 fontSize: 11, fontWeight: filter === key ? 700 : 400,
                 cursor: "pointer", fontFamily: "'DM Sans',sans-serif", transition: "all .2s",
@@ -5377,54 +6391,54 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
           </div>
           {/* Property list */}
           <div style={{ padding: "20px 24px" }}>
-          {filtered.map(p => (
-            <button key={p.id} onClick={() => setSelected(p)} style={{
-              width: "100%", background: "#ffffff06",
-              border: "1px solid " + (p.status === "aprobada" ? "#10b98120" : "#f59e0b20"),
-              borderRadius: 20, overflow: "hidden", marginBottom: 14,
-              display: "flex", cursor: "pointer", textAlign: "left",
-            }}>
-              <img src={p.img} alt={p.name} style={{ width: 100, height: 100, objectFit: "cover", flexShrink: 0 }} />
-              <div style={{ padding: "12px 14px", flex: 1, minWidth: 0 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 3 }}>
-                  <p style={{ fontFamily: "'Syne',sans-serif", color: "white", fontSize: 14, fontWeight: 700, lineHeight: 1.2, flex: 1, marginRight: 8 }}>{p.name}</p>
-                  <span style={{
-                    background: p.status === "aprobada" ? "#10b98115" : p.status === "rechazada" ? "#ef444415" : "#f59e0b15",
-                    border: "1px solid " + (p.status === "aprobada" ? "#10b98140" : p.status === "rechazada" ? "#ef444440" : "#f59e0b40"),
-                    borderRadius: 99, padding: "2px 8px",
-                    color: p.status === "aprobada" ? "#10b981" : p.status === "rechazada" ? "#ef4444" : "#f59e0b",
-                    fontSize: 10, fontWeight: 700, flexShrink: 0,
-                  }}>
-                    {p.status === "aprobada" ? "Aprobada" : p.status === "rechazada" ? "Rechazada" : "Pendiente"}
-                  </span>
-                </div>
-                <p style={{ color: "#64748b", fontSize: 12, marginBottom: 4 }}>👤 {p.owner}</p>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                  <p style={{ fontFamily: "'Syne',sans-serif", color: "#8b5cf6", fontSize: 14, fontWeight: 700 }}>
-                    {"$" + p.price.toLocaleString()}<span style={{ color: "#64748b", fontSize: 10, fontWeight: 400 }}>/mes</span>
-                  </p>
-                  <span style={{ color: "#64748b", fontSize: 11 }}>{p.city}</span>
-                </div>
-                {/* Gestión badge */}
+        {filtered.map(p => (
+          <button key={p.id} onClick={() => setSelected(p)} style={{
+            width: "100%", background: "#ffffff06",
+            border: "1px solid " + p.status === "aprobada" ? "#10b98120" : "#f59e0b20",
+            borderRadius: 20, overflow: "hidden", marginBottom: 14,
+            display: "flex", cursor: "pointer", textAlign: "left",
+          }}>
+            <img src={p.img} alt={p.name} style={{ width: 100, height: 100, objectFit: "cover", flexShrink: 0 }} />
+            <div style={{ padding: "12px 14px", flex: 1, minWidth: 0 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 3 }}>
+                <p style={{ fontFamily: "'Syne',sans-serif", color: "white", fontSize: 14, fontWeight: 700, lineHeight: 1.2, flex: 1, marginRight: 8 }}>{p.name}</p>
                 <span style={{
-                  display: "inline-flex", alignItems: "center", gap: 4,
-                  background: p._mode === "managed" ? "#3b82f615" : "#f59e0b15",
-                  border: "1px solid " + (p._mode === "managed" ? "#3b82f640" : "#f59e0b40"),
+                  background: p.status === "aprobada" ? "#10b98115" : p.status === "rechazada" ? "#ef444415" : "#f59e0b15",
+                  border: "1px solid " + p.status === "aprobada" ? "#10b98140" : p.status === "rechazada" ? "#ef444440" : "#f59e0b40",
                   borderRadius: 99, padding: "2px 8px",
-                  color: p._mode === "managed" ? "#3b82f6" : "#f59e0b",
-                  fontSize: 9, fontWeight: 700,
+                  color: p.status === "aprobada" ? "#10b981" : p.status === "rechazada" ? "#ef4444" : "#f59e0b",
+                  fontSize: 10, fontWeight: 700, flexShrink: 0,
                 }}>
-                  {p._mode === "managed" ? "🛎️ Gestión Baja Renta" : "👤 Autogestión"}
+                  {p.status === "aprobada" ? "Aprobada" : p.status === "rechazada" ? "Rechazada" : "Pendiente"}
                 </span>
               </div>
-            </button>
-          ))}
-          {filtered.length === 0 && (
-            <div style={{ textAlign: "center", padding: "48px 0" }}>
-              <p style={{ fontSize: 32, marginBottom: 8 }}>🏠</p>
-              <p style={{ color: "#64748b", fontSize: 14 }}>Sin propiedades en esta categoría</p>
+              <p style={{ color: "#64748b", fontSize: 12, marginBottom: 4 }}>👤 {p.owner}</p>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                <p style={{ fontFamily: "'Syne',sans-serif", color: "#8b5cf6", fontSize: 14, fontWeight: 700 }}>
+                  {"$" + p.price.toLocaleString()}<span style={{ color: "#64748b", fontSize: 10, fontWeight: 400 }}>/mes</span>
+                </p>
+                <span style={{ color: "#64748b", fontSize: 11 }}>{p.city}</span>
+              </div>
+              {/* Gestión badge */}
+              <span style={{
+                display: "inline-flex", alignItems: "center", gap: 4,
+                background: p._mode === "managed" ? "#3b82f615" : "#f59e0b15",
+                border: "1px solid " + (p._mode === "managed" ? "#3b82f640" : "#f59e0b40"),
+                borderRadius: 99, padding: "2px 8px",
+                color: p._mode === "managed" ? "#3b82f6" : "#f59e0b",
+                fontSize: 9, fontWeight: 700,
+              }}>
+                {p._mode === "managed" ? "🛎️ Gestión Baja Renta" : "👤 Autogestión"}
+              </span>
             </div>
-          )}
+          </button>
+        ))}
+        {filtered.length === 0 && (
+          <div style={{ textAlign: "center", padding: "48px 0" }}>
+            <p style={{ fontSize: 32, marginBottom: 8 }}>🏠</p>
+            <p style={{ color: "#64748b", fontSize: 14 }}>Sin propiedades en esta categoría</p>
+          </div>
+        )}
           </div>
         </div>
       )}
