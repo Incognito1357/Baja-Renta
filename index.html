@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BAJA RENTA v3.0 CLEAN -->
+<!-- BAJA RENTA v4.0 -->
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -3882,7 +3882,7 @@ function OwnerPropertyDetail({ property, onBack, approvedApplicants, onApprove, 
               headers: { "Content-Type": "application/json", "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ", "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ" },
               body: JSON.stringify({ status: "revision" }),
             }).then(function() {
-              alert("Solicitud enviada. El equipo de Baja Renta revisará tu propiedad en 24-72 horas.");
+              alert("Solicitud enviada. El equipo revisará tu propiedad en 24-72 hrs.");
             }).catch(function() { alert("Error de conexión."); });
           }} style={{ width: "100%", background: "linear-gradient(135deg, #3b82f6, #6366f1)", border: "none", borderRadius: 16, padding: 16, color: "white", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
             📤 Solicitar publicación
@@ -5156,7 +5156,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
       ) : (
         <div>
           {/* Self mode - submit to review button */}
-          {(function() {
+          {!masterApproved && (function() {
             var selfFormReady = propForm.name && propForm.city && propForm.address && propForm.price && propForm.deposit;
             return (
               <div style={{ marginBottom: 12 }}>
@@ -5208,7 +5208,295 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
               </div>
             );
           })()}
-          
+          {masterApproved ? (
+            <button onClick={function() {
+              fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/create-checkout", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+                },
+                body: JSON.stringify({
+                  property_name: propForm.name || "Propiedad",
+                  owner_email: propForm.email || "",
+                  property_id: propForm.id || null,
+                }),
+              }).then(function(r) { return r.json(); }).then(function(res) {
+                if (res.url) {
+                  window.open(res.url, "_blank");
+                } else {
+                  alert("Error al crear sesión de pago. Intenta de nuevo.");
+                }
+              }).catch(function() {
+                alert("Error de conexión. Verifica tu internet e intenta de nuevo.");
+              });
+            }} className="btn-glow" style={{
+              width: "100%", background: accentGrad,
+              border: "none", borderRadius: 16, padding: "18px", color: textOP,
+              fontSize: 16, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", transition: "all .3s",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+            }}>
+              <Icon name="arrow" size={18} color="white" /> {"💳 Pagar $500 MXN y publicar"}
+            </button>
+          ) : (
+            <div>
+              <div style={{ background: "#f59e0b10", border: "1px solid #f59e0b30", borderRadius: 16, padding: "16px", marginBottom: 12, display: "flex", alignItems: "center", gap: 12 }}>
+                <span style={{ fontSize: 22, flexShrink: 0 }}>🔒</span>
+                <div>
+                  <p style={{ color: "#f59e0b", fontSize: 13, fontWeight: 700, marginBottom: 3 }}>Pago deshabilitado</p>
+                  <p style={{ color: "#78716c", fontSize: 12, lineHeight: 1.5 }}>La sección de pago se habilitará una vez que tu propiedad sea autorizada por el equipo de Baja Renta.</p>
+                </div>
+              </div>
+              <button disabled style={{
+                width: "100%", background: cardBgOP, border: "1px solid #ffffff15",
+                borderRadius: 16, padding: "18px", color: textSubOP,
+                fontSize: 16, fontWeight: 700, cursor: "not-allowed", fontFamily: "'DM Sans',sans-serif",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: 0.5,
+              }}>
+                {"🔒 Continuar al pago · $500 MXN"}
+              </button>
+              <div style={{ marginTop: 12, background: "#3b82f610", border: "1px solid #3b82f630", borderRadius: 12, padding: "12px 16px" }}>
+                <p style={{ color: "#3b82f6", fontSize: 12, fontWeight: 600, marginBottom: 4 }}>📧 ¿Qué sigue?</p>
+                <p style={{ color: "#64748b", fontSize: 12, lineHeight: 1.6 }}>
+                  El equipo de Baja Renta revisará tu propiedad en 24–72 horas hábiles. Recibirás un correo cuando sea aprobada y podrás proceder con el pago.
+                </p>
+              </div>
+            </div>
+          )}
+          <p style={{ color: textSubOP, fontSize: 12, textAlign: "center", marginTop: 8 }}>
+            🛎️ Nuestro equipo revisará tu propiedad en 24–72 hrs laborables
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function GuestPropertyDetail({ p, onBack, onRegister }) {
+  const [imgIdx, setImgIdx] = useState(0);
+  const [zoomed, setZoomed] = useState(false);
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#0a0f1e" }}>
+
+      {/* Fullscreen lightbox */}
+      {zoomed && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 100, background: "#000000f5", display: "flex", flexDirection: "column", animation: "fadeUp .2s ease" }}>
+          {/* Header: close + price + address */}
+          <div style={{ padding: "48px 20px 16px", display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+            <div>
+              <p style={{ fontFamily: "'DM Sans',sans-serif", color: "#3b82f6", fontSize: 24, fontWeight: 700, lineHeight: 1 }}>{"$" + p.price.toLocaleString()}<span style={{ color: "#64748b", fontSize: 12, fontWeight: 400 }}>/mes</span></p>
+              <p style={{ color: "#64748b", fontSize: 12, marginTop: 4, display: "flex", alignItems: "center", gap: 4 }}>
+                <Icon name="map" size={11} color="#94a3b8" /> {p.address}
+              </p>
+            </div>
+            <button onClick={() => setZoomed(false)} style={{ background: "#ffffff10", backdropFilter: "blur(8px)", border: "none", borderRadius: 99, width: 40, height: 40, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginLeft: 12 }}>
+              <Icon name="x" size={20} color="white" />
+            </button>
+          </div>
+
+          {/* Full image */}
+          <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+            <img src={p.images[imgIdx]} alt="" style={{ width: "100%", maxHeight: "100%", objectFit: "contain" }} />
+          </div>
+
+          {/* Thumbnail strip */}
+          <div style={{ padding: "16px 20px 36px", display: "flex", gap: 8, justifyContent: "center" }}>
+            {p.images.map((img, i) => (
+              <button key={i} onClick={() => setImgIdx(i)} style={{
+                width: i === imgIdx ? 52 : 44, height: 44, borderRadius: 10, overflow: "hidden",
+                border: "2px solid " + i === imgIdx ? "#3b82f6" : "transparent",
+                padding: 0, cursor: "pointer", transition: "all .2s", flexShrink: 0,
+              }}>
+                <img src={img} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div style={{ position: "relative", height: "45vh", overflow: "hidden" }}>
+        <img src={p.images[imgIdx]} alt="" onClick={() => setZoomed(true)}
+          style={{ width: "100%", height: "100%", objectFit: "cover", cursor: "zoom-in" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, #00000040, transparent 40%, #0a0f1e 100%)", pointerEvents: "none" }} />
+        {/* Mock watermark */}
+        {p.isMock && (
+          <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none", zIndex: 2 }}>
+            <div style={{ position: "absolute", inset: -40, transform: "rotate(-35deg)", display: "flex", flexDirection: "column", gap: 28, alignItems: "center", justifyContent: "center" }}>
+              {[0,1,2,3,4].map(row => (
+                <div key={row} style={{ display: "flex", gap: 40, whiteSpace: "nowrap" }}>
+                  {[0,1,2].map(col => (
+                    <span key={col} style={{ color: "white", fontSize: 11, fontWeight: 800, letterSpacing: 3, textTransform: "uppercase", opacity: 0.22, textShadow: "0 1px 4px #000" }}>{"DISEÑO DE MUESTRA"}</span>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        <button onClick={onBack} style={{ position: "absolute", top: 16, left: 16, background: "#000000a0", backdropFilter: "blur(8px)", border: "none", borderRadius: 99, width: 38, height: 38, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 3 }}>
+          <Icon name="back" size={16} color="white" />
+        </button>
+        <div style={{ position: "absolute", top: 16, right: 16, background: "#000000a0", backdropFilter: "blur(8px)", borderRadius: 99, padding: "5px 12px", display: "flex", alignItems: "center", gap: 5, pointerEvents: "none", zIndex: 3 }}>
+          <span style={{ fontSize: 12 }}>🔍</span>
+          <span style={{ color: "white", fontSize: 11 }}>Toca para ampliar</span>
+        </div>
+        <div style={{ position: "absolute", bottom: 60, left: 0, right: 0, display: "flex", justifyContent: "center", gap: 6, zIndex: 3 }}>
+          {p.images.map((_, i) => (
+            <button key={i} onClick={() => setImgIdx(i)} style={{ width: i === imgIdx ? 20 : 6, height: 6, borderRadius: 99, background: i === imgIdx ? "#3b82f6" : "#ffffff50", border: "none", cursor: "pointer", transition: "all .3s" }} />
+          ))}
+        </div>
+      </div>
+
+      <div style={{ padding: "0 24px 48px" }}>
+        {p.isMock && (
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "#f59e0b15", border: "1px solid #f59e0b40", borderRadius: 99, padding: "3px 10px", marginTop: 12, marginBottom: 4 }}>
+            <span style={{ color: "#f59e0b", fontSize: 10, fontWeight: 700, letterSpacing: 0.5 }}>🏷️ DISEÑO DE MUESTRA</span>
+          </div>
+        )}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
+          <div>
+            <h2 style={{ fontFamily: "'DM Sans',sans-serif", color: "white", fontSize: 22, fontWeight: 700, marginBottom: 4 }}>{p.name}</h2>
+            <p style={{ color: "#64748b", fontSize: 13, display: "flex", alignItems: "center", gap: 4 }}><Icon name="map" size={12} color="#64748b" /> {p.address}</p>
+          </div>
+          <div style={{ textAlign: "right" }}>
+            <p style={{ fontFamily: "'DM Sans',sans-serif", color: "#3b82f6", fontSize: 22, fontWeight: 700 }}>{"$" + p.price.toLocaleString()}</p>
+            <p style={{ color: "#64748b", fontSize: 11 }}>/mes</p>
+          </div>
+        </div>
+        <div style={{ background: "#ffffff06", border: "1px solid #ffffff15", borderRadius: 16, padding: 18, marginBottom: 20 }}>
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <div>
+              <p style={{ color: "#64748b", fontSize: 12 }}>Depósito requerido</p>
+              <p style={{ fontFamily: "'DM Sans',sans-serif", color: "#f59e0b", fontSize: 18, fontWeight: 700 }}>{"$" + p.deposit.toLocaleString()}</p>
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <p style={{ color: "#64748b", fontSize: 12 }}>Renta mensual</p>
+              <p style={{ fontFamily: "'DM Sans',sans-serif", color: "#3b82f6", fontSize: 18, fontWeight: 700 }}>{"$" + p.price.toLocaleString()}</p>
+            </div>
+          </div>
+        </div>
+        <button onClick={onRegister} className="btn-glow" style={{
+          width: "100%", background: "linear-gradient(135deg, #3b82f6, #6366f1)",
+          border: "none", borderRadius: 14, padding: "16px", marginBottom: 16, cursor: "pointer",
+          display: "flex", flexDirection: "column", alignItems: "center", gap: 4, transition: "all .3s",
+        }}>
+          <p style={{ color: "white", fontSize: 14, fontWeight: 700 }}>🏠 ¿Te interesa esta propiedad?</p>
+          <p style={{ color: "#bfdbfe", fontSize: 12 }}>Crea una cuenta para solicitar la renta</p>
+        </button>
+        <button onClick={onBack} style={{
+          width: "100%", background: "#ffffff06", border: "1px solid #ffffff15",
+          borderRadius: 16, padding: "16px", color: "#64748b",
+          fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif",
+          display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+        }}>
+          <Icon name="back" size={16} color="#94a3b8" /> Regresar al catálogo
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function VisitorRegister({ onBack, onComplete, onLogin, darkMode = true }) {
+  const [regStep, setRegStep] = useState("form"); // form | verify
+  const [showPass, setShowPass] = useState(false);
+  const [showConfirmPass, setShowConfirmPass] = useState(false);
+  const [agreed, setAgreed] = useState(false);
+  const [form, setForm] = useState({ name: "", email: "", phone: "", password: "", confirmPassword: "", dob: "" });
+  const [code, setCode] = useState(["", "", "", ""]);
+  const ref0 = useRef(); const ref1 = useRef(); const ref2 = useRef(); const ref3 = useRef();
+  const codeRefs = [ref0, ref1, ref2, ref3];
+  var setF = function(k, v) { setForm(function(f) { var n = Object.assign({}, f); n[k] = v; return n; }); };
+  const getAge = (dob) => {
+    if (!dob) return null;
+    const today = new Date();
+    const birth = new Date(dob);
+    let a = today.getFullYear() - birth.getFullYear();
+    const m = today.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) a--;
+    return a;
+  };
+  const age = getAge(form.dob);
+  const isAdult = age !== null && age >= 18;
+  const [showMinorPopup, setShowMinorPopup] = useState(false);
+  const passwordsMatch = form.password && form.confirmPassword && form.password === form.confirmPassword;
+  const allFilled = form.name && form.email && form.phone && form.password && form.confirmPassword && passwordsMatch && form.dob && isAdult && agreed;
+  const codeComplete = code.every(c => c !== "");
+  const [otpError, setOtpError] = useState("");
+  const [otpLoading, setOtpLoading] = useState(false);
+
+  const [showPushPrompt, setShowPushPrompt] = useState(false);
+  const handleVisitorRegister = function() {
+    if (!allFilled) return;
+    setOtpError("");
+    setOtpLoading(true);
+    fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/send-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ" },
+      body: JSON.stringify({ email: form.email, name: form.name }),
+    }).then(function() {
+      setOtpLoading(false);
+      setRegStep("verify");
+    }).catch(function(e) {
+      console.log("send-otp error:", e);
+      setOtpLoading(false);
+      setRegStep("verify");
+    });
+  };
+
+  const bg      = darkMode ? "#0a0f1e"   : "#f8fafc";
+  const navBg   = darkMode ? "linear-gradient(135deg, #0d1f3c, #0a0f1e)" : "linear-gradient(135deg, #dbeafe, #f8fafc)";
+  const text    = darkMode ? "white"     : "#0f172a";
+  const textSub = darkMode ? "#64748b"   : "#64748b";
+  const border  = darkMode ? "#ffffff15" : "#e2e8f0";
+  const inputBg = darkMode ? "#ffffff08" : "#ffffff";
+  const codeBg  = (c) => c ? (darkMode ? "#3b82f615" : "#eff6ff") : inputBg;
+  const codeBdr = (c) => c ? "#3b82f6" : (darkMode ? border : "#e2e8f0");
+
+  const handleCodeInput = (i, val) => {
+    if (!/^\d?$/.test(val)) return;
+    const next = [...code]; next[i] = val; setCode(next);
+    if (val && i < 3) codeRefs[i + 1].current.focus();
+  };
+  const handleCodeKey = (i, e) => {
+    if (e.key === "Backspace" && !code[i] && i > 0) codeRefs[i - 1].current.focus();
+  };
+
+  if (regStep === "verify") {
+    return (
+      <div style={{ position: "relative" }}>
+        {showPushPrompt && <PushPrompt email={form.email} role="visitor" onDone={function() { setShowPushPrompt(false); onComplete({ name: form.name, email: form.email, phone: form.phone }); }} />}
+      <div style={{ minHeight: "100vh", background: bg, padding: "48px 24px", display: "flex", flexDirection: "column", transition: "background .3s" }}>
+        <button onClick={() => setRegStep("form")} style={{ background: "none", border: "none", color: textSub, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontSize: 14, marginBottom: 40, fontFamily: "'DM Sans',sans-serif" }}>
+          <Icon name="back" size={16} /> Regresar
+        </button>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
+          <div style={{ width: 80, height: 80, borderRadius: "50%", background: "#3b82f615", border: "1px solid #3b82f640", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 24 }}>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+          </div>
+          <h2 style={{ fontFamily: "'DM Sans',sans-serif", color: text, fontSize: 22, fontWeight: 700, marginBottom: 8, transition: "color .3s" }}>Verifica tu correo</h2>
+          <p style={{ color: textSub, fontSize: 14, marginBottom: 6, maxWidth: 300 }}>Enviamos un código de 4 dígitos a</p>
+          <p style={{ color: "#3b82f6", fontSize: 14, fontWeight: 600, marginBottom: 36 }}>{form.email}</p>
+          <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
+            {code.map((c, i) => (
+              <input key={i} ref={codeRefs[i]} value={c}
+                onChange={e => handleCodeInput(i, e.target.value)}
+                onKeyDown={e => handleCodeKey(i, e)}
+                maxLength={1} inputMode="numeric"
+                style={{
+                  width: 56, height: 64, borderRadius: 14, textAlign: "center",
+                  fontSize: 26, fontWeight: 700, color: text,
+                  background: codeBg(c),
+                  border: "2px solid " + codeBdr(c),
+                  outline: "none", transition: "all .2s", fontFamily: "'DM Sans',sans-serif",
+                }} />
+            ))}
+          </div>
+          {otpError && (
+            <p style={{ color: "#ef4444", fontSize: 13, marginBottom: 12 }}>{otpError}</p>
+          )}
           <button onClick={function() {
             if (!codeComplete || otpLoading) return;
             setOtpLoading(true);
@@ -5259,7 +5547,9 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
           </button>
         </div>
       </div>
+      </div>
     );
+  }
 
 
   return (
