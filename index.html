@@ -5164,7 +5164,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
       ) : (
         <div>
           {/* Self mode - submit to review button */}
-          {!masterApproved && (function() {
+          {(function() {
             var selfFormReady = propForm.name && propForm.city && propForm.address && propForm.price && propForm.deposit;
             return (
               <div style={{ marginBottom: 12 }}>
