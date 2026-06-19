@@ -4475,6 +4475,14 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
       status: "pending",
       is_mock: false,
       owner_email: currentUser && currentUser.email ? currentUser.email : null,
+      images: uploadedPhotos.length > 0 ? uploadedPhotos.map(function(p) { return p.url; }) : DEFAULT_PHOTOS.slice(0, 1),
+      documents: {
+        escritura: uploadedDocs.escritura ? { name: uploadedDocs.escritura.name, data: uploadedDocs.escritura.data } : null,
+        ine: uploadedDocs.ine ? { name: uploadedDocs.ine.name, data: uploadedDocs.ine.data } : null,
+        domicilio: uploadedDocs.domicilio ? { name: uploadedDocs.domicilio.name, data: uploadedDocs.domicilio.data } : null,
+        predial: uploadedDocs.predial ? { name: uploadedDocs.predial.name, data: uploadedDocs.predial.data } : null,
+      },
+      owner_name: propForm.ownerName || (currentUser && currentUser.name) || "Propietario",
     };
 
     fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties", {
@@ -6137,11 +6145,19 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
       setFetchStatus("✅ " + data.length + " propiedades en BD");
       if (data.length === 0) return;
       var supaProps = data.map(function(p) {
+        var imgs = [];
+        try { imgs = Array.isArray(p.images) ? p.images : (p.images ? JSON.parse(p.images) : []); } catch(e) { imgs = []; }
+        var fb = "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80";
+        var docsRaw = p.documents || {};
+        var uploadedDocsObj = {};
+        ["escritura", "ine", "domicilio", "predial"].forEach(function(key) {
+          uploadedDocsObj[key] = docsRaw[key] ? { name: docsRaw[key].name || (key + ".jpg"), type: "image/jpeg", data: docsRaw[key].data } : null;
+        });
         return {
           id: p.id,
           name: p.name || "Propiedad",
-          owner: "Propietario registrado",
-          ownerEmail: "",
+          owner: p.owner_name || "Propietario registrado",
+          ownerEmail: p.owner_email || "",
           city: p.city || "—",
           state: "Baja California",
           address: p.address || "—",
@@ -6161,9 +6177,11 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
           laundry: p.laundry,
           patio: p.patio,
           status: p.status === "pending" ? "pendiente" : p.status === "approved" ? "aprobada" : p.status === "rejected" ? "rechazada" : "pendiente",
-          img: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80",
-          images: ["https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80"],
+          img: imgs.length > 0 ? imgs[0] : fb,
+          images: imgs.length > 0 ? imgs : [fb],
           submitted: p.created_at ? p.created_at.slice(0, 10) : "—",
+          _uploadedPhotos: imgs.map(function(url, i) { return { url: url, name: "foto" + (i + 1) + ".jpg" }; }),
+          _uploadedDocs: uploadedDocsObj,
           _mode: p.management_mode || "self",
           isNew: true,
           isSupa: true,
