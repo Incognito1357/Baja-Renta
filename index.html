@@ -4475,7 +4475,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
       status: "pending",
       is_mock: false,
       owner_email: currentUser && currentUser.email ? currentUser.email : null,
-      images: uploadedPhotos.length > 0 ? uploadedPhotos.map(function(p) { return p.url; }) : DEFAULT_PHOTOS.slice(0, 1),
+      images: uploadedPhotos.length > 0 ? uploadedPhotos.slice(0, 2).map(function(p) { return p.url; }) : DEFAULT_PHOTOS.slice(0, 1),
       documents: {
         escritura: uploadedDocs.escritura ? { name: uploadedDocs.escritura.name, data: uploadedDocs.escritura.data } : null,
         ine: uploadedDocs.ine ? { name: uploadedDocs.ine.name, data: uploadedDocs.ine.data } : null,
@@ -4494,9 +4494,38 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
         "Prefer": "return=representation",
       },
       body: JSON.stringify(supaData),
-    }).then(function(r) { return r.json(); }).then(function(res) {
+    }).then(function(r) {
+      if (!r.ok) { return r.text().then(function(t) { throw new Error("HTTP " + r.status + ": " + t); }); }
+      return r.json();
+    }).then(function(res) {
       console.log("Property saved to Supabase:", res);
-    }).catch(function(e) { console.log("Supabase save error:", e); });
+    }).catch(function(e) {
+      console.log("Supabase save error (full payload):", e.message);
+      // Retry without the heavy/optional fields in case documents/images columns
+      // don't exist yet or the payload was too large
+      var fallbackData = Object.assign({}, supaData);
+      delete fallbackData.documents;
+      delete fallbackData.owner_name;
+      fallbackData.images = [DEFAULT_PHOTOS[0]];
+      fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+          "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+          "Prefer": "return=representation",
+        },
+        body: JSON.stringify(fallbackData),
+      }).then(function(r2) {
+        if (!r2.ok) { return r2.text().then(function(t2) { throw new Error("HTTP " + r2.status + ": " + t2); }); }
+        return r2.json();
+      }).then(function(res2) {
+        console.log("Property saved to Supabase (fallback, no documents/owner_name):", res2);
+      }).catch(function(e2) {
+        console.log("Supabase fallback save ALSO failed:", e2.message);
+        alert("Hubo un problema guardando tu propiedad en el servidor. Por favor contacta soporte. Detalle técnico: " + e2.message.slice(0, 150));
+      });
+    });
 
     if (onPublish) onPublish(newProp);
     sendEmail("new_property_pending", "miguelayalamartinez@gmail.com", {
