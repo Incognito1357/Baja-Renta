@@ -4506,7 +4506,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
       var fallbackData = Object.assign({}, supaData);
       delete fallbackData.documents;
       delete fallbackData.owner_name;
-      fallbackData.images = [DEFAULT_PHOTOS[0]];
+      delete fallbackData.images;
       fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties", {
         method: "POST",
         headers: {
