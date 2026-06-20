@@ -3878,7 +3878,7 @@ function OwnerPropertyDetail({ property, onBack, approvedApplicants, onApprove, 
                 if (!r.ok) { return r.text().then(function(t) { throw new Error("HTTP " + r.status + ": " + t); }); }
                 return r.json();
               }).then(function(res) {
-                if (res.url) window.open(res.url, "_blank");
+                if (res.url) window.location.href = res.url;
                 else alert("Error al crear sesion de pago: respuesta sin URL.");
               }).catch(function(e) { alert("Error al conectar con el sistema de pagos. Detalle: " + e.message.slice(0, 150)); });
             }} style={{ width: "100%", background: "linear-gradient(135deg, #10b981, #059669)", border: "none", borderRadius: 16, padding: 16, color: "white", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
