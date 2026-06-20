@@ -3820,6 +3820,7 @@ function OwnerPropertyDetail({ property, onBack, approvedApplicants, onApprove, 
   var status = property.status || "pendiente";
   var isApproved = status === "aprobada" || status === "approved";
   var isPublished = status === "published" || status === "publicada";
+  var isExpired = status === "expirada" || status === "expired";
   var applicants = property.applicants || [];
   return (
     <div style={{ minHeight: "100vh", background: "#0a0f1e", paddingBottom: 100 }}>
@@ -3829,8 +3830,8 @@ function OwnerPropertyDetail({ property, onBack, approvedApplicants, onApprove, 
         </button>
         <p style={{ color: "white", fontSize: 20, fontWeight: 700, marginBottom: 4 }}>{name}</p>
         <p style={{ color: "#64748b", fontSize: 13, marginBottom: 12 }}>{city}</p>
-        <span style={{ background: isApproved ? "#10b98120" : "#f59e0b20", color: isApproved ? "#10b981" : "#f59e0b", fontSize: 11, fontWeight: 700, padding: "4px 12px", borderRadius: 99 }}>
-          {isApproved ? "Aprobada" : status}
+        <span style={{ background: isExpired ? "#f59e0b20" : (isPublished || isApproved) ? "#10b98120" : "#f59e0b20", color: isExpired ? "#f59e0b" : (isPublished || isApproved) ? "#10b981" : "#f59e0b", fontSize: 11, fontWeight: 700, padding: "4px 12px", borderRadius: 99 }}>
+          {isExpired ? "Expirada" : isPublished ? "Publicada" : isApproved ? "Aprobada" : status}
         </span>
         <p style={{ color: "#3b82f6", fontSize: 22, fontWeight: 700, marginTop: 12 }}>
           {"$" + price.toLocaleString() + "/mes"}
@@ -3859,7 +3860,28 @@ function OwnerPropertyDetail({ property, onBack, approvedApplicants, onApprove, 
         })}
       </div>
       <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, padding: "16px 20px 32px", background: "linear-gradient(to top, #0a0f1e, transparent)" }}>
-        {isPublished ? (
+        {isExpired ? (
+          <div>
+            <div style={{ background: "#f59e0b10", border: "1px solid #f59e0b30", borderRadius: 12, padding: "10px 16px", marginBottom: 10, textAlign: "center" }}>
+              <p style={{ color: "#fcd34d", fontSize: 12, fontWeight: 600 }}>⏰ Tu publicación de 90 días terminó</p>
+            </div>
+            <button onClick={function() {
+              fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/create-checkout", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ" },
+                body: JSON.stringify({ property_name: name, owner_email: property.owner_email || "", property_id: String(property.id || "") }),
+              }).then(function(r) {
+                if (!r.ok) { return r.text().then(function(t) { throw new Error("HTTP " + r.status + ": " + t); }); }
+                return r.json();
+              }).then(function(res) {
+                if (res.url) window.location.href = res.url;
+                else alert("Error al crear sesion de pago: respuesta sin URL.");
+              }).catch(function(e) { alert("Error al conectar con el sistema de pagos. Detalle: " + e.message.slice(0, 150)); });
+            }} style={{ width: "100%", background: "linear-gradient(135deg, #10b981, #059669)", border: "none", borderRadius: 16, padding: 16, color: "white", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
+              🔄 Renovar publicación · $500 MXN
+            </button>
+          </div>
+        ) : isPublished ? (
           <div style={{ background: "#10b98110", border: "1px solid #10b98130", borderRadius: 14, padding: "14px 16px", textAlign: "center" }}>
             <p style={{ color: "#10b981", fontSize: 13, fontWeight: 700, marginBottom: 4 }}>✅ Publicada</p>
             <p style={{ color: "#78716c", fontSize: 12 }}>Tu propiedad está activa y visible para visitantes durante 90 días.</p>
@@ -4162,7 +4184,7 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
           var fb = "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80";
           return {
             id: p.id, name: p.name, city: p.city, price: p.price, deposit: p.deposit,
-            status: p.status === "approved" ? "aprobada" : p.status === "rejected" ? "rechazada" : p.status === "published" ? "published" : "pendiente",
+            status: p.status === "approved" ? "aprobada" : p.status === "rejected" ? "rechazada" : p.status === "published" ? "published" : p.status === "expired" ? "expirada" : "pendiente",
             img: rawImgs.length > 0 ? rawImgs[0] : fb,
             images: rawImgs.length > 0 ? rawImgs : [fb],
             bedrooms: p.bedrooms, bathrooms: p.bathrooms, _mode: p.management_mode || "self",
@@ -6309,7 +6331,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
           kitchen: p.kitchen,
           laundry: p.laundry,
           patio: p.patio,
-          status: p.status === "pending" ? "pendiente" : p.status === "approved" ? "aprobada" : p.status === "rejected" ? "rechazada" : p.status === "published" ? "publicada" : "pendiente",
+          status: p.status === "pending" ? "pendiente" : p.status === "approved" ? "aprobada" : p.status === "rejected" ? "rechazada" : p.status === "published" ? "publicada" : p.status === "expired" ? "expirada" : "pendiente",
           img: imgs.length > 0 ? imgs[0] : fb,
           images: imgs.length > 0 ? imgs : [fb],
           submitted: p.created_at ? p.created_at.slice(0, 10) : "—",
