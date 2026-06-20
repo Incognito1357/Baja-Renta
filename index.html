@@ -6852,16 +6852,19 @@ function App() {
   const [ownerGoToDashboard, setOwnerGoToDashboard] = useState(false);
   const [publishedProperties, setPublishedProperties] = useState([...PROPERTIES]);
 
-  // Load approved properties from Supabase — show them FIRST
+  // Load published (paid & active) properties from Supabase — show them FIRST
   useEffect(function() {
-    fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties?status=eq.approved&select=*&order=created_at.desc", {
+    fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties?status=eq.published&select=*&order=created_at.desc", {
       headers: {
         "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
         "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
       },
     }).then(function(r) { return r.json(); }).then(function(data) {
       if (!Array.isArray(data) || data.length === 0) return;
+      var fb = "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80";
       var supaApproved = data.map(function(p) {
+        var imgs = [];
+        try { imgs = Array.isArray(p.images) ? p.images : (p.images ? JSON.parse(p.images) : []); } catch(e) { imgs = []; }
         return {
           id: p.id,
           name: p.name || "Propiedad",
@@ -6883,9 +6886,9 @@ function App() {
           kitchen: p.kitchen !== false,
           laundry: p.laundry || false,
           patio: p.patio || false,
-          img: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80",
-          images: ["https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80"],
-          owner: "Propietario",
+          img: imgs.length > 0 ? imgs[0] : fb,
+          images: imgs.length > 0 ? imgs : [fb],
+          owner: p.owner_name || "Propietario",
           ownerPhone: "",
           ownerEmail: p.owner_email || "",
           views: 0,
@@ -6896,7 +6899,7 @@ function App() {
       });
       // Show Supabase properties FIRST, then mocks
       setPublishedProperties(supaApproved.concat(PROPERTIES));
-    }).catch(function(e) { console.log("approved properties fetch error:", e); });
+    }).catch(function(e) { console.log("published properties fetch error:", e); });
   }, []);
   const [ownerSubmissions, setOwnerSubmissions] = useState([]);
 
