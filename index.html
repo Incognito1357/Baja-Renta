@@ -6848,7 +6848,12 @@ function App() {
   const [darkMode, setDarkMode] = useState(true);
   const [profile, setProfile] = useState(null);
   const [currentUser, setCurrentUser] = useState({ name: "", email: "", phone: "" });
-  const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [paymentSuccess, setPaymentSuccess] = useState(function() {
+    try {
+      var p = new URLSearchParams(window.location.search);
+      return p.get("payment") === "success";
+    } catch(e) { return false; }
+  });
   const [ownerGoToDashboard, setOwnerGoToDashboard] = useState(false);
   const [publishedProperties, setPublishedProperties] = useState([...PROPERTIES]);
 
