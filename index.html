@@ -6905,9 +6905,29 @@ function App() {
     try {
       var params = new URLSearchParams(window.location.search);
       if (params.get("payment") === "success") {
-        setPaymentSuccess(true);
-        // Clean URL
+        var sessionId = params.get("session_id");
+        // Clean URL immediately so a page refresh doesn't re-trigger this
         window.history.replaceState({}, "", window.location.pathname);
+        if (sessionId) {
+          fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/confirm-payment", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+            },
+            body: JSON.stringify({ session_id: sessionId }),
+          }).then(function(r) { return r.json(); }).then(function(res) {
+            console.log("confirm-payment result:", res);
+            setPaymentSuccess(true);
+          }).catch(function(e) {
+            console.log("confirm-payment error:", e);
+            // Still show success screen — the webhook may have already handled it
+            setPaymentSuccess(true);
+          });
+        } else {
+          // No session_id available (older checkout link) — just show success screen
+          setPaymentSuccess(true);
+        }
       }
     } catch(e) {}
   }, []);
