@@ -6309,7 +6309,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
           kitchen: p.kitchen,
           laundry: p.laundry,
           patio: p.patio,
-          status: p.status === "pending" ? "pendiente" : p.status === "approved" ? "aprobada" : p.status === "rejected" ? "rechazada" : "pendiente",
+          status: p.status === "pending" ? "pendiente" : p.status === "approved" ? "aprobada" : p.status === "rejected" ? "rechazada" : p.status === "published" ? "publicada" : "pendiente",
           img: imgs.length > 0 ? imgs[0] : fb,
           images: imgs.length > 0 ? imgs : [fb],
           submitted: p.created_at ? p.created_at.slice(0, 10) : "—",
