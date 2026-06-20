@@ -4558,9 +4558,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
 
     Promise.all(uploadPromises).then(function(uploadedUrls) {
       var validUrls = uploadedUrls.filter(function(u) { return u; });
-      var supaData = Object.assign({}, newProp, {
-        images: validUrls.length > 0 ? validUrls : DEFAULT_PHOTOS.slice(0, 1),
-      });
+      supaData.images = validUrls.length > 0 ? validUrls : DEFAULT_PHOTOS.slice(0, 1);
       postPropertyToSupabase(supaData);
     });
   };
