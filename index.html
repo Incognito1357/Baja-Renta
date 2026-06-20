@@ -6757,7 +6757,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
         <div>
           {/* Filter tabs */}
           <div style={{ display: "flex", padding: "0 24px", borderBottom: "1px solid #ffffff10", overflowX: "auto" }}>
-            {[["todas","Todas"],["pendiente","Pendientes"],["aprobada","Aprobadas"],["rechazada","Rechazadas"]].map(([key, label]) => (
+            {[["todas","Todas"],["pendiente","Pendientes"],["aprobada","Aprobadas"],["publicada","Publicadas"],["rechazada","Rechazadas"]].map(([key, label]) => (
               <button key={key} onClick={() => setFilter(key)} style={{
                 flex: 1, minWidth: 70, padding: "12px 0", background: "none", border: "none",
                 borderBottom: "2px solid " + filter === key ? "#8b5cf6" : "transparent",
