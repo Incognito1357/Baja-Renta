@@ -4370,7 +4370,7 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
 }
 
 
-function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkModeProp, onToggleTheme, currentUser = {}, onSetUser }) {
+function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkModeProp, onToggleTheme, currentUser = {}, onSetUser, goToDashboard, onDashboardHandled }) {
   const [ownerUser, setOwnerUser] = useState(currentUser);
   var mergedEmail = ownerUser.email || currentUser.email || "";
   const mergedUser = Object.assign({}, currentUser, ownerUser, { email: mergedEmail });
@@ -4378,6 +4378,15 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
   const listedProperties = listedProps || (isMiguel ? myProperties : []);
   const [mode, setMode] = useState(null);
   const darkMode = darkModeProp !== undefined ? darkModeProp : true;
+
+  // If returning here right after a successful payment, skip straight to the
+  // dashboard instead of showing the login/register screen again
+  useEffect(function() {
+    if (goToDashboard && mergedEmail) {
+      setMode("dashboard");
+      if (onDashboardHandled) onDashboardHandled();
+    }
+  }, [goToDashboard, mergedEmail]);
 
   // Theme tokens — used in all form steps
   const bg       = darkMode ? "#0a0f1e"   : "#f8fafc";
@@ -6840,6 +6849,7 @@ function App() {
   const [profile, setProfile] = useState(null);
   const [currentUser, setCurrentUser] = useState({ name: "", email: "", phone: "" });
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [ownerGoToDashboard, setOwnerGoToDashboard] = useState(false);
   const [publishedProperties, setPublishedProperties] = useState([...PROPERTIES]);
 
   // Load approved properties from Supabase — show them FIRST
@@ -7086,14 +7096,14 @@ function App() {
     <div style={{ minHeight: "100vh", background: "#0a0f1e", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
       <div style={{ textAlign: "center", maxWidth: 340 }}>
         <div style={{ fontSize: 64, marginBottom: 16 }}>🎉</div>
-        <h2 style={{ color: "white", fontFamily: "'Syne',sans-serif", fontSize: 24, fontWeight: 800, marginBottom: 8 }}>¡Pago exitoso!</h2>
+        <h2 style={{ color: "white", fontFamily: "'Syne',sans-serif", fontSize: 24, fontWeight: 800, marginBottom: 8 }}>¡Propiedad publicada!</h2>
         <p style={{ color: "#94a3b8", fontSize: 14, lineHeight: 1.7, marginBottom: 8 }}>
           Tu pago de <strong style={{ color: "#10b981" }}>$500 MXN</strong> fue procesado correctamente.
         </p>
         <p style={{ color: "#64748b", fontSize: 13, lineHeight: 1.6, marginBottom: 28 }}>
-          Recibirás un recibo por correo. El equipo de Baja Renta revisará tu propiedad en 24–72 horas y recibirás una notificación cuando esté publicada.
+          Tu propiedad ya está activa y visible para visitantes durante los próximos 90 días. Recibirás un recibo por correo.
         </p>
-        <button onClick={function() { setPaymentSuccess(false); setScreen("owner"); }} className="btn-glow" style={{
+        <button onClick={function() { setPaymentSuccess(false); setScreen("owner"); setOwnerGoToDashboard(true); }} className="btn-glow" style={{
           width: "100%", background: "linear-gradient(135deg,#f59e0b,#d97706)",
           border: "none", borderRadius: 16, padding: "16px", color: "white",
           fontSize: 16, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif",
@@ -7146,7 +7156,7 @@ function App() {
       darkMode={darkMode}
     />
   );
-  if (screen === "owner") return <OwnerPanel onBack={() => setScreen("profile")} onPublish={addProperty} listedProperties={listedProperties} darkModeProp={darkMode} onToggleTheme={() => setDarkMode(v => !v)} currentUser={currentUser} onSetUser={setCurrentUser} />;
+  if (screen === "owner") return <OwnerPanel onBack={() => setScreen("profile")} onPublish={addProperty} listedProperties={listedProperties} darkModeProp={darkMode} onToggleTheme={() => setDarkMode(v => !v)} currentUser={currentUser} onSetUser={setCurrentUser} goToDashboard={ownerGoToDashboard} onDashboardHandled={() => setOwnerGoToDashboard(false)} />;
   if (screen === "success") return <SuccessScreen onRestart={restart} />;
   if (screen === "master") return <MasterDashboard onBack={() => setScreen("profile")} publishedProperties={ownerSubmissions} onApproveProperty={approveProperty} />;
   return null;
