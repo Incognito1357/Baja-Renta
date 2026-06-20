@@ -6358,9 +6358,12 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
           mode: prop.mode || "self",
         });
       } else if (status === "rechazada") {
+        var wasPublished = prop.status === "published" || prop.status === "publicada";
         sendEmail("application_rejected", prop.ownerEmail, {
           property_name: prop.name,
-          reason: "El equipo de Baja Renta ha revisado tu propiedad y no cumple con los requisitos actuales de publicación.",
+          reason: wasPublished
+            ? "El equipo de Baja Renta ha removido tu propiedad publicada. Si tienes dudas, contacta a soporte."
+            : "El equipo de Baja Renta ha revisado tu propiedad y no cumple con los requisitos actuales de publicación.",
         });
       }
     }
@@ -6575,6 +6578,25 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
                 fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif",
               }}>
                 {"✓ Aprobar propiedad"}
+              </button>
+            </div>
+          ) : (p.status === "published" || p.status === "publicada") ? (
+            <div>
+              <div style={{ background: "#10b98115", border: "1px solid #10b98140", borderRadius: 14, padding: "12px 16px", display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                <Icon name="check" size={18} color="#10b981" />
+                <p style={{ color: "#10b981", fontSize: 14, fontWeight: 700 }}>Propiedad publicada y activa</p>
+              </div>
+              <button onClick={() => {
+                if (window.confirm("¿Seguro que quieres remover esta propiedad? Ya fue pagada y está activa para visitantes — dejará de mostrarse de inmediato en el catálogo y el dueño será notificado.")) {
+                  rejectStatus(p.id);
+                  setSelected(null);
+                }
+              }} style={{
+                width: "100%", background: "#ef444415", border: "1px solid #ef444430",
+                borderRadius: 14, padding: "14px", color: "#ef4444",
+                fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif",
+              }}>
+                ✗ Remover propiedad publicada
               </button>
             </div>
           ) : (
