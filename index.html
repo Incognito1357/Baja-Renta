@@ -4255,10 +4255,6 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
 
   return (
     <div style={{ minHeight: "100vh", background: bg, paddingBottom: 100 }}>
-      {/* TEMP DEBUG - remove once confirmed working */}
-      <div style={{ background: "#000", color: "#0f0", fontSize: 11, padding: "8px 12px", fontFamily: "monospace", wordBreak: "break-all" }}>
-        DEBUG · email: {JSON.stringify(currentUser && currentUser.email)} · isMiguel: {String(isMiguel)} · supaProperties: {supaProperties.length} · myProperties: {myProperties.length} · refreshKey: {refreshKey}
-      </div>
       {/* Header */}
       <div style={{ background: navBg, padding: "48px 24px 24px", borderBottom: "1px solid " + border2 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
@@ -4316,7 +4312,6 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
 
       <div style={{ padding: "20px 24px" }}>
         <h3 style={{ color: text, fontSize: 15, fontWeight: 700, fontFamily: "'DM Sans',sans-serif", marginBottom: 14 }}>Mis propiedades</h3>
-        <p style={{ color: "#f59e0b", fontSize: 11, marginBottom: 8 }}>Supa: {supaProperties.length} | Email: {currentUser && currentUser.email ? currentUser.email.slice(0,10) : "ninguno"}</p>
         {myProperties.map(function(p) {
           var safeP = {
             id: p.id || "",
