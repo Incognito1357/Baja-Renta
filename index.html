@@ -4388,6 +4388,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
   const borderOP = darkMode ? "#ffffff15" : "#e2e8f0";
   const inputBgOP= darkMode ? "#ffffff08" : "#ffffff";
   const [submitted, setSubmitted] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
   const [formStep, setFormStep] = useState("details");
   const [masterApproved, setMasterApproved] = useState(false);
 
@@ -4452,6 +4453,32 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
   var formatCard = function(v) { var d = v.replace(/\D/g,"").slice(0,16); var r = ""; for(var x=0;x<d.length;x++) { if(x>0&&x%4===0) r+=" "; r+=d[x]; } return r.trim(); };
   const formatExp  = (v) => { const d = v.replace(/\D/g,"").slice(0,4); return d.length > 2 ? d.slice(0,2)+"/"+d.slice(2) : d; };
   const canPay = cardName && cardNum.replace(/\s/g,"").length === 16 && expiry.length === 5 && cvv.length >= 3;
+  const uploadPhotoToStorage = function(photo, index) {
+    // photo.url is a data URL like "data:image/jpeg;base64,AAAA..."
+    var match = /^data:([^;]+);base64,(.+)$/.exec(photo.url || "");
+    if (!match) return Promise.resolve(null);
+    var mimeType = match[1];
+    var base64Data = match[2];
+    var ext = mimeType.indexOf("png") >= 0 ? "png" : mimeType.indexOf("webp") >= 0 ? "webp" : "jpg";
+    var byteChars = atob(base64Data);
+    var byteNumbers = new Array(byteChars.length);
+    for (var i = 0; i < byteChars.length; i++) { byteNumbers[i] = byteChars.charCodeAt(i); }
+    var byteArray = new Uint8Array(byteNumbers);
+    var path = "owner_" + (currentUser && currentUser.email ? currentUser.email.replace(/[^a-zA-Z0-9]/g, "_") : "anon") + "/" + Date.now() + "_" + index + "." + ext;
+    return fetch("https://uwtclxtywhthwecsqeug.supabase.co/storage/v1/object/property-photos/" + path, {
+      method: "POST",
+      headers: {
+        "Content-Type": mimeType,
+        "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+      },
+      body: byteArray,
+    }).then(function(r) {
+      if (!r.ok) { return null; }
+      return "https://uwtclxtywhthwecsqeug.supabase.co/storage/v1/object/public/property-photos/" + path;
+    }).catch(function() { return null; });
+  };
+
   const buildAndPublish = () => {
     const newProp = {
       id: Date.now(),
@@ -4512,7 +4539,6 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
       status: "pending",
       is_mock: false,
       owner_email: currentUser && currentUser.email ? currentUser.email : null,
-      images: uploadedPhotos.length > 0 ? uploadedPhotos.slice(0, 2).map(function(p) { return p.url; }) : DEFAULT_PHOTOS.slice(0, 1),
       documents: {
         escritura: uploadedDocs.escritura ? { name: uploadedDocs.escritura.name, data: uploadedDocs.escritura.data } : null,
         ine: uploadedDocs.ine ? { name: uploadedDocs.ine.name, data: uploadedDocs.ine.data } : null,
@@ -4521,6 +4547,25 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
       },
       owner_name: propForm.ownerName || (currentUser && currentUser.name) || "Propietario",
     };
+
+    // Upload photos to Supabase Storage first, then save the property with the
+    // resulting public URLs (instead of storing base64 directly in the table)
+    setIsPublishing(true);
+    var photosToUpload = uploadedPhotos.slice(0, 5);
+    var uploadPromises = photosToUpload.length > 0
+      ? photosToUpload.map(function(photo, i) { return uploadPhotoToStorage(photo, i); })
+      : [];
+
+    Promise.all(uploadPromises).then(function(uploadedUrls) {
+      var validUrls = uploadedUrls.filter(function(u) { return u; });
+      var supaData = Object.assign({}, newProp, {
+        images: validUrls.length > 0 ? validUrls : DEFAULT_PHOTOS.slice(0, 1),
+      });
+      postPropertyToSupabase(supaData);
+    });
+  };
+
+  const postPropertyToSupabase = function(supaData) {
 
     fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties", {
       method: "POST",
@@ -4536,6 +4581,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
       return r.json();
     }).then(function(res) {
       console.log("Property saved to Supabase:", res);
+      finishPublish(supaData);
     }).catch(function(e) {
       console.log("Supabase save error (full payload):", e.message);
       // Retry without the heavy/optional fields in case documents/images columns
@@ -4558,21 +4604,26 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
         return r2.json();
       }).then(function(res2) {
         console.log("Property saved to Supabase (fallback, no documents/owner_name):", res2);
+        finishPublish(supaData);
       }).catch(function(e2) {
         console.log("Supabase fallback save ALSO failed:", e2.message);
+        setIsPublishing(false);
         alert("Hubo un problema guardando tu propiedad en el servidor. Por favor contacta soporte. Detalle técnico: " + e2.message.slice(0, 150));
       });
     });
+  };
 
-    if (onPublish) onPublish(newProp);
+  const finishPublish = function(supaData) {
+    if (onPublish) onPublish(supaData);
     sendEmail("new_property_pending", "miguelayalamartinez@gmail.com", {
-      property_name: newProp.name,
+      property_name: supaData.name,
       owner_name: propForm.ownerName || "Propietario",
-      city: newProp.city,
-      type: newProp.type,
-      price: "$" + (newProp.price || "").toLocaleString(),
+      city: supaData.city,
+      type: supaData.type,
+      price: "$" + (supaData.price || "").toLocaleString(),
       mode: mode,
     });
+    setIsPublishing(false);
     setSubmitted(true);
   };
 
@@ -5238,20 +5289,26 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
             return (
               <div style={{ marginBottom: 12 }}>
                 <button onClick={function() {
-                  if (!selfFormReady) return;
+                  if (!selfFormReady || isPublishing) return;
                   buildAndPublish();
-                }} disabled={!selfFormReady} className={selfFormReady ? "btn-glow" : ""} style={{
+                }} disabled={!selfFormReady || isPublishing} className={selfFormReady && !isPublishing ? "btn-glow" : ""} style={{
                   width: "100%",
                   background: selfFormReady ? "linear-gradient(135deg, #3b82f6, #6366f1)" : (darkMode ? "#ffffff10" : "#e2e8f0"),
                   border: "none", borderRadius: 16, padding: "18px", color: selfFormReady ? "white" : textSubOP,
                   fontSize: 16, fontWeight: 700,
-                  cursor: selfFormReady ? "pointer" : "not-allowed",
+                  cursor: (selfFormReady && !isPublishing) ? "pointer" : "not-allowed",
                   fontFamily: "'DM Sans',sans-serif", transition: "all .3s",
                   display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                  opacity: selfFormReady ? 1 : 0.6,
+                  opacity: selfFormReady ? (isPublishing ? 0.7 : 1) : 0.6,
                 }}>
-                  <Icon name="upload" size={18} color={selfFormReady ? "white" : textSubOP} />
-                  {selfFormReady ? "📤 Solicitar publicación" : "Completa el formulario para continuar"}
+                  {isPublishing ? (
+                    <React.Fragment>⏳ Subiendo fotos y enviando...</React.Fragment>
+                  ) : (
+                    <React.Fragment>
+                      <Icon name="upload" size={18} color={selfFormReady ? "white" : textSubOP} />
+                      {selfFormReady ? "📤 Solicitar publicación" : "Completa el formulario para continuar"}
+                    </React.Fragment>
+                  )}
                 </button>
                 {!selfFormReady && (
                   <div style={{ marginTop: 10, background: "#f59e0b10", border: "1px solid #f59e0b30", borderRadius: 12, padding: "10px 14px" }}>
