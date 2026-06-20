@@ -4246,8 +4246,8 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
     return <OwnerSettingsScreen onBack={() => setShowSettings(false)} onSignOut={onBack} darkModeProp={darkMode} onToggleTheme={onToggleTheme} currentUser={currentUser} />;
   }
 
-  const statusColor = (s) => s === "Rentado" ? "#6366f1" : s === "Activo" ? "#10b981" : "#f59e0b";
-  const statusBg   = (s) => s === "Rentado" ? "#6366f115" : s === "Activo" ? "#10b98115" : "#f59e0b15";
+  const statusColor = (s) => s === "Rentado" ? "#6366f1" : (s === "Activo" || s === "published" || s === "publicada") ? "#10b981" : "#f59e0b";
+  const statusBg   = (s) => s === "Rentado" ? "#6366f115" : (s === "Activo" || s === "published" || s === "publicada") ? "#10b98115" : "#f59e0b15";
   const getRentedStatus = (p) => {
     const isRented = (p.applicants || []).some(a => allApprovedApplicants[p.id + "-" + a.id] === true);
     return isRented ? "Rentado" : p.status;
@@ -4341,7 +4341,7 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
                 <p style={{ fontFamily: "'DM Sans',sans-serif", color: text, fontSize: 14, fontWeight: 700, lineHeight: 1.2 }}>{safeP.name}</p>
                 <span style={{ background: statusBg(st), border: "1px solid " + statusColor(st) + "30", borderRadius: 99, padding: "2px 8px", color: statusColor(st), fontSize: 10, fontWeight: 700, flexShrink: 0, marginLeft: 6 }}>
-                  {st === "Rentado" ? "🏠 Rentado" : st}
+                  {st === "Rentado" ? "🏠 Rentado" : (st === "published" || st === "publicada") ? "✓ Publicada" : st === "approved" ? "Aprobada" : st === "aprobada" ? "Aprobada" : st}
                 </span>
               </div>
               <p style={{ color: textSub, fontSize: 12, marginBottom: 8 }}>{safeP.city}</p>
@@ -6405,8 +6405,8 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
           <button onClick={() => setSelected(null)} style={{ position: "absolute", top: 16, left: 16, background: "#000000a0", backdropFilter: "blur(8px)", border: "none", borderRadius: 99, width: 38, height: 38, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <Icon name="back" size={16} color="white" />
           </button>
-          <span style={{ position: "absolute", top: 16, right: 16, background: p.status === "aprobada" ? "#10b981" : p.status === "rechazada" ? "#ef4444" : "#f59e0b", borderRadius: 99, padding: "5px 14px", color: "white", fontSize: 12, fontWeight: 700 }}>
-            {p.status === "aprobada" ? "✓ Aprobada" : p.status === "rechazada" ? "✗ Rechazada" : "⚠️ Pendiente"}
+          <span style={{ position: "absolute", top: 16, right: 16, background: (p.status === "aprobada" || p.status === "published" || p.status === "publicada") ? "#10b981" : p.status === "rechazada" ? "#ef4444" : "#f59e0b", borderRadius: 99, padding: "5px 14px", color: "white", fontSize: 12, fontWeight: 700 }}>
+            {(p.status === "published" || p.status === "publicada") ? "✓ Publicada" : p.status === "aprobada" ? "✓ Aprobada" : p.status === "rechazada" ? "✗ Rechazada" : "⚠️ Pendiente"}
           </span>
         </div>
 
@@ -6772,7 +6772,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
         {filtered.map(p => (
           <button key={p.id} onClick={() => setSelected(p)} style={{
             width: "100%", background: "#ffffff06",
-            border: "1px solid " + p.status === "aprobada" ? "#10b98120" : "#f59e0b20",
+            border: "1px solid " + ((p.status === "aprobada" || p.status === "published" || p.status === "publicada") ? "#10b98120" : "#f59e0b20"),
             borderRadius: 20, overflow: "hidden", marginBottom: 14,
             display: "flex", cursor: "pointer", textAlign: "left",
           }}>
@@ -6781,13 +6781,13 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 3 }}>
                 <p style={{ fontFamily: "'Syne',sans-serif", color: "white", fontSize: 14, fontWeight: 700, lineHeight: 1.2, flex: 1, marginRight: 8 }}>{p.name}</p>
                 <span style={{
-                  background: p.status === "aprobada" ? "#10b98115" : p.status === "rechazada" ? "#ef444415" : "#f59e0b15",
-                  border: "1px solid " + p.status === "aprobada" ? "#10b98140" : p.status === "rechazada" ? "#ef444440" : "#f59e0b40",
+                  background: (p.status === "aprobada" || p.status === "published" || p.status === "publicada") ? "#10b98115" : p.status === "rechazada" ? "#ef444415" : "#f59e0b15",
+                  border: "1px solid " + ((p.status === "aprobada" || p.status === "published" || p.status === "publicada") ? "#10b98140" : p.status === "rechazada" ? "#ef444440" : "#f59e0b40"),
                   borderRadius: 99, padding: "2px 8px",
-                  color: p.status === "aprobada" ? "#10b981" : p.status === "rechazada" ? "#ef4444" : "#f59e0b",
+                  color: (p.status === "aprobada" || p.status === "published" || p.status === "publicada") ? "#10b981" : p.status === "rechazada" ? "#ef4444" : "#f59e0b",
                   fontSize: 10, fontWeight: 700, flexShrink: 0,
                 }}>
-                  {p.status === "aprobada" ? "Aprobada" : p.status === "rechazada" ? "Rechazada" : "Pendiente"}
+                  {(p.status === "published" || p.status === "publicada") ? "Publicada" : p.status === "aprobada" ? "Aprobada" : p.status === "rechazada" ? "Rechazada" : "Pendiente"}
                 </span>
               </div>
               <p style={{ color: "#64748b", fontSize: 12, marginBottom: 4 }}>👤 {p.owner}</p>
