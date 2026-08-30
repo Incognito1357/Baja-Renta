@@ -449,7 +449,7 @@ function SplashScreen({ onStart }) {
             <path d="M10 54 C22 42, 38 42, 50 54 C62 66, 78 66, 100 54" stroke="white" strokeWidth="9" strokeLinecap="round" fill="none"/>
           </svg>
         </div>
-        <h1 style={{
+        <h1 translate="no" className="notranslate" style={{
           fontFamily: "'Dancing Script', 'Brush Script MT', cursive",
           fontSize: 46, fontWeight: 700, color: "white", lineHeight: 1,
           textShadow: "0 2px 20px #3b82f640",
@@ -873,7 +873,23 @@ function LoginScreen({ onBack, onLogin, onMasterLogin, onRegister, darkMode = tr
           if (typeof Notification !== "undefined" && Notification.permission === "default") {
             requestPushPermission(email, function(token) { console.log("login push token:", token); });
           }
-          onLogin({ email: email, name: email, phone: "" });
+          // Fetch the real profile (name, phone) instead of defaulting to email
+          var userId = res.user && res.user.id;
+          if (userId) {
+            fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/profiles?id=eq." + userId + "&select=full_name,phone", {
+              headers: {
+                "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+                "Authorization": "Bearer " + res.access_token,
+              },
+            }).then(function(pr) { return pr.json(); }).then(function(profiles) {
+              var prof = Array.isArray(profiles) && profiles[0] ? profiles[0] : {};
+              onLogin({ email: email, name: prof.full_name || email, phone: prof.phone || "" });
+            }).catch(function() {
+              onLogin({ email: email, name: email, phone: "" });
+            });
+          } else {
+            onLogin({ email: email, name: email, phone: "" });
+          }
         } else {
           setError(true);
         }
@@ -1475,7 +1491,7 @@ function HelpScreen({ onBack, darkMode = true }) {
   );
 }
 
-function ChangePasswordScreen({ onBack, darkMode = true }) {
+function ChangePasswordScreen({ onBack, darkMode = true, currentUser = {} }) {
   const [step, setStep] = useState("verify"); // verify | create | success
   const [current, setCurrent] = useState("");
   const [newPass, setNewPass] = useState("");
@@ -1484,6 +1500,7 @@ function ChangePasswordScreen({ onBack, darkMode = true }) {
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const bg      = darkMode ? "#0a0f1e"   : "#f8fafc";
   const navBg   = darkMode ? "linear-gradient(135deg, #0d1f3c, #0a0f1e)" : "linear-gradient(135deg, #dbeafe, #f8fafc)";
@@ -1521,8 +1538,47 @@ function ChangePasswordScreen({ onBack, darkMode = true }) {
     if (!current) { setError("Ingresa tu contraseña actual"); return; }
     if (strength < 3) { setError("La contraseña nueva debe ser más segura"); return; }
     if (!matches) { setError("Las contraseñas nuevas no coinciden"); return; }
+    if (!currentUser || !currentUser.email) { setError("No se encontró tu sesión. Vuelve a iniciar sesión e intenta de nuevo."); return; }
     setError("");
-    setStep("success");
+    setLoading(true);
+
+    // Step 1: re-authenticate with the current password to get a fresh access token
+    fetch("https://uwtclxtywhthwecsqeug.supabase.co/auth/v1/token?grant_type=password", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+      },
+      body: JSON.stringify({ email: currentUser.email, password: current }),
+    }).then(function(r) { return r.json(); }).then(function(authRes) {
+      if (!authRes.access_token) {
+        setLoading(false);
+        setError("Tu contraseña actual es incorrecta.");
+        return;
+      }
+      // Step 2: use the fresh token to actually update the password
+      fetch("https://uwtclxtywhthwecsqeug.supabase.co/auth/v1/user", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+          "Authorization": "Bearer " + authRes.access_token,
+        },
+        body: JSON.stringify({ password: newPass }),
+      }).then(function(r2) {
+        if (!r2.ok) { return r2.json().then(function(e2) { throw new Error(e2.msg || e2.error_description || "Error al actualizar"); }); }
+        return r2.json();
+      }).then(function() {
+        setLoading(false);
+        setStep("success");
+      }).catch(function(e2) {
+        setLoading(false);
+        setError("No se pudo actualizar la contraseña. " + (e2.message || ""));
+      });
+    }).catch(function() {
+      setLoading(false);
+      setError("Error de conexión. Intenta de nuevo.");
+    });
   };
 
   // SUCCESS
@@ -1663,14 +1719,14 @@ function ChangePasswordScreen({ onBack, darkMode = true }) {
           ))}
         </div>
 
-        <button onClick={handleSubmit} style={{
-          width: "100%", background: canSubmit ? "linear-gradient(135deg, #8b5cf6, #6d28d9)" : (darkMode ? "#ffffff10" : "#e2e8f0"),
-          border: "none", borderRadius: 16, padding: "18px", color: canSubmit ? "white" : (darkMode ? "#475569" : "#94a3b8"),
-          fontSize: 16, fontWeight: 700, cursor: canSubmit ? "pointer" : "not-allowed",
+        <button onClick={handleSubmit} disabled={!canSubmit || loading} style={{
+          width: "100%", background: (canSubmit && !loading) ? "linear-gradient(135deg, #8b5cf6, #6d28d9)" : (darkMode ? "#ffffff10" : "#e2e8f0"),
+          border: "none", borderRadius: 16, padding: "18px", color: (canSubmit && !loading) ? "white" : (darkMode ? "#475569" : "#94a3b8"),
+          fontSize: 16, fontWeight: 700, cursor: (canSubmit && !loading) ? "pointer" : "not-allowed",
           fontFamily: "'DM Sans',sans-serif", transition: "all .3s",
-          boxShadow: canSubmit ? "0 0 24px #8b5cf640" : "none",
+          boxShadow: (canSubmit && !loading) ? "0 0 24px #8b5cf640" : "none",
         }}>
-          🔐 Actualizar contraseña
+          {loading ? "⏳ Actualizando..." : "🔐 Actualizar contraseña"}
         </button>
 
         <p style={{ color: "#64748b", fontSize: 12, textAlign: "center", marginTop: 16, lineHeight: 1.6 }}>
@@ -3938,7 +3994,7 @@ function OwnerSettingsScreen({ onBack, onSignOut, darkModeProp, onToggleTheme, c
   const [showHelp, setShowHelp] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  if (showChangePass) return <ChangePasswordScreen onBack={() => setShowChangePass(false)} darkMode={darkMode} />;
+  if (showChangePass) return <ChangePasswordScreen onBack={() => setShowChangePass(false)} darkMode={darkMode} currentUser={currentUser} />;
   if (showHelp) return <HelpScreen onBack={() => setShowHelp(false)} darkMode={darkMode} />;
 
   const bg      = darkMode ? "#0a0f1e"   : "#f8fafc";
@@ -6260,14 +6316,33 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
   const [selected, setSelected] = useState(null);
   const [masterTab, setMasterTab] = useState("owners"); // owners | visitors
   const [visitorSearch, setVisitorSearch] = useState("");
-  const [visitors, setVisitors] = useState([
-    { id: 1, name: "Carlos Mendoza", email: "carlos.mendoza@gmail.com", phone: "664-123-4567", city: "Tijuana", status: "verificado", joined: "12/03/2026", solicitudes: 2 },
-    { id: 2, name: "Ana Sofia Ruiz", email: "ana.ruiz@hotmail.com", phone: "664-987-6543", city: "Ensenada", status: "pendiente", joined: "05/04/2026", solicitudes: 1 },
-    { id: 3, name: "Jorge Hernandez", email: "jorge.h@gmail.com", phone: "646-555-0011", city: "Rosarito", status: "verificado", joined: "20/01/2026", solicitudes: 3 },
-    { id: 4, name: "Lucia Flores", email: "lucia.flores@outlook.com", phone: "664-222-3344", city: "Tijuana", status: "verificado", joined: "08/05/2026", solicitudes: 0 },
-    { id: 5, name: "Roberto Castillo", email: "rcastillo@yahoo.com", phone: "646-777-8899", city: "Ensenada", status: "inactivo", joined: "15/02/2026", solicitudes: 1 },
-    { id: 6, name: "Maria Gonzalez", email: "mgonzalez@gmail.com", phone: "664-444-5566", city: "Tecate", status: "verificado", joined: "30/04/2026", solicitudes: 4 },
-  ]);
+  const [visitors, setVisitors] = useState([]);
+  const [visitorsLoading, setVisitorsLoading] = useState(true);
+
+  const fetchVisitors = function() {
+    setVisitorsLoading(true);
+    fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/manage-visitors", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+      },
+      body: JSON.stringify({ action: "list" }),
+    }).then(function(r) { return r.json(); }).then(function(res) {
+      setVisitors(Array.isArray(res.visitors) ? res.visitors.map(function(v) {
+        return Object.assign({}, v, {
+          joined: v.joined ? new Date(v.joined).toLocaleDateString("es-MX") : "—",
+          solicitudes: 0,
+        });
+      }) : []);
+      setVisitorsLoading(false);
+    }).catch(function(e) {
+      console.log("fetchVisitors error:", e);
+      setVisitorsLoading(false);
+    });
+  };
+
+  useEffect(function() { fetchVisitors(); }, []);
   const [confirmDeleteVisitor, setConfirmDeleteVisitor] = useState(null);
 
   const MOCK_VISITORS = visitors;
@@ -6786,7 +6861,26 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
             <h3 style={{ color: "white", fontSize: 16, fontWeight: 700, textAlign: "center", marginBottom: 6, fontFamily: "'DM Sans',sans-serif" }}>Eliminar visitante</h3>
             <p style={{ color: "#94a3b8", fontSize: 13, textAlign: "center", lineHeight: 1.6, marginBottom: 6 }}>{confirmDeleteVisitor.name}</p>
             <p style={{ color: "#64748b", fontSize: 12, textAlign: "center", lineHeight: 1.6, marginBottom: 24 }}>Esta accion eliminara permanentemente el perfil y todos sus datos.</p>
-            <button onClick={() => { setVisitors(prev => prev.filter(x => x.id !== confirmDeleteVisitor.id)); setConfirmDeleteVisitor(null); }} style={{ width: "100%", background: "#ef4444", border: "none", borderRadius: 14, padding: "15px", color: "white", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", marginBottom: 10 }}>
+            <button onClick={() => {
+              var idToDelete = confirmDeleteVisitor.id;
+              setConfirmDeleteVisitor(null);
+              fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/manage-visitors", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+                },
+                body: JSON.stringify({ action: "delete", user_id: idToDelete }),
+              }).then(function(r) { return r.json(); }).then(function(res) {
+                if (res.success) {
+                  setVisitors(function(prev) { return prev.filter(function(x) { return x.id !== idToDelete; }); });
+                } else {
+                  alert("No se pudo eliminar el perfil: " + (res.error || "error desconocido"));
+                }
+              }).catch(function() {
+                alert("Error de conexión al eliminar el perfil.");
+              });
+            }} style={{ width: "100%", background: "#ef4444", border: "none", borderRadius: 14, padding: "15px", color: "white", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", marginBottom: 10 }}>
               Eliminar perfil
             </button>
             <button onClick={() => setConfirmDeleteVisitor(null)} style={{ width: "100%", background: "transparent", border: "1px solid #ffffff15", borderRadius: 14, padding: "13px", color: "#64748b", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
@@ -7164,27 +7258,183 @@ function App() {
     setFilters({}); setCardIdx(0); setLikedProperty(null);
   };
 
-  if (paymentSuccess) return (
-    <div style={{ minHeight: "100vh", background: "#0a0f1e", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
-      <div style={{ textAlign: "center", maxWidth: 340 }}>
-        <div style={{ fontSize: 64, marginBottom: 16 }}>🎉</div>
-        <h2 style={{ color: "white", fontFamily: "'Syne',sans-serif", fontSize: 24, fontWeight: 800, marginBottom: 8 }}>¡Propiedad publicada!</h2>
-        <p style={{ color: "#94a3b8", fontSize: 14, lineHeight: 1.7, marginBottom: 8 }}>
-          Tu pago de <strong style={{ color: "#10b981" }}>$500 MXN</strong> fue procesado correctamente.
-        </p>
-        <p style={{ color: "#64748b", fontSize: 13, lineHeight: 1.6, marginBottom: 28 }}>
-          Tu propiedad ya está activa y visible para visitantes durante los próximos 90 días. Recibirás un recibo por correo.
-        </p>
-        <button onClick={function() { setPaymentSuccess(false); setScreen("owner"); setOwnerGoToDashboard(true); }} className="btn-glow" style={{
-          width: "100%", background: "linear-gradient(135deg,#f59e0b,#d97706)",
-          border: "none", borderRadius: 16, padding: "16px", color: "white",
-          fontSize: 16, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif",
-        }}>
-          🏠 Ir a mi dashboard
-        </button>
-      </div>
-    </div>
-  );
+  if (paymentSuccess) {
+    var PaymentSuccessScreen = function() {
+      var [step, setStep] = React.useState("choose");
+      var [rfc, setRfc] = React.useState("");
+      var [razonSocial, setRazonSocial] = React.useState("");
+      var [usoCfdi, setUsoCfdi] = React.useState("G03");
+      var [regimenFiscal, setRegimenFiscal] = React.useState("612");
+      var [cp, setCp] = React.useState("");
+      var [sending, setSending] = React.useState(false);
+      var [rfcError, setRfcError] = React.useState("");
+
+      var validateRfc = function(v) {
+        var clean = v.toUpperCase().replace(/\s/g, "");
+        setRfc(clean);
+        if (clean.length > 0 && !/^[A-Z&Ñ]{3,4}[0-9]{6}[A-Z0-9]{3}$/.test(clean)) {
+          setRfcError("RFC inválido — debe ser formato SAT");
+        } else { setRfcError(""); }
+      };
+
+      var sendInvoiceRequest = function() {
+        if (!rfc || rfcError || !razonSocial.trim()) return;
+        setSending(true);
+        fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/invoice_requests", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+            "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+          },
+          body: JSON.stringify({
+            owner_email: currentUser && currentUser.email ? currentUser.email : "",
+            owner_name: currentUser && currentUser.name ? currentUser.name : "",
+            rfc: rfc, razon_social: razonSocial,
+            uso_cfdi: usoCfdi, regimen_fiscal: regimenFiscal, cp: cp, amount: 500,
+          }),
+        }).then(function() {
+          setSending(false);
+          setStep("invoice_sent");
+        }).catch(function() {
+          setSending(false);
+          setStep("invoice_sent");
+        });
+      };
+
+      var inp = { display: "block", width: "100%", background: "#ffffff0a", border: "1px solid #ffffff20", borderRadius: 12, padding: "13px 16px", color: "white", fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none", marginBottom: 12, boxSizing: "border-box" };
+      var lbl = { color: "#94a3b8", fontSize: 12, fontWeight: 600, display: "block", marginBottom: 4, textAlign: "left" };
+      var email = currentUser && currentUser.email ? currentUser.email : "";
+
+      if (step === "choose") return (
+        <div style={{ minHeight: "100vh", background: "#0a0f1e", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+          <div style={{ textAlign: "center", maxWidth: 340, width: "100%" }}>
+            <div style={{ fontSize: 64, marginBottom: 16 }}>🎉</div>
+            <h2 style={{ color: "white", fontFamily: "'Syne',sans-serif", fontSize: 24, fontWeight: 800, marginBottom: 8 }}>¡Propiedad publicada!</h2>
+            <p style={{ color: "#94a3b8", fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>
+              Tu pago de <strong style={{ color: "#10b981" }}>$500 MXN</strong> fue procesado. Tu propiedad está activa por 90 días.
+            </p>
+            <p style={{ color: "#64748b", fontSize: 13, marginBottom: 16, fontWeight: 600 }}>¿Qué comprobante necesitas?</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 20 }}>
+              <button onClick={function() {
+                // Send receipt email now that user explicitly chose it
+                fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/send-email", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+                  },
+                  body: JSON.stringify({
+                    type: "payment_receipt",
+                    to: email,
+                    owner_name: currentUser && currentUser.name ? currentUser.name : email,
+                    amount: "$500.00 MXN",
+                    concept: "Publicación de propiedad (90 días) — Baja Renta",
+                    date: new Date().toLocaleDateString("es-MX", { year: "numeric", month: "long", day: "numeric" }),
+                  }),
+                }).catch(function() {});
+                setStep("receipt_sent");
+              }} style={{ width: "100%", background: "#ffffff08", border: "1px solid #ffffff20", borderRadius: 16, padding: "16px", color: "white", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", textAlign: "left", display: "flex", alignItems: "center", gap: 14 }}>
+                <span style={{ fontSize: 28 }}>🧾</span>
+                <div>
+                  <p style={{ color: "white", fontWeight: 700, marginBottom: 2 }}>Recibo de pago</p>
+                  <p style={{ color: "#64748b", fontSize: 12, fontWeight: 400 }}>Lo recibirás en tu correo de inmediato</p>
+                </div>
+              </button>
+              <button onClick={function() { setStep("invoice_form"); }} style={{ width: "100%", background: "#3b82f608", border: "1px solid #3b82f630", borderRadius: 16, padding: "16px", color: "white", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", textAlign: "left", display: "flex", alignItems: "center", gap: 14 }}>
+                <span style={{ fontSize: 28 }}>📄</span>
+                <div>
+                  <p style={{ color: "#3b82f6", fontWeight: 700, marginBottom: 2 }}>Factura CFDI</p>
+                  <p style={{ color: "#64748b", fontSize: 12, fontWeight: 400 }}>Ingresa tus datos fiscales y la procesamos</p>
+                </div>
+              </button>
+            </div>
+            <button onClick={function() { setPaymentSuccess(false); setScreen("owner"); setOwnerGoToDashboard(true); }} style={{ background: "none", border: "none", color: "#475569", fontSize: 13, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", textDecoration: "underline" }}>
+              Ir a mi dashboard sin comprobante
+            </button>
+          </div>
+        </div>
+      );
+
+      if (step === "receipt_sent") return (
+        <div style={{ minHeight: "100vh", background: "#0a0f1e", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+          <div style={{ textAlign: "center", maxWidth: 340 }}>
+            <div style={{ fontSize: 64, marginBottom: 16 }}>📧</div>
+            <h2 style={{ color: "white", fontFamily: "'Syne',sans-serif", fontSize: 22, fontWeight: 800, marginBottom: 8 }}>¡Recibo enviado!</h2>
+            <p style={{ color: "#94a3b8", fontSize: 14, lineHeight: 1.7, marginBottom: 28 }}>
+              Revisa tu correo <strong style={{ color: "white" }}>{email}</strong> — ahí encontrarás tu recibo de pago.
+            </p>
+            <button onClick={function() { setPaymentSuccess(false); setScreen("owner"); setOwnerGoToDashboard(true); }} className="btn-glow" style={{ width: "100%", background: "linear-gradient(135deg,#f59e0b,#d97706)", border: "none", borderRadius: 16, padding: "16px", color: "white", fontSize: 16, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
+              🏠 Ir a mi dashboard
+            </button>
+          </div>
+        </div>
+      );
+
+      if (step === "invoice_form") return (
+        <div style={{ minHeight: "100vh", background: "#0a0f1e", padding: "48px 24px 32px", overflowY: "auto" }}>
+          <button onClick={function() { setStep("choose"); }} style={{ background: "none", border: "none", color: "#3b82f6", fontSize: 14, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", marginBottom: 24, display: "flex", alignItems: "center", gap: 6 }}>← Regresar</button>
+          <h2 style={{ color: "white", fontFamily: "'Syne',sans-serif", fontSize: 22, fontWeight: 800, marginBottom: 4 }}>📄 Datos para factura</h2>
+          <p style={{ color: "#64748b", fontSize: 13, marginBottom: 24 }}>Ingresa tus datos fiscales para generar el CFDI de $500 MXN.</p>
+
+          <label style={lbl}>RFC *</label>
+          <input value={rfc} onChange={function(e) { validateRfc(e.target.value); }} placeholder="Ej. AAMM860612BL1" style={Object.assign({}, inp, rfcError ? { border: "1px solid #ef444460" } : {})} />
+          {rfcError ? <p style={{ color: "#ef4444", fontSize: 11, marginTop: -8, marginBottom: 12, textAlign: "left" }}>{rfcError}</p> : null}
+
+          <label style={lbl}>Razón social / Nombre fiscal *</label>
+          <input value={razonSocial} onChange={function(e) { setRazonSocial(e.target.value); }} placeholder="Como aparece en tu constancia del SAT" style={inp} />
+
+          <label style={lbl}>Uso del CFDI</label>
+          <select value={usoCfdi} onChange={function(e) { setUsoCfdi(e.target.value); }} style={inp}>
+            <option value="G03">G03 — Gastos en general</option>
+            <option value="S01">S01 — Sin efectos fiscales</option>
+            <option value="CP01">CP01 — Pagos</option>
+            <option value="D01">D01 — Honorarios médicos</option>
+          </select>
+
+          <label style={lbl}>Régimen fiscal</label>
+          <select value={regimenFiscal} onChange={function(e) { setRegimenFiscal(e.target.value); }} style={inp}>
+            <option value="612">612 — Personas Físicas con Actividades Empresariales</option>
+            <option value="625">625 — Plataformas Tecnológicas</option>
+            <option value="626">626 — Simplificado de Confianza</option>
+            <option value="601">601 — General de Ley Personas Morales</option>
+          </select>
+
+          <label style={lbl}>Código Postal fiscal</label>
+          <input value={cp} onChange={function(e) { setCp(e.target.value.replace(/\D/g, "").slice(0, 5)); }} placeholder="5 dígitos" maxLength={5} style={inp} />
+
+          <div style={{ background: "#f59e0b10", border: "1px solid #f59e0b30", borderRadius: 12, padding: "12px 16px", marginBottom: 20 }}>
+            <p style={{ color: "#fcd34d", fontSize: 12, fontWeight: 600 }}>⏱️ Tu factura llegará en 24–72 hrs hábiles a <span style={{ color: "white" }}>{email}</span></p>
+          </div>
+
+          <button onClick={sendInvoiceRequest} disabled={sending || !rfc || !!rfcError || !razonSocial.trim()} style={{ width: "100%", background: (sending || !rfc || !!rfcError || !razonSocial.trim()) ? "#ffffff10" : "linear-gradient(135deg,#3b82f6,#6366f1)", border: "none", borderRadius: 16, padding: "16px", color: "white", fontSize: 16, fontWeight: 700, cursor: (sending || !rfc || !!rfcError || !razonSocial.trim()) ? "not-allowed" : "pointer", fontFamily: "'DM Sans',sans-serif", opacity: (sending || !rfc || !!rfcError || !razonSocial.trim()) ? 0.6 : 1 }}>
+            {sending ? "⏳ Enviando solicitud..." : "📤 Enviar solicitud de factura"}
+          </button>
+        </div>
+      );
+
+      if (step === "invoice_sent") return (
+        <div style={{ minHeight: "100vh", background: "#0a0f1e", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+          <div style={{ textAlign: "center", maxWidth: 340 }}>
+            <div style={{ fontSize: 64, marginBottom: 16 }}>✅</div>
+            <h2 style={{ color: "white", fontFamily: "'Syne',sans-serif", fontSize: 22, fontWeight: 800, marginBottom: 8 }}>¡Solicitud enviada!</h2>
+            <p style={{ color: "#94a3b8", fontSize: 14, lineHeight: 1.7, marginBottom: 12 }}>
+              Recibirás tu factura CFDI en las próximas <strong style={{ color: "white" }}>24–72 horas hábiles</strong> en tu correo.
+            </p>
+            <p style={{ color: "#64748b", fontSize: 13, lineHeight: 1.6, marginBottom: 28 }}>
+              ¿Dudas? Escríbenos a <span style={{ color: "#3b82f6" }}>admin@bajarenta.com</span>
+            </p>
+            <button onClick={function() { setPaymentSuccess(false); setScreen("owner"); setOwnerGoToDashboard(true); }} className="btn-glow" style={{ width: "100%", background: "linear-gradient(135deg,#f59e0b,#d97706)", border: "none", borderRadius: 16, padding: "16px", color: "white", fontSize: 16, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
+              🏠 Ir a mi dashboard
+            </button>
+          </div>
+        </div>
+      );
+
+      return null;
+    };
+    return <PaymentSuccessScreen />;
+  }
 
   if (screen === "splash") return <SplashScreen onStart={() => { playSound("click"); setScreen("profile"); }} />;
   if (screen === "profile") return <ProfileSelect onSelect={handleProfileSelect} darkMode={darkMode} />;
@@ -7207,7 +7457,7 @@ function App() {
     />
   );
   if (screen === "settings") return <SettingsScreen onBack={() => setScreen("cards")} onSignOut={() => setScreen("profile")} darkModeProp={darkMode} onToggleTheme={() => setDarkMode(v => !v)} onChangePassword={() => setScreen("changePassword")} onHelp={() => setScreen("help")} currentUser={currentUser} />;
-  if (screen === "changePassword") return <ChangePasswordScreen onBack={() => setScreen("settings")} darkMode={darkMode} />;
+  if (screen === "changePassword") return <ChangePasswordScreen onBack={() => setScreen("settings")} darkMode={darkMode} currentUser={currentUser} />;
   if (screen === "help") return <HelpScreen onBack={() => setScreen("settings")} darkMode={darkMode} />;
   if (screen === "cards") return (
     <PropertyCard
