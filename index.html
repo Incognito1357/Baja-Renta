@@ -5670,9 +5670,13 @@ function VisitorRegister({ onBack, onComplete, onLogin, darkMode = true }) {
                   method: "POST",
                   headers: { "Content-Type": "application/json", "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ" },
                   body: JSON.stringify({ email: form.email, password: form.password, role: "visitor", full_name: form.name, phone: form.phone || null, date_of_birth: form.dob || null }),
-                }).then(function() {
+                }).then(function(regRes) {
                   sendEmail('welcome_visitor', form.email, { name: form.name, email: form.email });
-                  setShowPushPrompt(true);
+                  if (typeof setShowPushPrompt === 'function') {
+                    setShowPushPrompt(true);
+                  } else {
+                    onComplete({ name: form.name, email: form.email, phone: form.phone });
+                  }
                 }).catch(function() {
                   sendEmail('welcome_visitor', form.email, { name: form.name, email: form.email });
                   onComplete({ name: form.name, email: form.email, phone: form.phone });
