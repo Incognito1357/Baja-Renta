@@ -3870,6 +3870,7 @@ function ApplicantDetail({ applicant, onBack, isApproved, isRejected, onApprove,
 
 function OwnerPropertyDetail({ property, onBack, approvedApplicants, onApprove, darkMode }) {
   const [tab, setTab] = useState("info");
+  const [selectedApplicant, setSelectedApplicant] = useState(null);
   var name = property.name || "Propiedad";
   var city = property.city || "";
   var price = property.price || 0;
@@ -3878,6 +3879,41 @@ function OwnerPropertyDetail({ property, onBack, approvedApplicants, onApprove, 
   var isPublished = status === "published" || status === "publicada";
   var isExpired = status === "expirada" || status === "expired";
   var applicants = property.applicants || [];
+
+  if (selectedApplicant) {
+    var isApprovedApplicant = approvedApplicants && approvedApplicants[property.id + "-" + selectedApplicant.id] === true;
+    var isRejectedApplicant = approvedApplicants && approvedApplicants[property.id + "-" + selectedApplicant.id] === "rejected";
+    return (
+      <ApplicantDetail
+        applicant={selectedApplicant}
+        onBack={function() { setSelectedApplicant(null); }}
+        isApproved={isApprovedApplicant}
+        isRejected={isRejectedApplicant}
+        onApprove={function() {
+          if (onApprove) onApprove(selectedApplicant.id);
+          fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/applications?id=eq." + String(selectedApplicant.id), {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+              "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+            },
+            body: JSON.stringify({ status: "approved" }),
+          }).then(function() {
+            if (selectedApplicant.email) {
+              fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/send-email", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ" },
+                body: JSON.stringify({ type: "application_approved", to: selectedApplicant.email, visitor_name: selectedApplicant.name, property_name: name }),
+              }).catch(function() {});
+            }
+          }).catch(function() {});
+        }}
+        darkMode={darkMode}
+      />
+    );
+  }
+
   return (
     <div style={{ minHeight: "100vh", background: "#0a0f1e", paddingBottom: 100 }}>
       <div style={{ background: "#0d1f3c", padding: "48px 20px 20px" }}>
@@ -3903,81 +3939,37 @@ function OwnerPropertyDetail({ property, onBack, approvedApplicants, onApprove, 
             <p style={{ color: "#64748b", fontSize: 13 }}>Deposito: {"$" + (property.deposit || 0).toLocaleString()}</p>
           </div>
         )}
-        {tab === "solicitudes" && (function() {
-          var [selectedApplicant, setSelectedApplicant] = React.useState(null);
-
-          if (selectedApplicant) {
-            var isApprovedApplicant = approvedApplicants && approvedApplicants[property.id + "-" + selectedApplicant.id] === true;
-            var isRejectedApplicant = approvedApplicants && approvedApplicants[property.id + "-" + selectedApplicant.id] === "rejected";
-            return (
-              <div>
-                <ApplicantDetail
-                  applicant={selectedApplicant}
-                  onBack={function() { setSelectedApplicant(null); }}
-                  isApproved={isApprovedApplicant}
-                  isRejected={isRejectedApplicant}
-                  onApprove={function() {
-                    if (onApprove) onApprove(selectedApplicant.id);
-                    fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/applications?id=eq." + String(selectedApplicant.id), {
-                      method: "PATCH",
-                      headers: {
-                        "Content-Type": "application/json",
-                        "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
-                        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
-                      },
-                      body: JSON.stringify({ status: "approved" }),
-                    }).then(function() {
-                      if (selectedApplicant.email) {
-                        fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/send-email", {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json", "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ" },
-                          body: JSON.stringify({ type: "application_approved", to: selectedApplicant.email, visitor_name: selectedApplicant.name, property_name: name }),
-                        }).catch(function() {});
-                      }
-                    }).catch(function() {});
-                  }}
-                  darkMode={darkMode}
-                />
-              </div>
-            );
-          }
-
-          if (applicants.length === 0) return (
-            <div style={{ textAlign: "center", padding: "40px 20px" }}>
-              <p style={{ fontSize: 32, marginBottom: 8 }}>📭</p>
-              <p style={{ color: "#64748b", fontSize: 14 }}>Sin solicitudes aún</p>
-              <p style={{ color: "#475569", fontSize: 12, marginTop: 4 }}>Cuando alguien solicite rentar tu propiedad aparecerá aquí</p>
-            </div>
-          );
-
+        {tab === "solicitudes" && applicants.length === 0 && (
+          <div style={{ textAlign: "center", padding: "40px 20px" }}>
+            <p style={{ fontSize: 32, marginBottom: 8 }}>📭</p>
+            <p style={{ color: "#64748b", fontSize: 14 }}>Sin solicitudes aún</p>
+            <p style={{ color: "#475569", fontSize: 12, marginTop: 4 }}>Cuando alguien solicite rentar tu propiedad aparecerá aquí</p>
+          </div>
+        )}
+        {tab === "solicitudes" && applicants.length > 0 && applicants.map(function(a) {
+          var isApprv = approvedApplicants && approvedApplicants[property.id + "-" + a.id] === true;
+          var isRejct = approvedApplicants && approvedApplicants[property.id + "-" + a.id] === "rejected";
           return (
-            <div>
-              {applicants.map(function(a) {
-                var isApproved = approvedApplicants && approvedApplicants[property.id + "-" + a.id] === true;
-                var isRejected = approvedApplicants && approvedApplicants[property.id + "-" + a.id] === "rejected";
-                return (
-                  <button key={String(a.id)} onClick={function() { setSelectedApplicant(a); }} style={{
-                    width: "100%", background: "#ffffff08",
-                    border: "1px solid " + (isApproved ? "#10b98130" : isRejected ? "#ef444430" : "#ffffff15"),
-                    borderRadius: 16, padding: "14px 16px", marginBottom: 10,
-                    cursor: "pointer", textAlign: "left", display: "flex", alignItems: "center", gap: 12,
-                  }}>
-                    <div style={{ width: 44, height: 44, borderRadius: "50%", background: "linear-gradient(135deg,#3b82f6,#6366f1)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, color: "white", fontSize: 18, flexShrink: 0 }}>
-                      {(a.name || "?")[0].toUpperCase()}
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <p style={{ color: "white", fontSize: 14, fontWeight: 700, marginBottom: 2 }}>{a.name || "Solicitante"}</p>
-                      <p style={{ color: "#64748b", fontSize: 12 }}>{a.email || ""}</p>
-                    </div>
-                    <span style={{ background: isApproved ? "#10b98120" : isRejected ? "#ef444420" : "#f59e0b20", color: isApproved ? "#10b981" : isRejected ? "#ef4444" : "#f59e0b", fontSize: 10, fontWeight: 700, padding: "3px 10px", borderRadius: 99, flexShrink: 0 }}>
-                      {isApproved ? "✓ Aprobado" : isRejected ? "✗ Rechazado" : "⏳ Pendiente"}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+            <button key={String(a.id)} onClick={function() { setSelectedApplicant(a); }} style={{
+              width: "100%", background: "#ffffff08",
+              border: "1px solid " + (isApprv ? "#10b98130" : isRejct ? "#ef444430" : "#ffffff15"),
+              borderRadius: 16, padding: "14px 16px", marginBottom: 10,
+              cursor: "pointer", textAlign: "left", display: "flex", alignItems: "center", gap: 12,
+            }}>
+              <div style={{ width: 44, height: 44, borderRadius: "50%", background: "linear-gradient(135deg,#3b82f6,#6366f1)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, color: "white", fontSize: 18, flexShrink: 0 }}>
+                {(a.name || "?")[0].toUpperCase()}
+              </div>
+              <div style={{ flex: 1 }}>
+                <p style={{ color: "white", fontSize: 14, fontWeight: 700, marginBottom: 2 }}>{a.name || "Solicitante"}</p>
+                <p style={{ color: "#64748b", fontSize: 12 }}>{a.email || ""}</p>
+                {a.phone ? <p style={{ color: "#475569", fontSize: 11 }}>📞 {a.phone}</p> : null}
+              </div>
+              <span style={{ background: isApprv ? "#10b98120" : isRejct ? "#ef444420" : "#f59e0b20", color: isApprv ? "#10b981" : isRejct ? "#ef4444" : "#f59e0b", fontSize: 10, fontWeight: 700, padding: "3px 10px", borderRadius: 99, flexShrink: 0 }}>
+                {isApprv ? "✓ Aprobado" : isRejct ? "✗ Rechazado" : "⏳ Pendiente"}
+              </span>
+            </button>
           );
-        })()}
+        })}
       </div>
       <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, padding: "16px 20px 32px", background: "linear-gradient(to top, #0a0f1e, transparent)" }}>
         {isExpired ? (
