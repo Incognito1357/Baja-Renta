@@ -3883,9 +3883,26 @@ function OwnerPropertyDetail({ property, onBack, approvedApplicants, onApprove, 
   if (selectedApplicant) {
     var isApprovedApplicant = approvedApplicants && approvedApplicants[property.id + "-" + selectedApplicant.id] === true;
     var isRejectedApplicant = approvedApplicants && approvedApplicants[property.id + "-" + selectedApplicant.id] === "rejected";
+    // Normalize applicant to ensure ApplicantDetail never crashes on missing fields
+    var normalizedApplicant = Object.assign({
+      refs: [],
+      docs: { ine: false, comprobante: false, estadoCuenta: false },
+      photo: null,
+      age: null,
+      income: 0,
+      job: "",
+      phone: "",
+      email: "",
+      propertyName: name,
+    }, selectedApplicant, {
+      refs: Array.isArray(selectedApplicant.refs) ? selectedApplicant.refs : [],
+      docs: selectedApplicant.docs && typeof selectedApplicant.docs === "object"
+        ? selectedApplicant.docs
+        : { ine: false, comprobante: false, estadoCuenta: false },
+    });
     return (
       <ApplicantDetail
-        applicant={selectedApplicant}
+        applicant={normalizedApplicant}
         onBack={function() { setSelectedApplicant(null); }}
         isApproved={isApprovedApplicant}
         isRejected={isRejectedApplicant}
