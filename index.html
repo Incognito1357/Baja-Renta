@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- BAJA RENTA v4.0 -->
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -20,7 +19,6 @@
     @keyframes cardIn { from { opacity:0; transform:scale(.97); } to { opacity:1; transform:scale(1); } }
     @keyframes pulse0 { to { transform:rotate(360deg); } }
     @keyframes glow { 0%,100% { box-shadow:0 0 20px #3b82f640; } 50% { box-shadow:0 0 40px #3b82f680; } }
-    @keyframes spin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
     .btn-glow { animation: glow 3s ease-in-out infinite; }
     .btn-glow:hover { transform: translateY(-1px); }
   </style>
@@ -31,9 +29,8 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/@babel/standalone@7.23.10/babel.min.js"></script>
-  <script type="text/babel" data-presets="react">
-/* @jsx React.createElement */
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script type="text/babel">
     const { useState, useEffect, useRef } = React;
 
 
@@ -449,7 +446,7 @@ function SplashScreen({ onStart }) {
             <path d="M10 54 C22 42, 38 42, 50 54 C62 66, 78 66, 100 54" stroke="white" strokeWidth="9" strokeLinecap="round" fill="none"/>
           </svg>
         </div>
-        <h1 translate="no" className="notranslate" style={{
+        <h1 style={{
           fontFamily: "'Dancing Script', 'Brush Script MT', cursive",
           fontSize: 46, fontWeight: 700, color: "white", lineHeight: 1,
           textShadow: "0 2px 20px #3b82f640",
@@ -873,23 +870,7 @@ function LoginScreen({ onBack, onLogin, onMasterLogin, onRegister, darkMode = tr
           if (typeof Notification !== "undefined" && Notification.permission === "default") {
             requestPushPermission(email, function(token) { console.log("login push token:", token); });
           }
-          // Fetch the real profile (name, phone) instead of defaulting to email
-          var userId = res.user && res.user.id;
-          if (userId) {
-            fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/profiles?id=eq." + userId + "&select=full_name,phone", {
-              headers: {
-                "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
-                "Authorization": "Bearer " + res.access_token,
-              },
-            }).then(function(pr) { return pr.json(); }).then(function(profiles) {
-              var prof = Array.isArray(profiles) && profiles[0] ? profiles[0] : {};
-              onLogin({ email: email, name: prof.full_name || email, phone: prof.phone || "" });
-            }).catch(function() {
-              onLogin({ email: email, name: email, phone: "" });
-            });
-          } else {
-            onLogin({ email: email, name: email, phone: "" });
-          }
+          onLogin({ email: email, name: email, phone: "" });
         } else {
           setError(true);
         }
@@ -1491,7 +1472,7 @@ function HelpScreen({ onBack, darkMode = true }) {
   );
 }
 
-function ChangePasswordScreen({ onBack, darkMode = true, currentUser = {} }) {
+function ChangePasswordScreen({ onBack, darkMode = true }) {
   const [step, setStep] = useState("verify"); // verify | create | success
   const [current, setCurrent] = useState("");
   const [newPass, setNewPass] = useState("");
@@ -1500,7 +1481,6 @@ function ChangePasswordScreen({ onBack, darkMode = true, currentUser = {} }) {
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
 
   const bg      = darkMode ? "#0a0f1e"   : "#f8fafc";
   const navBg   = darkMode ? "linear-gradient(135deg, #0d1f3c, #0a0f1e)" : "linear-gradient(135deg, #dbeafe, #f8fafc)";
@@ -1538,47 +1518,8 @@ function ChangePasswordScreen({ onBack, darkMode = true, currentUser = {} }) {
     if (!current) { setError("Ingresa tu contraseña actual"); return; }
     if (strength < 3) { setError("La contraseña nueva debe ser más segura"); return; }
     if (!matches) { setError("Las contraseñas nuevas no coinciden"); return; }
-    if (!currentUser || !currentUser.email) { setError("No se encontró tu sesión. Vuelve a iniciar sesión e intenta de nuevo."); return; }
     setError("");
-    setLoading(true);
-
-    // Step 1: re-authenticate with the current password to get a fresh access token
-    fetch("https://uwtclxtywhthwecsqeug.supabase.co/auth/v1/token?grant_type=password", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
-      },
-      body: JSON.stringify({ email: currentUser.email, password: current }),
-    }).then(function(r) { return r.json(); }).then(function(authRes) {
-      if (!authRes.access_token) {
-        setLoading(false);
-        setError("Tu contraseña actual es incorrecta.");
-        return;
-      }
-      // Step 2: use the fresh token to actually update the password
-      fetch("https://uwtclxtywhthwecsqeug.supabase.co/auth/v1/user", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
-          "Authorization": "Bearer " + authRes.access_token,
-        },
-        body: JSON.stringify({ password: newPass }),
-      }).then(function(r2) {
-        if (!r2.ok) { return r2.json().then(function(e2) { throw new Error(e2.msg || e2.error_description || "Error al actualizar"); }); }
-        return r2.json();
-      }).then(function() {
-        setLoading(false);
-        setStep("success");
-      }).catch(function(e2) {
-        setLoading(false);
-        setError("No se pudo actualizar la contraseña. " + (e2.message || ""));
-      });
-    }).catch(function() {
-      setLoading(false);
-      setError("Error de conexión. Intenta de nuevo.");
-    });
+    setStep("success");
   };
 
   // SUCCESS
@@ -1719,14 +1660,14 @@ function ChangePasswordScreen({ onBack, darkMode = true, currentUser = {} }) {
           ))}
         </div>
 
-        <button onClick={handleSubmit} disabled={!canSubmit || loading} style={{
-          width: "100%", background: (canSubmit && !loading) ? "linear-gradient(135deg, #8b5cf6, #6d28d9)" : (darkMode ? "#ffffff10" : "#e2e8f0"),
-          border: "none", borderRadius: 16, padding: "18px", color: (canSubmit && !loading) ? "white" : (darkMode ? "#475569" : "#94a3b8"),
-          fontSize: 16, fontWeight: 700, cursor: (canSubmit && !loading) ? "pointer" : "not-allowed",
+        <button onClick={handleSubmit} style={{
+          width: "100%", background: canSubmit ? "linear-gradient(135deg, #8b5cf6, #6d28d9)" : (darkMode ? "#ffffff10" : "#e2e8f0"),
+          border: "none", borderRadius: 16, padding: "18px", color: canSubmit ? "white" : (darkMode ? "#475569" : "#94a3b8"),
+          fontSize: 16, fontWeight: 700, cursor: canSubmit ? "pointer" : "not-allowed",
           fontFamily: "'DM Sans',sans-serif", transition: "all .3s",
-          boxShadow: (canSubmit && !loading) ? "0 0 24px #8b5cf640" : "none",
+          boxShadow: canSubmit ? "0 0 24px #8b5cf640" : "none",
         }}>
-          {loading ? "⏳ Actualizando..." : "🔐 Actualizar contraseña"}
+          🔐 Actualizar contraseña
         </button>
 
         <p style={{ color: "#64748b", fontSize: 12, textAlign: "center", marginTop: 16, lineHeight: 1.6 }}>
@@ -2716,14 +2657,14 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
           </div>
           <p style={{ color: "#94a3b8", fontSize: 13, marginBottom: 10 }}>Duración del contrato</p>
           <div style={{ display: "flex", gap: 8 }}>
-            {[["12", "1 año"]].map(([val, label]) => (
+            {[["12", "1 año"]].map(function(pair) { var val = pair[0], label = pair[1]; return  (
               <button key={val} onClick={() => setContract(val)} style={{
                 flex: 1, padding: "10px", borderRadius: 12, cursor: "pointer", fontSize: 13, fontWeight: 600,
                 background: contract === val ? "linear-gradient(135deg, #3b82f6, #6366f1)" : "#ffffff10",
                 border: "1px solid " + contract === val ? "transparent" : border,
                 color: text, fontFamily: "'DM Sans',sans-serif", transition: "all .2s",
               }}>{label}</button>
-            ))}
+            );})}
           </div>
         </div>
       </div>
@@ -3567,14 +3508,14 @@ function ApplicantDetail({ applicant, onBack, isApproved, isRejected, onApprove,
 
         {/* Sub tabs */}
         <div style={{ display: "flex", gap: 8 }}>
-          {[["profile","Perfil"],["refs","Referencias"],["docs","Documentos"]].map(([k, l]) => (
+          {[["profile","Perfil"],["refs","Referencias"],["docs","Documentos"]].map(function(pair) { var k = pair[0], l = pair[1]; return  (
             <button key={k} onClick={() => setDocTab(k)} style={{
               flex: 1, padding: "8px 0", borderRadius: 10, border: "none", cursor: "pointer",
               background: docTab === k ? "#f59e0b" : (darkMode ? "#ffffff08" : "#e2e8f0"),
               color: docTab === k ? "#000" : textSub,
               fontSize: 12, fontWeight: 700, fontFamily: "'DM Sans',sans-serif", transition: "all .2s",
             }}>{l}</button>
-          ))}
+          );})}
         </div>
       </div>
 
@@ -3868,79 +3809,106 @@ function ApplicantDetail({ applicant, onBack, isApproved, isRejected, onApprove,
   );
 }
 
+// PATCH helper. Uses return=representation so an RLS block (0 rows) is detected instead of failing silently.
+function supaPatch(path, body, allowEmpty) {
+  var KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ";
+  return fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/" + path, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      "apikey": KEY,
+      "Authorization": "Bearer " + KEY,
+      "Prefer": "return=representation",
+    },
+    body: JSON.stringify(body),
+  }).then(function(r) {
+    return r.json().then(function(rows) {
+      if (!r.ok) throw new Error((rows && rows.message) || "Error al actualizar");
+      if (!allowEmpty && (!Array.isArray(rows) || rows.length === 0)) {
+        throw new Error("No se pudo guardar (sin permiso o registro no encontrado)");
+      }
+      return rows;
+    });
+  });
+}
+
+// Approve applicant -> property becomes "rented" (leaves the catalog) -> other applicants rejected.
+// Every step is idempotent, so the owner can safely retry if one fails.
+function approveApplicantAndRent(property, applicant) {
+  return supaPatch("applications?id=eq." + applicant.id, { status: "approved" }, false)
+    .then(function() {
+      return supaPatch("properties?id=eq." + property.id, { status: "rented" }, false);
+    })
+    .then(function() {
+      return supaPatch("applications?property_id=eq." + property.id + "&id=neq." + applicant.id, { status: "rejected" }, true);
+    });
+}
+
 function OwnerPropertyDetail({ property, onBack, approvedApplicants, onApprove, darkMode }) {
   const [tab, setTab] = useState("info");
-  const [selectedApplicant, setSelectedApplicant] = useState(null);
+  const [confirmApp, setConfirmApp] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [errMsg, setErrMsg] = useState("");
+  const doApprove = function() {
+    if (!confirmApp || saving) return;
+    var chosen = confirmApp;
+    setSaving(true);
+    setErrMsg("");
+    approveApplicantAndRent(property, chosen).then(function() {
+      if (chosen.email) {
+        sendEmail("application_approved", chosen.email, {
+          property_name: property.name || "la propiedad",
+          city: property.city || "",
+          price: property.price ? "$" + property.price.toLocaleString() : "",
+        });
+      }
+      setSaving(false);
+      setConfirmApp(null);
+      if (onApprove) onApprove(property.id, chosen.id);
+    }).catch(function(e) {
+      setSaving(false);
+      setErrMsg(String(e && e.message ? e.message : e));
+    });
+  };
   var name = property.name || "Propiedad";
   var city = property.city || "";
   var price = property.price || 0;
   var status = property.status || "pendiente";
   var isApproved = status === "aprobada" || status === "approved";
-  var isPublished = status === "published" || status === "publicada";
-  var isExpired = status === "expirada" || status === "expired";
   var applicants = property.applicants || [];
-
-  if (selectedApplicant) {
-    var isApprovedApplicant = approvedApplicants && approvedApplicants[property.id + "-" + selectedApplicant.id] === true;
-    var isRejectedApplicant = approvedApplicants && approvedApplicants[property.id + "-" + selectedApplicant.id] === "rejected";
-    // Normalize applicant to ensure ApplicantDetail never crashes on missing fields
-    var normalizedApplicant = Object.assign({
-      refs: [],
-      docs: { ine: false, comprobante: false, estadoCuenta: false },
-      photo: null,
-      age: null,
-      income: 0,
-      job: "",
-      phone: "",
-      email: "",
-      propertyName: name,
-    }, selectedApplicant, {
-      refs: Array.isArray(selectedApplicant.refs) ? selectedApplicant.refs : [],
-      docs: selectedApplicant.docs && typeof selectedApplicant.docs === "object"
-        ? selectedApplicant.docs
-        : { ine: false, comprobante: false, estadoCuenta: false },
-    });
-    return (
-      <ApplicantDetail
-        applicant={normalizedApplicant}
-        onBack={function() { setSelectedApplicant(null); }}
-        isApproved={isApprovedApplicant}
-        isRejected={isRejectedApplicant}
-        onApprove={function() {
-          if (onApprove) onApprove(selectedApplicant.id);
-          fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/applications?id=eq." + String(selectedApplicant.id), {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-              "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
-              "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
-            },
-            body: JSON.stringify({ status: "approved" }),
-          }).then(function() {
-            if (selectedApplicant.email) {
-              fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/send-email", {
-                method: "POST",
-                headers: { "Content-Type": "application/json", "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ" },
-                body: JSON.stringify({ type: "application_approved", to: selectedApplicant.email, visitor_name: selectedApplicant.name, property_name: name }),
-              }).catch(function() {});
-            }
-          }).catch(function() {});
-        }}
-        darkMode={darkMode}
-      />
-    );
-  }
-
   return (
     <div style={{ minHeight: "100vh", background: "#0a0f1e", paddingBottom: 100 }}>
+      {confirmApp && (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 200, background: "#000000c0", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+          <div style={{ background: "#0d1f3c", border: "1px solid #10b98140", borderRadius: 24, padding: "28px 22px", width: "100%", maxWidth: 360, textAlign: "center" }}>
+            <p style={{ color: "white", fontSize: 20, fontWeight: 800, marginBottom: 10 }}>Confirmar aprobación</p>
+            <p style={{ color: "#94a3b8", fontSize: 14, lineHeight: 1.5, marginBottom: 6 }}>¿Aprobar a</p>
+            <p style={{ color: "white", fontSize: 16, fontWeight: 700, marginBottom: 14 }}>{(confirmApp.name || "este solicitante") + "?"}</p>
+            <p style={{ color: "#64748b", fontSize: 12, lineHeight: 1.5, marginBottom: 18 }}>
+              La propiedad pasará a Rentada y saldrá del catálogo. Los demás solicitantes serán rechazados.
+            </p>
+            {errMsg !== "" && (
+              <p style={{ color: "#ef4444", fontSize: 12, marginBottom: 14 }}>{errMsg}</p>
+            )}
+            <div style={{ display: "flex", gap: 12 }}>
+              <button onClick={function() { if (!saving) { setConfirmApp(null); setErrMsg(""); } }} style={{ flex: 1, background: "#ffffff08", border: "1px solid #ffffff15", borderRadius: 14, padding: 14, color: "#94a3b8", fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
+                Cancelar
+              </button>
+              <button onClick={doApprove} style={{ flex: 1, background: "linear-gradient(135deg, #10b981, #059669)", border: "none", borderRadius: 14, padding: 14, color: "white", fontSize: 14, fontWeight: 700, cursor: "pointer", opacity: saving ? 0.6 : 1 }}>
+                {saving ? "Guardando..." : "✓ Aprobar"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div style={{ background: "#0d1f3c", padding: "48px 20px 20px" }}>
         <button onClick={onBack} style={{ background: "none", border: "none", color: "#3b82f6", fontSize: 16, cursor: "pointer", marginBottom: 12 }}>
           &larr; Regresar
         </button>
         <p style={{ color: "white", fontSize: 20, fontWeight: 700, marginBottom: 4 }}>{name}</p>
         <p style={{ color: "#64748b", fontSize: 13, marginBottom: 12 }}>{city}</p>
-        <span style={{ background: isExpired ? "#f59e0b20" : (isPublished || isApproved) ? "#10b98120" : "#f59e0b20", color: isExpired ? "#f59e0b" : (isPublished || isApproved) ? "#10b981" : "#f59e0b", fontSize: 11, fontWeight: 700, padding: "4px 12px", borderRadius: 99 }}>
-          {isExpired ? "Expirada" : isPublished ? "Publicada" : isApproved ? "Aprobada" : status}
+        <span style={{ background: isApproved ? "#10b98120" : "#f59e0b20", color: isApproved ? "#10b981" : "#f59e0b", fontSize: 11, fontWeight: 700, padding: "4px 12px", borderRadius: 99 }}>
+          {isApproved ? "Aprobada" : status}
         </span>
         <p style={{ color: "#3b82f6", fontSize: 22, fontWeight: 700, marginTop: 12 }}>
           {"$" + price.toLocaleString() + "/mes"}
@@ -3957,102 +3925,46 @@ function OwnerPropertyDetail({ property, onBack, approvedApplicants, onApprove, 
           </div>
         )}
         {tab === "solicitudes" && applicants.length === 0 && (
-          <div style={{ textAlign: "center", padding: "40px 20px" }}>
-            <p style={{ fontSize: 32, marginBottom: 8 }}>📭</p>
-            <p style={{ color: "#64748b", fontSize: 14 }}>Sin solicitudes aún</p>
-            <p style={{ color: "#475569", fontSize: 12, marginTop: 4 }}>Cuando alguien solicite rentar tu propiedad aparecerá aquí</p>
-          </div>
+          <p style={{ color: "#64748b", textAlign: "center", padding: 40 }}>Sin solicitudes aun</p>
         )}
-        {tab === "solicitudes" && applicants.length > 0 && applicants.map(function(a) {
-          var isApprv = approvedApplicants && approvedApplicants[property.id + "-" + a.id] === true;
-          var isRejct = approvedApplicants && approvedApplicants[property.id + "-" + a.id] === "rejected";
+        {tab === "solicitudes" && applicants.map(function(a) {
           return (
-            <button key={String(a.id)} onClick={function() { setSelectedApplicant(a); }} style={{
-              width: "100%", background: "#ffffff08",
-              border: "1px solid " + (isApprv ? "#10b98130" : isRejct ? "#ef444430" : "#ffffff15"),
-              borderRadius: 16, padding: "14px 16px", marginBottom: 10,
-              cursor: "pointer", textAlign: "left", display: "flex", alignItems: "center", gap: 12,
-            }}>
-              <div style={{ width: 44, height: 44, borderRadius: "50%", background: "linear-gradient(135deg,#3b82f6,#6366f1)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, color: "white", fontSize: 18, flexShrink: 0 }}>
-                {(a.name || "?")[0].toUpperCase()}
+            <div key={String(a.id)} style={{ background: "#ffffff08", borderRadius: 12, padding: "12px 16px", marginBottom: 10 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+                <p style={{ color: "white", fontSize: 14, fontWeight: 700 }}>{a.name || "Solicitante"}</p>
+                {a.status === "Aprobado" && (
+                  <span style={{ background: "#10b98115", color: "#10b981", fontSize: 10, fontWeight: 700, padding: "3px 10px", borderRadius: 99 }}>✓ Aprobado</span>
+                )}
+                {a.status === "Rechazado" && (
+                  <span style={{ background: "#ef444415", color: "#ef4444", fontSize: 10, fontWeight: 700, padding: "3px 10px", borderRadius: 99 }}>✗ Rechazado</span>
+                )}
               </div>
-              <div style={{ flex: 1 }}>
-                <p style={{ color: "white", fontSize: 14, fontWeight: 700, marginBottom: 2 }}>{a.name || "Solicitante"}</p>
-                <p style={{ color: "#64748b", fontSize: 12 }}>{a.email || ""}</p>
-                {a.phone ? <p style={{ color: "#475569", fontSize: 11 }}>📞 {a.phone}</p> : null}
-              </div>
-              <span style={{ background: isApprv ? "#10b98120" : isRejct ? "#ef444420" : "#f59e0b20", color: isApprv ? "#10b981" : isRejct ? "#ef4444" : "#f59e0b", fontSize: 10, fontWeight: 700, padding: "3px 10px", borderRadius: 99, flexShrink: 0 }}>
-                {isApprv ? "✓ Aprobado" : isRejct ? "✗ Rechazado" : "⏳ Pendiente"}
-              </span>
-            </button>
+              <p style={{ color: "#64748b", fontSize: 12 }}>{a.email || ""}</p>
+              {status !== "Rentado" && !property.isMock && a.status !== "Aprobado" && a.status !== "Rechazado" && (
+                <button onClick={function() { setErrMsg(""); setConfirmApp(a); }} style={{ marginTop: 10, width: "100%", background: "linear-gradient(135deg, #10b981, #059669)", border: "none", borderRadius: 10, padding: 10, color: "white", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+                  ✓ Aprobar solicitante
+                </button>
+              )}
+            </div>
           );
         })}
       </div>
-      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, padding: "16px 20px 32px", background: "linear-gradient(to top, #0a0f1e, transparent)" }}>
-        {isExpired ? (
-          <div>
-            <div style={{ background: "#f59e0b10", border: "1px solid #f59e0b30", borderRadius: 12, padding: "10px 16px", marginBottom: 10, textAlign: "center" }}>
-              <p style={{ color: "#fcd34d", fontSize: 12, fontWeight: 600 }}>⏰ Tu publicación de 90 días terminó</p>
-            </div>
-            <button onClick={function() {
-              fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/create-checkout", {
-                method: "POST",
-                headers: { "Content-Type": "application/json", "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ" },
-                body: JSON.stringify({ property_name: name, owner_email: property.owner_email || "", property_id: String(property.id || "") }),
-              }).then(function(r) {
-                if (!r.ok) { return r.text().then(function(t) { throw new Error("HTTP " + r.status + ": " + t); }); }
-                return r.json();
-              }).then(function(res) {
-                if (res.url) window.location.href = res.url;
-                else alert("Error al crear sesion de pago: respuesta sin URL.");
-              }).catch(function(e) { alert("Error al conectar con el sistema de pagos. Detalle: " + e.message.slice(0, 150)); });
-            }} style={{ width: "100%", background: "linear-gradient(135deg, #10b981, #059669)", border: "none", borderRadius: 16, padding: 16, color: "white", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
-              🔄 Renovar publicación · $500 MXN
-            </button>
-          </div>
-        ) : isPublished ? (
-          <div style={{ background: "#10b98110", border: "1px solid #10b98130", borderRadius: 14, padding: "14px 16px", textAlign: "center" }}>
-            <p style={{ color: "#10b981", fontSize: 13, fontWeight: 700, marginBottom: 4 }}>✅ Publicada</p>
-            <p style={{ color: "#78716c", fontSize: 12 }}>Tu propiedad está activa y visible para visitantes durante 90 días.</p>
-          </div>
-        ) : isApproved ? (
-          <div>
-            <div style={{ background: "#f59e0b10", border: "1px solid #f59e0b30", borderRadius: 12, padding: "10px 16px", marginBottom: 10, textAlign: "center" }}>
-              <p style={{ color: "#fcd34d", fontSize: 12, fontWeight: 600 }}>📅 Publicación activa por 90 días · Pago único $500 MXN</p>
-            </div>
-            <button onClick={function() {
-              fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/create-checkout", {
-                method: "POST",
-                headers: { "Content-Type": "application/json", "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ" },
-                body: JSON.stringify({ property_name: name, owner_email: property.owner_email || "", property_id: String(property.id || "") }),
-              }).then(function(r) {
-                if (!r.ok) { return r.text().then(function(t) { throw new Error("HTTP " + r.status + ": " + t); }); }
-                return r.json();
-              }).then(function(res) {
-                if (res.url) window.location.href = res.url;
-                else alert("Error al crear sesion de pago: respuesta sin URL.");
-              }).catch(function(e) { alert("Error al conectar con el sistema de pagos. Detalle: " + e.message.slice(0, 150)); });
-            }} style={{ width: "100%", background: "linear-gradient(135deg, #10b981, #059669)", border: "none", borderRadius: 16, padding: 16, color: "white", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
-              💳 Pagar $500 MXN y publicar
-            </button>
-          </div>
-        ) : status === "pendiente" || status === "pending" ? (
-          <div style={{ background: "#f59e0b10", border: "1px solid #f59e0b30", borderRadius: 14, padding: "14px 16px", textAlign: "center" }}>
-            <p style={{ color: "#fcd34d", fontSize: 13, fontWeight: 700, marginBottom: 4 }}>⏳ En revisión</p>
-            <p style={{ color: "#78716c", fontSize: 12 }}>El equipo de Baja Renta está revisando tu propiedad. Recibirás un correo en 24-72 hrs hábiles cuando sea aprobada.</p>
-          </div>
-        ) : status === "rechazada" || status === "rejected" ? (
-          <div style={{ background: "#ef444410", border: "1px solid #ef444430", borderRadius: 14, padding: "14px 16px", textAlign: "center" }}>
-            <p style={{ color: "#f87171", fontSize: 13, fontWeight: 700, marginBottom: 4 }}>❌ No aprobada</p>
-            <p style={{ color: "#78716c", fontSize: 12 }}>Tu propiedad no cumplió los requisitos. Contacta soporte para más información.</p>
-          </div>
-        ) : (
-          <div style={{ background: "#f59e0b10", border: "1px solid #f59e0b30", borderRadius: 14, padding: "14px 16px", textAlign: "center" }}>
-            <p style={{ color: "#fcd34d", fontSize: 13, fontWeight: 700, marginBottom: 4 }}>⏳ En revisión</p>
-            <p style={{ color: "#78716c", fontSize: 12 }}>El equipo revisará tu propiedad en 24-72 hrs hábiles.</p>
-          </div>
-        )}
-      </div>
+      {isApproved && (
+        <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, padding: "16px 20px 32px", background: "linear-gradient(to top, #0a0f1e, transparent)" }}>
+          <button onClick={function() {
+            fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/create-checkout", {
+              method: "POST",
+              headers: { "Content-Type": "application/json", "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ" },
+              body: JSON.stringify({ property_name: name, owner_email: property.owner_email || "", property_id: String(property.id || "") }),
+            }).then(function(r) { return r.json(); }).then(function(res) {
+              if (res.url) window.open(res.url, "_blank");
+              else alert("Error al crear sesion de pago.");
+            }).catch(function() { alert("Error de conexion."); });
+          }} style={{ width: "100%", background: "linear-gradient(135deg, #10b981, #059669)", border: "none", borderRadius: 16, padding: 16, color: "white", fontSize: 15, fontWeight: 700, cursor: "pointer" }}>
+            Pagar $500 MXN y publicar
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -4067,7 +3979,7 @@ function OwnerSettingsScreen({ onBack, onSignOut, darkModeProp, onToggleTheme, c
   const [showHelp, setShowHelp] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  if (showChangePass) return <ChangePasswordScreen onBack={() => setShowChangePass(false)} darkMode={darkMode} currentUser={currentUser} />;
+  if (showChangePass) return <ChangePasswordScreen onBack={() => setShowChangePass(false)} darkMode={darkMode} />;
   if (showHelp) return <HelpScreen onBack={() => setShowHelp(false)} darkMode={darkMode} />;
 
   const bg      = darkMode ? "#0a0f1e"   : "#f8fafc";
@@ -4271,12 +4183,9 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [allApprovedApplicants, setAllApprovedApplicants] = useState({});
   const [showSettings, setShowSettings] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
-  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const fetchMyProperties = function(showSpinner) {
+  useEffect(function() {
     if (!currentUser || !currentUser.email) return;
-    if (showSpinner) setIsRefreshing(true);
     var email = currentUser.email;
     var url = isMiguel
       ? "https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties?select=*&order=created_at.desc"
@@ -4287,7 +4196,7 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
         "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
       },
     }).then(function(r) { return r.json(); }).then(function(data) {
-      if (!Array.isArray(data)) { if (showSpinner) setIsRefreshing(false); return; }
+      if (!Array.isArray(data)) return;
       // For each property, load its applications
       var propPromises = data.map(function(p) {
         return fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/applications?property_id=eq." + p.id + "&select=*", {
@@ -4308,39 +4217,20 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
               docs: { ine: true, comprobante: true, estadoCuenta: true },
             };
           }) : [];
-          var rawImgs = [];
-          try { rawImgs = Array.isArray(p.images) ? p.images : (p.images ? JSON.parse(p.images) : []); } catch(e) { rawImgs = []; }
-          var fb = "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80";
           return {
             id: p.id, name: p.name, city: p.city, price: p.price, deposit: p.deposit,
-            status: p.status === "approved" ? "aprobada" : p.status === "rejected" ? "rechazada" : p.status === "published" ? "published" : p.status === "expired" ? "expirada" : "pendiente",
-            img: rawImgs.length > 0 ? rawImgs[0] : fb,
-            images: rawImgs.length > 0 ? rawImgs : [fb],
+            status: p.status === "approved" ? "aprobada" : p.status === "rejected" ? "rechazada" : p.status === "rented" ? "Rentado" : "pendiente",
+            img: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80",
+            images: ["https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80"],
             bedrooms: p.bedrooms, bathrooms: p.bathrooms, _mode: p.management_mode || "self",
-            owner_email: p.owner_email || "",
-            description: p.description || "",
             views: 0, applicants: applicants, isMock: false,
           };
         });
       });
       Promise.all(propPromises).then(function(props) {
         setSupaProperties(props);
-        if (showSpinner) setIsRefreshing(false);
       });
-    }).catch(function(e) { console.log("owner dashboard fetch error:", e); if (showSpinner) setIsRefreshing(false); });
-  };
-
-  // Initial load + reload whenever refreshKey changes (e.g. returning from detail view)
-  useEffect(function() {
-    fetchMyProperties(false);
-  }, [currentUser && currentUser.email, refreshKey]);
-
-  // Auto-refresh every 15 seconds while the dashboard is visible, so approvals
-  // and payment confirmations show up without the owner having to do anything
-  useEffect(function() {
-    if (!currentUser || !currentUser.email) return;
-    var interval = setInterval(function() { fetchMyProperties(false); }, 15000);
-    return function() { clearInterval(interval); };
+    }).catch(function(e) { console.log("owner dashboard fetch error:", e); });
   }, [currentUser && currentUser.email]);
 
   const myProperties = isMiguel ? MOCK_LISTED.concat(supaProperties) : supaProperties;
@@ -4362,9 +4252,23 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
     setAllApprovedApplicants(newApproved);
   };
 
+  const handleRented = function(propertyId, applicantId) {
+    setSupaProperties(function(prev) {
+      return prev.map(function(p) {
+        if (String(p.id) !== String(propertyId)) return p;
+        return Object.assign({}, p, {
+          status: "Rentado",
+          applicants: (p.applicants || []).map(function(a) {
+            return Object.assign({}, a, { status: a.id === applicantId ? "Aprobado" : "Rechazado" });
+          }),
+        });
+      });
+    });
+    setSelectedProperty(null);
+  };
+
   if (selectedProperty) {
     var sp = selectedProperty;
-    var fallbackImg = "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80";
     var spSafe = {
       id: String(sp.id || ""),
       name: String(sp.name || "Propiedad"),
@@ -4374,22 +4278,18 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
       bedrooms: Number(sp.bedrooms) || 0,
       bathrooms: Number(sp.bathrooms) || 0,
       status: String(sp.status || "pendiente"),
-      img: String(sp.img || fallbackImg),
-      images: Array.isArray(sp.images) && sp.images.length > 0 ? sp.images : [String(sp.img || fallbackImg)],
+      img: String(sp.img || "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80"),
       applicants: Array.isArray(sp.applicants) ? sp.applicants : [],
       views: Number(sp.views) || 0,
       owner_email: String(sp.owner_email || ""),
-      description: String(sp.description || ""),
-      address: String(sp.address || ""),
-      _mode: String(sp._mode || "self"),
-      isMock: Boolean(sp.isMock),
+      isMock: !!sp.isMock,
     };
     return <OwnerPropertyDetail
       property={spSafe}
-      approvedApplicants={allApprovedApplicants}
-      onApprove={function(applicantId) { handleApprove(spSafe.id, applicantId, spSafe.applicants); }}
-      onBack={function() { setSelectedProperty(null); setRefreshKey(function(k) { return k + 1; }); }}
-      darkMode={darkMode}
+      approvedApplicants={{}}
+      onApprove={handleRented}
+      onBack={function() { setSelectedProperty(null); }}
+      darkMode={true}
     />;
   }
 
@@ -4397,8 +4297,8 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
     return <OwnerSettingsScreen onBack={() => setShowSettings(false)} onSignOut={onBack} darkModeProp={darkMode} onToggleTheme={onToggleTheme} currentUser={currentUser} />;
   }
 
-  const statusColor = (s) => s === "Rentado" ? "#6366f1" : (s === "Activo" || s === "published" || s === "publicada") ? "#10b981" : "#f59e0b";
-  const statusBg   = (s) => s === "Rentado" ? "#6366f115" : (s === "Activo" || s === "published" || s === "publicada") ? "#10b98115" : "#f59e0b15";
+  const statusColor = (s) => s === "Rentado" ? "#6366f1" : s === "Activo" ? "#10b981" : "#f59e0b";
+  const statusBg   = (s) => s === "Rentado" ? "#6366f115" : s === "Activo" ? "#10b98115" : "#f59e0b15";
   const getRentedStatus = (p) => {
     const isRented = (p.applicants || []).some(a => allApprovedApplicants[p.id + "-" + a.id] === true);
     return isRented ? "Rentado" : p.status;
@@ -4421,19 +4321,6 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
             </div>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            {/* Refresh button */}
-            <button onClick={() => fetchMyProperties(true)} disabled={isRefreshing} style={{
-              width: 40, height: 40, borderRadius: "50%", background: cardBg,
-              border: "1px solid " + border, display: "flex", alignItems: "center",
-              justifyContent: "center", cursor: isRefreshing ? "default" : "pointer",
-            }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ animation: isRefreshing ? "spin 1s linear infinite" : "none" }}>
-              <path d="M21 2v6h-6"/>
-              <path d="M3 12a9 9 0 0 1 15-6.7L21 8"/>
-              <path d="M3 22v-6h6"/>
-              <path d="M21 12a9 9 0 0 1-15 6.7L3 16"/>
-            </svg>
-            </button>
             {/* Settings Gear */}
             <button onClick={() => setShowSettings(true)} style={{
               width: 40, height: 40, borderRadius: "50%", background: cardBg,
@@ -4463,6 +4350,7 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
 
       <div style={{ padding: "20px 24px" }}>
         <h3 style={{ color: text, fontSize: 15, fontWeight: 700, fontFamily: "'DM Sans',sans-serif", marginBottom: 14 }}>Mis propiedades</h3>
+        <p style={{ color: "#f59e0b", fontSize: 11, marginBottom: 8 }}>Supa: {supaProperties.length} | Email: {currentUser && currentUser.email ? currentUser.email.slice(0,10) : "ninguno"}</p>
         {myProperties.map(function(p) {
           var safeP = {
             id: p.id || "",
@@ -4492,7 +4380,7 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
                 <p style={{ fontFamily: "'DM Sans',sans-serif", color: text, fontSize: 14, fontWeight: 700, lineHeight: 1.2 }}>{safeP.name}</p>
                 <span style={{ background: statusBg(st), border: "1px solid " + statusColor(st) + "30", borderRadius: 99, padding: "2px 8px", color: statusColor(st), fontSize: 10, fontWeight: 700, flexShrink: 0, marginLeft: 6 }}>
-                  {st === "Rentado" ? "🏠 Rentado" : (st === "published" || st === "publicada") ? "✓ Publicada" : st === "approved" ? "Aprobada" : st === "aprobada" ? "Aprobada" : st}
+                  {st === "Rentado" ? "🏠 Rentado" : st}
                 </span>
               </div>
               <p style={{ color: textSub, fontSize: 12, marginBottom: 8 }}>{safeP.city}</p>
@@ -4521,23 +4409,14 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
 }
 
 
-function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkModeProp, onToggleTheme, currentUser = {}, onSetUser, goToDashboard, onDashboardHandled }) {
+function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkModeProp, onToggleTheme, currentUser = {}, onSetUser }) {
   const [ownerUser, setOwnerUser] = useState(currentUser);
   var mergedEmail = ownerUser.email || currentUser.email || "";
   const mergedUser = Object.assign({}, currentUser, ownerUser, { email: mergedEmail });
   const isMiguel = currentUser && currentUser.email === "miguelayalamartinez@gmail.com";
-  const listedProperties = listedProps || (isMiguel ? myProperties : []);
+  const listedProperties = listedProps || (isMiguel ? MOCK_LISTED : []);
   const [mode, setMode] = useState(null);
   const darkMode = darkModeProp !== undefined ? darkModeProp : true;
-
-  // If returning here right after a successful payment, skip straight to the
-  // dashboard instead of showing the login/register screen again
-  useEffect(function() {
-    if (goToDashboard && mergedEmail) {
-      setMode("dashboard");
-      if (onDashboardHandled) onDashboardHandled();
-    }
-  }, [goToDashboard, mergedEmail]);
 
   // Theme tokens — used in all form steps
   const bg       = darkMode ? "#0a0f1e"   : "#f8fafc";
@@ -4548,7 +4427,6 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
   const borderOP = darkMode ? "#ffffff15" : "#e2e8f0";
   const inputBgOP= darkMode ? "#ffffff08" : "#ffffff";
   const [submitted, setSubmitted] = useState(false);
-  const [isPublishing, setIsPublishing] = useState(false);
   const [formStep, setFormStep] = useState("details");
   const [masterApproved, setMasterApproved] = useState(false);
 
@@ -4613,32 +4491,6 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
   var formatCard = function(v) { var d = v.replace(/\D/g,"").slice(0,16); var r = ""; for(var x=0;x<d.length;x++) { if(x>0&&x%4===0) r+=" "; r+=d[x]; } return r.trim(); };
   const formatExp  = (v) => { const d = v.replace(/\D/g,"").slice(0,4); return d.length > 2 ? d.slice(0,2)+"/"+d.slice(2) : d; };
   const canPay = cardName && cardNum.replace(/\s/g,"").length === 16 && expiry.length === 5 && cvv.length >= 3;
-  const uploadPhotoToStorage = function(photo, index) {
-    // photo.url is a data URL like "data:image/jpeg;base64,AAAA..."
-    var match = /^data:([^;]+);base64,(.+)$/.exec(photo.url || "");
-    if (!match) return Promise.resolve(null);
-    var mimeType = match[1];
-    var base64Data = match[2];
-    var ext = mimeType.indexOf("png") >= 0 ? "png" : mimeType.indexOf("webp") >= 0 ? "webp" : "jpg";
-    var byteChars = atob(base64Data);
-    var byteNumbers = new Array(byteChars.length);
-    for (var i = 0; i < byteChars.length; i++) { byteNumbers[i] = byteChars.charCodeAt(i); }
-    var byteArray = new Uint8Array(byteNumbers);
-    var path = "owner_" + (currentUser && currentUser.email ? currentUser.email.replace(/[^a-zA-Z0-9]/g, "_") : "anon") + "/" + Date.now() + "_" + index + "." + ext;
-    return fetch("https://uwtclxtywhthwecsqeug.supabase.co/storage/v1/object/property-photos/" + path, {
-      method: "POST",
-      headers: {
-        "Content-Type": mimeType,
-        "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
-        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
-      },
-      body: byteArray,
-    }).then(function(r) {
-      if (!r.ok) { return null; }
-      return "https://uwtclxtywhthwecsqeug.supabase.co/storage/v1/object/public/property-photos/" + path;
-    }).catch(function() { return null; });
-  };
-
   const buildAndPublish = () => {
     const newProp = {
       id: Date.now(),
@@ -4699,31 +4551,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
       status: "pending",
       is_mock: false,
       owner_email: currentUser && currentUser.email ? currentUser.email : null,
-      documents: {
-        escritura: uploadedDocs.escritura ? { name: uploadedDocs.escritura.name, data: uploadedDocs.escritura.data } : null,
-        ine: uploadedDocs.ine ? { name: uploadedDocs.ine.name, data: uploadedDocs.ine.data } : null,
-        domicilio: uploadedDocs.domicilio ? { name: uploadedDocs.domicilio.name, data: uploadedDocs.domicilio.data } : null,
-        predial: uploadedDocs.predial ? { name: uploadedDocs.predial.name, data: uploadedDocs.predial.data } : null,
-      },
-      owner_name: propForm.ownerName || (currentUser && currentUser.name) || "Propietario",
     };
-
-    // Upload photos to Supabase Storage first, then save the property with the
-    // resulting public URLs (instead of storing base64 directly in the table)
-    setIsPublishing(true);
-    var photosToUpload = uploadedPhotos.slice(0, 5);
-    var uploadPromises = photosToUpload.length > 0
-      ? photosToUpload.map(function(photo, i) { return uploadPhotoToStorage(photo, i); })
-      : [];
-
-    Promise.all(uploadPromises).then(function(uploadedUrls) {
-      var validUrls = uploadedUrls.filter(function(u) { return u; });
-      supaData.images = validUrls.length > 0 ? validUrls : DEFAULT_PHOTOS.slice(0, 1);
-      postPropertyToSupabase(supaData);
-    });
-  };
-
-  const postPropertyToSupabase = function(supaData) {
 
     fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties", {
       method: "POST",
@@ -4734,54 +4562,19 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
         "Prefer": "return=representation",
       },
       body: JSON.stringify(supaData),
-    }).then(function(r) {
-      if (!r.ok) { return r.text().then(function(t) { throw new Error("HTTP " + r.status + ": " + t); }); }
-      return r.json();
-    }).then(function(res) {
+    }).then(function(r) { return r.json(); }).then(function(res) {
       console.log("Property saved to Supabase:", res);
-      finishPublish(supaData);
-    }).catch(function(e) {
-      console.log("Supabase save error (full payload):", e.message);
-      // Retry without the heavy/optional fields in case documents/images columns
-      // don't exist yet or the payload was too large
-      var fallbackData = Object.assign({}, supaData);
-      delete fallbackData.documents;
-      delete fallbackData.owner_name;
-      delete fallbackData.images;
-      fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
-          "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
-          "Prefer": "return=representation",
-        },
-        body: JSON.stringify(fallbackData),
-      }).then(function(r2) {
-        if (!r2.ok) { return r2.text().then(function(t2) { throw new Error("HTTP " + r2.status + ": " + t2); }); }
-        return r2.json();
-      }).then(function(res2) {
-        console.log("Property saved to Supabase (fallback, no documents/owner_name):", res2);
-        finishPublish(supaData);
-      }).catch(function(e2) {
-        console.log("Supabase fallback save ALSO failed:", e2.message);
-        setIsPublishing(false);
-        alert("Hubo un problema guardando tu propiedad en el servidor. Por favor contacta soporte. Detalle técnico: " + e2.message.slice(0, 150));
-      });
-    });
-  };
+    }).catch(function(e) { console.log("Supabase save error:", e); });
 
-  const finishPublish = function(supaData) {
-    if (onPublish) onPublish(supaData);
+    if (onPublish) onPublish(newProp);
     sendEmail("new_property_pending", "miguelayalamartinez@gmail.com", {
-      property_name: supaData.name,
+      property_name: newProp.name,
       owner_name: propForm.ownerName || "Propietario",
-      city: supaData.city,
-      type: supaData.type,
-      price: "$" + (supaData.price || "").toLocaleString(),
+      city: newProp.city,
+      type: newProp.type,
+      price: "$" + (newProp.price || "").toLocaleString(),
       mode: mode,
     });
-    setIsPublishing(false);
     setSubmitted(true);
   };
 
@@ -4937,13 +4730,10 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
         <div style={{ width: 90, height: 90, borderRadius: "50%", background: "linear-gradient(135deg, #10b981, #059669)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 24, boxShadow: "0 0 40px #10b98150" }}>
           <Icon name="check" size={42} color="white" />
         </div>
-        <h2 style={{ fontFamily: "'Syne',sans-serif", color: textOP, fontSize: 26, fontWeight: 800, marginBottom: 8 }}>¡Solicitud enviada!</h2>
+        <h2 style={{ fontFamily: "'Syne',sans-serif", color: textOP, fontSize: 26, fontWeight: 800, marginBottom: 8 }}>¡Propiedad publicada!</h2>
         <p style={{ color: textSubOP, fontSize: 14, marginBottom: 12, maxWidth: 300 }}>
-          Tu solicitud fue enviada para aprobación. Te avisaremos por correo cuando el equipo de Baja Renta la revise.
+          Tu propiedad está activa. Recibirás solicitudes directamente en tu perfil.
         </p>
-        <div style={{ background: "#f59e0b10", border: "1px solid #f59e0b30", borderRadius: 14, padding: "12px 20px", marginBottom: 12, maxWidth: 320 }}>
-          <p style={{ color: "#fcd34d", fontSize: 13, fontWeight: 600 }}>⏱️ Revisión en 24–72 hrs laborables</p>
-        </div>
         <div style={{ background: "#10b98110", border: "1px solid #10b98130", borderRadius: 14, padding: "12px 20px", marginBottom: 32 }}>
           <p style={{ color: "#10b981", fontSize: 13, fontWeight: 600 }}>🔑 Autogestión activada</p>
         </div>
@@ -5442,31 +5232,25 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
       ) : (
         <div>
           {/* Self mode - submit to review button */}
-          {(function() {
+          {!masterApproved && (function() {
             var selfFormReady = propForm.name && propForm.city && propForm.address && propForm.price && propForm.deposit;
             return (
               <div style={{ marginBottom: 12 }}>
                 <button onClick={function() {
-                  if (!selfFormReady || isPublishing) return;
+                  if (!selfFormReady) return;
                   buildAndPublish();
-                }} disabled={!selfFormReady || isPublishing} className={selfFormReady && !isPublishing ? "btn-glow" : ""} style={{
+                }} disabled={!selfFormReady} className={selfFormReady ? "btn-glow" : ""} style={{
                   width: "100%",
-                  background: selfFormReady ? "linear-gradient(135deg, #3b82f6, #6366f1)" : (darkMode ? "#ffffff10" : "#e2e8f0"),
+                  background: selfFormReady ? "linear-gradient(135deg, #f59e0b, #d97706)" : (darkMode ? "#ffffff10" : "#e2e8f0"),
                   border: "none", borderRadius: 16, padding: "18px", color: selfFormReady ? "white" : textSubOP,
                   fontSize: 16, fontWeight: 700,
-                  cursor: (selfFormReady && !isPublishing) ? "pointer" : "not-allowed",
+                  cursor: selfFormReady ? "pointer" : "not-allowed",
                   fontFamily: "'DM Sans',sans-serif", transition: "all .3s",
                   display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                  opacity: selfFormReady ? (isPublishing ? 0.7 : 1) : 0.6,
+                  opacity: selfFormReady ? 1 : 0.6,
                 }}>
-                  {isPublishing ? (
-                    <React.Fragment>⏳ Subiendo fotos y enviando...</React.Fragment>
-                  ) : (
-                    <React.Fragment>
-                      <Icon name="upload" size={18} color={selfFormReady ? "white" : textSubOP} />
-                      {selfFormReady ? "📤 Solicitar publicación" : "Completa el formulario para continuar"}
-                    </React.Fragment>
-                  )}
+                  <Icon name="upload" size={18} color={selfFormReady ? "white" : textSubOP} />
+                  {selfFormReady ? "Enviar propiedad a revisión" : "Completa el formulario para continuar"}
                 </button>
                 {!selfFormReady && (
                   <div style={{ marginTop: 10, background: "#f59e0b10", border: "1px solid #f59e0b30", borderRadius: 12, padding: "10px 14px" }}>
@@ -5494,9 +5278,73 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
                     </div>
                   </div>
                 )}
+                <p style={{ color: textSubOP, fontSize: 12, textAlign: "center", marginTop: 8 }}>
+                  🛎️ Nuestro equipo revisará tu propiedad en 24–72 hrs laborables
+                </p>
               </div>
             );
           })()}
+          {masterApproved ? (
+            <button onClick={function() {
+              fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/create-checkout", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+                },
+                body: JSON.stringify({
+                  property_name: propForm.name || "Propiedad",
+                  owner_email: propForm.email || "",
+                  property_id: propForm.id || null,
+                }),
+              }).then(function(r) { return r.json(); }).then(function(res) {
+                if (res.url) {
+                  window.open(res.url, "_blank");
+                } else {
+                  alert("Error al crear sesión de pago. Intenta de nuevo.");
+                }
+              }).catch(function() {
+                alert("Error de conexión. Verifica tu internet e intenta de nuevo.");
+              });
+            }} className="btn-glow" style={{
+              width: "100%", background: accentGrad,
+              border: "none", borderRadius: 16, padding: "18px", color: textOP,
+              fontSize: 16, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", transition: "all .3s",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+            }}>
+              <Icon name="arrow" size={18} color="white" /> {"💳 Pagar $500 MXN y publicar"}
+            </button>
+          ) : (
+            <div>
+              <div style={{ background: "#f59e0b10", border: "1px solid #f59e0b30", borderRadius: 16, padding: "16px", marginBottom: 12, display: "flex", alignItems: "center", gap: 12 }}>
+                <span style={{ fontSize: 22, flexShrink: 0 }}>🔒</span>
+                <div>
+                  <p style={{ color: "#f59e0b", fontSize: 13, fontWeight: 700, marginBottom: 3 }}>Pago deshabilitado</p>
+                  <p style={{ color: "#78716c", fontSize: 12, lineHeight: 1.5 }}>La sección de pago se habilitará una vez que tu propiedad sea autorizada por el equipo de Baja Renta.</p>
+                </div>
+              </div>
+              <button disabled style={{
+                width: "100%", background: cardBgOP, border: "1px solid #ffffff15",
+                borderRadius: 16, padding: "18px", color: textSubOP,
+                fontSize: 16, fontWeight: 700, cursor: "not-allowed", fontFamily: "'DM Sans',sans-serif",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: 0.5,
+              }}>
+                {"🔒 Continuar al pago · $500 MXN"}
+              </button>
+              <div style={{ marginTop: 12, background: "#3b82f610", border: "1px solid #3b82f630", borderRadius: 12, padding: "12px 16px" }}>
+                <p style={{ color: "#3b82f6", fontSize: 12, fontWeight: 600, marginBottom: 4 }}>📧 ¿Qué sigue?</p>
+                <p style={{ color: "#64748b", fontSize: 12, lineHeight: 1.6 }}>
+                  El equipo de Baja Renta revisará tu propiedad en 24–72 horas hábiles. Recibirás un correo cuando sea aprobada y podrás proceder con el pago.
+                </p>
+              </div>
+            </div>
+          )}
+          <p style={{ color: textSubOP, fontSize: 12, textAlign: "center", marginTop: 8 }}>
+            {masterApproved ? "✅ Propiedad autorizada · 📅 Publicación activa por 90 días" : "📅 Publicación activa por 90 días una vez autorizada"}
+          </p>
+          <p style={{ color: textSubOP, fontSize: 12, textAlign: "center", marginTop: 4 }}>
+            🛎️ Nuestro equipo revisará tu propiedad en 24–72 hrs laborables
+          </p>
         </div>
       )}
     </div>
@@ -5743,13 +5591,9 @@ function VisitorRegister({ onBack, onComplete, onLogin, darkMode = true }) {
                   method: "POST",
                   headers: { "Content-Type": "application/json", "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ" },
                   body: JSON.stringify({ email: form.email, password: form.password, role: "visitor", full_name: form.name, phone: form.phone || null, date_of_birth: form.dob || null }),
-                }).then(function(regRes) {
+                }).then(function() {
                   sendEmail('welcome_visitor', form.email, { name: form.name, email: form.email });
-                  if (typeof setShowPushPrompt === 'function') {
-                    setShowPushPrompt(true);
-                  } else {
-                    onComplete({ name: form.name, email: form.email, phone: form.phone });
-                  }
+                  setShowPushPrompt(true);
                 }).catch(function() {
                   sendEmail('welcome_visitor', form.email, { name: form.name, email: form.email });
                   onComplete({ name: form.name, email: form.email, phone: form.phone });
@@ -6262,6 +6106,7 @@ function MasterLogin({ onBack, onLogin }) {
   const text     = "white";
   const textSubOP = "#64748b";
   const textOP   = "white";
+  const cardBgOP = "#ffffff06";
   const border   = "#ffffff15";
   const inputBg  = "#ffffff08";
   const [user, setUser] = useState("");
@@ -6309,7 +6154,6 @@ function MasterLogin({ onBack, onLogin }) {
           </div>
           <h2 style={{ fontFamily: "'Syne',sans-serif", color: textOP, fontSize: 24, fontWeight: 800 }}>Panel Maestro</h2>
           <p style={{ color: textSubOP, fontSize: 13, marginTop: 4 }}>Baja Renta — Administrador</p>
-          <p style={{ color: "#f59e0b", fontSize: 11, marginTop: 4 }}>{fetchStatus}</p>
         </div>
       </div>
 
@@ -6393,33 +6237,14 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
   const [selected, setSelected] = useState(null);
   const [masterTab, setMasterTab] = useState("owners"); // owners | visitors
   const [visitorSearch, setVisitorSearch] = useState("");
-  const [visitors, setVisitors] = useState([]);
-  const [visitorsLoading, setVisitorsLoading] = useState(true);
-
-  const fetchVisitors = function() {
-    setVisitorsLoading(true);
-    fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/manage-visitors", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
-      },
-      body: JSON.stringify({ action: "list" }),
-    }).then(function(r) { return r.json(); }).then(function(res) {
-      setVisitors(Array.isArray(res.visitors) ? res.visitors.map(function(v) {
-        return Object.assign({}, v, {
-          joined: v.joined ? new Date(v.joined).toLocaleDateString("es-MX") : "—",
-          solicitudes: 0,
-        });
-      }) : []);
-      setVisitorsLoading(false);
-    }).catch(function(e) {
-      console.log("fetchVisitors error:", e);
-      setVisitorsLoading(false);
-    });
-  };
-
-  useEffect(function() { fetchVisitors(); }, []);
+  const [visitors, setVisitors] = useState([
+    { id: 1, name: "Carlos Mendoza", email: "carlos.mendoza@gmail.com", phone: "664-123-4567", city: "Tijuana", status: "verificado", joined: "12/03/2026", solicitudes: 2 },
+    { id: 2, name: "Ana Sofia Ruiz", email: "ana.ruiz@hotmail.com", phone: "664-987-6543", city: "Ensenada", status: "pendiente", joined: "05/04/2026", solicitudes: 1 },
+    { id: 3, name: "Jorge Hernandez", email: "jorge.h@gmail.com", phone: "646-555-0011", city: "Rosarito", status: "verificado", joined: "20/01/2026", solicitudes: 3 },
+    { id: 4, name: "Lucia Flores", email: "lucia.flores@outlook.com", phone: "664-222-3344", city: "Tijuana", status: "verificado", joined: "08/05/2026", solicitudes: 0 },
+    { id: 5, name: "Roberto Castillo", email: "rcastillo@yahoo.com", phone: "646-777-8899", city: "Ensenada", status: "inactivo", joined: "15/02/2026", solicitudes: 1 },
+    { id: 6, name: "Maria Gonzalez", email: "mgonzalez@gmail.com", phone: "664-444-5566", city: "Tecate", status: "verificado", joined: "30/04/2026", solicitudes: 4 },
+  ]);
   const [confirmDeleteVisitor, setConfirmDeleteVisitor] = useState(null);
 
   const MOCK_VISITORS = visitors;
@@ -6452,19 +6277,11 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
       setFetchStatus("✅ " + data.length + " propiedades en BD");
       if (data.length === 0) return;
       var supaProps = data.map(function(p) {
-        var imgs = [];
-        try { imgs = Array.isArray(p.images) ? p.images : (p.images ? JSON.parse(p.images) : []); } catch(e) { imgs = []; }
-        var fb = "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80";
-        var docsRaw = p.documents || {};
-        var uploadedDocsObj = {};
-        ["escritura", "ine", "domicilio", "predial"].forEach(function(key) {
-          uploadedDocsObj[key] = docsRaw[key] ? { name: docsRaw[key].name || (key + ".jpg"), type: "image/jpeg", data: docsRaw[key].data } : null;
-        });
         return {
           id: p.id,
           name: p.name || "Propiedad",
-          owner: p.owner_name || "Propietario registrado",
-          ownerEmail: p.owner_email || "",
+          owner: "Propietario registrado",
+          ownerEmail: "",
           city: p.city || "—",
           state: "Baja California",
           address: p.address || "—",
@@ -6483,12 +6300,10 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
           kitchen: p.kitchen,
           laundry: p.laundry,
           patio: p.patio,
-          status: p.status === "pending" ? "pendiente" : p.status === "approved" ? "aprobada" : p.status === "rejected" ? "rechazada" : p.status === "published" ? "publicada" : p.status === "expired" ? "expirada" : "pendiente",
-          img: imgs.length > 0 ? imgs[0] : fb,
-          images: imgs.length > 0 ? imgs : [fb],
+          status: p.status === "pending" ? "pendiente" : p.status === "approved" ? "aprobada" : p.status === "rejected" ? "rechazada" : p.status === "rented" ? "rentada" : "pendiente",
+          img: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80",
+          images: ["https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80"],
           submitted: p.created_at ? p.created_at.slice(0, 10) : "—",
-          _uploadedPhotos: imgs.map(function(url, i) { return { url: url, name: "foto" + (i + 1) + ".jpg" }; }),
-          _uploadedDocs: uploadedDocsObj,
           _mode: p.management_mode || "self",
           isNew: true,
           isSupa: true,
@@ -6532,12 +6347,9 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
           mode: prop.mode || "self",
         });
       } else if (status === "rechazada") {
-        var wasPublished = prop.status === "published" || prop.status === "publicada";
         sendEmail("application_rejected", prop.ownerEmail, {
           property_name: prop.name,
-          reason: wasPublished
-            ? "El equipo de Baja Renta ha removido tu propiedad publicada. Si tienes dudas, contacta a soporte."
-            : "El equipo de Baja Renta ha revisado tu propiedad y no cumple con los requisitos actuales de publicación.",
+          reason: "El equipo de Baja Renta ha revisado tu propiedad y no cumple con los requisitos actuales de publicación.",
         });
       }
     }
@@ -6552,6 +6364,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
     const isNewProp = _foundProp ? _foundProp.isNew : false;
     setProperties(function(prev) { return prev.map(function(p) {
       if (p.id !== id) return p;
+      if (p.status === "rentada") return p;
       const newStatus = p.status === "pendiente" ? "aprobada" : "pendiente";
       updatePropertyStatus(id, newStatus, p);
       return Object.assign({}, p, { status: newStatus });
@@ -6561,6 +6374,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
   const rejectStatus = function(id) {
     setProperties(function(prev) { return prev.map(function(p) {
       if (p.id !== id) return p;
+      if (p.status === "rentada") return p;
       updatePropertyStatus(id, "rechazada", p);
       return Object.assign({}, p, { status: "rechazada" });
     }); });
@@ -6582,8 +6396,8 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
           <button onClick={() => setSelected(null)} style={{ position: "absolute", top: 16, left: 16, background: "#000000a0", backdropFilter: "blur(8px)", border: "none", borderRadius: 99, width: 38, height: 38, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <Icon name="back" size={16} color="white" />
           </button>
-          <span style={{ position: "absolute", top: 16, right: 16, background: (p.status === "aprobada" || p.status === "published" || p.status === "publicada") ? "#10b981" : p.status === "rechazada" ? "#ef4444" : "#f59e0b", borderRadius: 99, padding: "5px 14px", color: "white", fontSize: 12, fontWeight: 700 }}>
-            {(p.status === "published" || p.status === "publicada") ? "✓ Publicada" : p.status === "aprobada" ? "✓ Aprobada" : p.status === "rechazada" ? "✗ Rechazada" : "⚠️ Pendiente"}
+          <span style={{ position: "absolute", top: 16, right: 16, background: p.status === "aprobada" ? "#10b981" : p.status === "rechazada" ? "#ef4444" : p.status === "rentada" ? "#6366f1" : "#f59e0b", borderRadius: 99, padding: "5px 14px", color: "white", fontSize: 12, fontWeight: 700 }}>
+            {p.status === "aprobada" ? "✓ Aprobada" : p.status === "rechazada" ? "✗ Rechazada" : p.status === "rentada" ? "🏠 Rentada" : "⚠️ Pendiente"}
           </span>
         </div>
 
@@ -6726,7 +6540,11 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
 
           {/* Approve / Reject */}
           <div style={{ height: 1, background: "#ffffff06", marginBottom: 16 }} />
-          {p.status === "aprobada" ? (
+          {p.status === "rentada" ? (
+            <div style={{ background: "#6366f115", border: "1px solid #6366f130", borderRadius: 14, padding: "12px 16px" }}>
+              <p style={{ color: "#6366f1", fontSize: 14, fontWeight: 700 }}>🏠 Propiedad rentada (fuera del catálogo)</p>
+            </div>
+          ) : p.status === "aprobada" ? (
             <div>
               <div style={{ background: "#10b98115", border: "1px solid #10b98130", borderRadius: 14, padding: "12px 16px", display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
                 <Icon name="check" size={18} color="#10b981" />
@@ -6752,25 +6570,6 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
                 fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif",
               }}>
                 {"✓ Aprobar propiedad"}
-              </button>
-            </div>
-          ) : (p.status === "published" || p.status === "publicada") ? (
-            <div>
-              <div style={{ background: "#10b98115", border: "1px solid #10b98140", borderRadius: 14, padding: "12px 16px", display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-                <Icon name="check" size={18} color="#10b981" />
-                <p style={{ color: "#10b981", fontSize: 14, fontWeight: 700 }}>Propiedad publicada y activa</p>
-              </div>
-              <button onClick={() => {
-                if (window.confirm("¿Seguro que quieres remover esta propiedad? Ya fue pagada y está activa para visitantes — dejará de mostrarse de inmediato en el catálogo y el dueño será notificado.")) {
-                  rejectStatus(p.id);
-                  setSelected(null);
-                }
-              }} style={{
-                width: "100%", background: "#ef444415", border: "1px solid #ef444430",
-                borderRadius: 14, padding: "14px", color: "#ef4444",
-                fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif",
-              }}>
-                ✗ Remover propiedad publicada
               </button>
             </div>
           ) : (
@@ -6938,26 +6737,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
             <h3 style={{ color: "white", fontSize: 16, fontWeight: 700, textAlign: "center", marginBottom: 6, fontFamily: "'DM Sans',sans-serif" }}>Eliminar visitante</h3>
             <p style={{ color: "#94a3b8", fontSize: 13, textAlign: "center", lineHeight: 1.6, marginBottom: 6 }}>{confirmDeleteVisitor.name}</p>
             <p style={{ color: "#64748b", fontSize: 12, textAlign: "center", lineHeight: 1.6, marginBottom: 24 }}>Esta accion eliminara permanentemente el perfil y todos sus datos.</p>
-            <button onClick={() => {
-              var idToDelete = confirmDeleteVisitor.id;
-              setConfirmDeleteVisitor(null);
-              fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/manage-visitors", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
-                },
-                body: JSON.stringify({ action: "delete", user_id: idToDelete }),
-              }).then(function(r) { return r.json(); }).then(function(res) {
-                if (res.success) {
-                  setVisitors(function(prev) { return prev.filter(function(x) { return x.id !== idToDelete; }); });
-                } else {
-                  alert("No se pudo eliminar el perfil: " + (res.error || "error desconocido"));
-                }
-              }).catch(function() {
-                alert("Error de conexión al eliminar el perfil.");
-              });
-            }} style={{ width: "100%", background: "#ef4444", border: "none", borderRadius: 14, padding: "15px", color: "white", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", marginBottom: 10 }}>
+            <button onClick={() => { setVisitors(prev => prev.filter(x => x.id !== confirmDeleteVisitor.id)); setConfirmDeleteVisitor(null); }} style={{ width: "100%", background: "#ef4444", border: "none", borderRadius: 14, padding: "15px", color: "white", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", marginBottom: 10 }}>
               Eliminar perfil
             </button>
             <button onClick={() => setConfirmDeleteVisitor(null)} style={{ width: "100%", background: "transparent", border: "1px solid #ffffff15", borderRadius: 14, padding: "13px", color: "#64748b", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
@@ -6972,7 +6752,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
         <div>
           {/* Filter tabs */}
           <div style={{ display: "flex", padding: "0 24px", borderBottom: "1px solid #ffffff10", overflowX: "auto" }}>
-            {[["todas","Todas"],["pendiente","Pendientes"],["aprobada","Aprobadas"],["publicada","Publicadas"],["rechazada","Rechazadas"]].map(([key, label]) => (
+            {[["todas","Todas"],["pendiente","Pendientes"],["aprobada","Aprobadas"],["rechazada","Rechazadas"]].map(function(pair) { var key = pair[0], label = pair[1]; return  (
               <button key={key} onClick={() => setFilter(key)} style={{
                 flex: 1, minWidth: 70, padding: "12px 0", background: "none", border: "none",
                 borderBottom: "2px solid " + filter === key ? "#8b5cf6" : "transparent",
@@ -6980,14 +6760,14 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
                 fontSize: 11, fontWeight: filter === key ? 700 : 400,
                 cursor: "pointer", fontFamily: "'DM Sans',sans-serif", transition: "all .2s",
               }}>{label}</button>
-            ))}
+            );})}
           </div>
           {/* Property list */}
           <div style={{ padding: "20px 24px" }}>
         {filtered.map(p => (
           <button key={p.id} onClick={() => setSelected(p)} style={{
             width: "100%", background: "#ffffff06",
-            border: "1px solid " + ((p.status === "aprobada" || p.status === "published" || p.status === "publicada") ? "#10b98120" : "#f59e0b20"),
+            border: "1px solid " + p.status === "aprobada" ? "#10b98120" : "#f59e0b20",
             borderRadius: 20, overflow: "hidden", marginBottom: 14,
             display: "flex", cursor: "pointer", textAlign: "left",
           }}>
@@ -6996,13 +6776,13 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 3 }}>
                 <p style={{ fontFamily: "'Syne',sans-serif", color: "white", fontSize: 14, fontWeight: 700, lineHeight: 1.2, flex: 1, marginRight: 8 }}>{p.name}</p>
                 <span style={{
-                  background: (p.status === "aprobada" || p.status === "published" || p.status === "publicada") ? "#10b98115" : p.status === "rechazada" ? "#ef444415" : "#f59e0b15",
-                  border: "1px solid " + ((p.status === "aprobada" || p.status === "published" || p.status === "publicada") ? "#10b98140" : p.status === "rechazada" ? "#ef444440" : "#f59e0b40"),
+                  background: p.status === "aprobada" ? "#10b98115" : p.status === "rechazada" ? "#ef444415" : "#f59e0b15",
+                  border: "1px solid " + p.status === "aprobada" ? "#10b98140" : p.status === "rechazada" ? "#ef444440" : "#f59e0b40",
                   borderRadius: 99, padding: "2px 8px",
-                  color: (p.status === "aprobada" || p.status === "published" || p.status === "publicada") ? "#10b981" : p.status === "rechazada" ? "#ef4444" : "#f59e0b",
+                  color: p.status === "aprobada" ? "#10b981" : p.status === "rechazada" ? "#ef4444" : "#f59e0b",
                   fontSize: 10, fontWeight: 700, flexShrink: 0,
                 }}>
-                  {(p.status === "published" || p.status === "publicada") ? "Publicada" : p.status === "aprobada" ? "Aprobada" : p.status === "rechazada" ? "Rechazada" : "Pendiente"}
+                  {p.status === "aprobada" ? "Aprobada" : p.status === "rechazada" ? "Rechazada" : p.status === "rentada" ? "Rentada" : "Pendiente"}
                 </span>
               </div>
               <p style={{ color: "#64748b", fontSize: 12, marginBottom: 4 }}>👤 {p.owner}</p>
@@ -7063,28 +6843,19 @@ function App() {
   const [darkMode, setDarkMode] = useState(true);
   const [profile, setProfile] = useState(null);
   const [currentUser, setCurrentUser] = useState({ name: "", email: "", phone: "" });
-  const [paymentSuccess, setPaymentSuccess] = useState(function() {
-    try {
-      var p = new URLSearchParams(window.location.search);
-      return p.get("payment") === "success";
-    } catch(e) { return false; }
-  });
-  const [ownerGoToDashboard, setOwnerGoToDashboard] = useState(false);
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [publishedProperties, setPublishedProperties] = useState([...PROPERTIES]);
 
-  // Load published (paid & active) properties from Supabase — show them FIRST
+  // Load approved properties from Supabase — show them FIRST
   useEffect(function() {
-    fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties?status=eq.published&select=*&order=created_at.desc", {
+    fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties?status=eq.approved&select=*&order=created_at.desc", {
       headers: {
         "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
         "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
       },
     }).then(function(r) { return r.json(); }).then(function(data) {
       if (!Array.isArray(data) || data.length === 0) return;
-      var fb = "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80";
       var supaApproved = data.map(function(p) {
-        var imgs = [];
-        try { imgs = Array.isArray(p.images) ? p.images : (p.images ? JSON.parse(p.images) : []); } catch(e) { imgs = []; }
         return {
           id: p.id,
           name: p.name || "Propiedad",
@@ -7106,9 +6877,9 @@ function App() {
           kitchen: p.kitchen !== false,
           laundry: p.laundry || false,
           patio: p.patio || false,
-          img: imgs.length > 0 ? imgs[0] : fb,
-          images: imgs.length > 0 ? imgs : [fb],
-          owner: p.owner_name || "Propietario",
+          img: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80",
+          images: ["https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80"],
+          owner: "Propietario",
           ownerPhone: "",
           ownerEmail: p.owner_email || "",
           views: 0,
@@ -7119,7 +6890,7 @@ function App() {
       });
       // Show Supabase properties FIRST, then mocks
       setPublishedProperties(supaApproved.concat(PROPERTIES));
-    }).catch(function(e) { console.log("published properties fetch error:", e); });
+    }).catch(function(e) { console.log("approved properties fetch error:", e); });
   }, []);
   const [ownerSubmissions, setOwnerSubmissions] = useState([]);
 
@@ -7128,29 +6899,9 @@ function App() {
     try {
       var params = new URLSearchParams(window.location.search);
       if (params.get("payment") === "success") {
-        var sessionId = params.get("session_id");
-        // Clean URL immediately so a page refresh doesn't re-trigger this
+        setPaymentSuccess(true);
+        // Clean URL
         window.history.replaceState({}, "", window.location.pathname);
-        if (sessionId) {
-          fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/confirm-payment", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
-            },
-            body: JSON.stringify({ session_id: sessionId }),
-          }).then(function(r) { return r.json(); }).then(function(res) {
-            console.log("confirm-payment result:", res);
-            setPaymentSuccess(true);
-          }).catch(function(e) {
-            console.log("confirm-payment error:", e);
-            // Still show success screen — the webhook may have already handled it
-            setPaymentSuccess(true);
-          });
-        } else {
-          // No session_id available (older checkout link) — just show success screen
-          setPaymentSuccess(true);
-        }
       }
     } catch(e) {}
   }, []);
@@ -7335,183 +7086,27 @@ function App() {
     setFilters({}); setCardIdx(0); setLikedProperty(null);
   };
 
-  if (paymentSuccess) {
-    var PaymentSuccessScreen = function() {
-      var [step, setStep] = React.useState("choose");
-      var [rfc, setRfc] = React.useState("");
-      var [razonSocial, setRazonSocial] = React.useState("");
-      var [usoCfdi, setUsoCfdi] = React.useState("G03");
-      var [regimenFiscal, setRegimenFiscal] = React.useState("612");
-      var [cp, setCp] = React.useState("");
-      var [sending, setSending] = React.useState(false);
-      var [rfcError, setRfcError] = React.useState("");
-
-      var validateRfc = function(v) {
-        var clean = v.toUpperCase().replace(/\s/g, "");
-        setRfc(clean);
-        if (clean.length > 0 && !/^[A-Z&Ñ]{3,4}[0-9]{6}[A-Z0-9]{3}$/.test(clean)) {
-          setRfcError("RFC inválido — debe ser formato SAT");
-        } else { setRfcError(""); }
-      };
-
-      var sendInvoiceRequest = function() {
-        if (!rfc || rfcError || !razonSocial.trim()) return;
-        setSending(true);
-        fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/invoice_requests", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
-            "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
-          },
-          body: JSON.stringify({
-            owner_email: currentUser && currentUser.email ? currentUser.email : "",
-            owner_name: currentUser && currentUser.name ? currentUser.name : "",
-            rfc: rfc, razon_social: razonSocial,
-            uso_cfdi: usoCfdi, regimen_fiscal: regimenFiscal, cp: cp, amount: 500,
-          }),
-        }).then(function() {
-          setSending(false);
-          setStep("invoice_sent");
-        }).catch(function() {
-          setSending(false);
-          setStep("invoice_sent");
-        });
-      };
-
-      var inp = { display: "block", width: "100%", background: "#ffffff0a", border: "1px solid #ffffff20", borderRadius: 12, padding: "13px 16px", color: "white", fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none", marginBottom: 12, boxSizing: "border-box" };
-      var lbl = { color: "#94a3b8", fontSize: 12, fontWeight: 600, display: "block", marginBottom: 4, textAlign: "left" };
-      var email = currentUser && currentUser.email ? currentUser.email : "";
-
-      if (step === "choose") return (
-        <div style={{ minHeight: "100vh", background: "#0a0f1e", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
-          <div style={{ textAlign: "center", maxWidth: 340, width: "100%" }}>
-            <div style={{ fontSize: 64, marginBottom: 16 }}>🎉</div>
-            <h2 style={{ color: "white", fontFamily: "'Syne',sans-serif", fontSize: 24, fontWeight: 800, marginBottom: 8 }}>¡Propiedad publicada!</h2>
-            <p style={{ color: "#94a3b8", fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>
-              Tu pago de <strong style={{ color: "#10b981" }}>$500 MXN</strong> fue procesado. Tu propiedad está activa por 90 días.
-            </p>
-            <p style={{ color: "#64748b", fontSize: 13, marginBottom: 16, fontWeight: 600 }}>¿Qué comprobante necesitas?</p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 20 }}>
-              <button onClick={function() {
-                // Send receipt email now that user explicitly chose it
-                fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/send-email", {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
-                  },
-                  body: JSON.stringify({
-                    type: "payment_receipt",
-                    to: email,
-                    owner_name: currentUser && currentUser.name ? currentUser.name : email,
-                    amount: "$500.00 MXN",
-                    concept: "Publicación de propiedad (90 días) — Baja Renta",
-                    date: new Date().toLocaleDateString("es-MX", { year: "numeric", month: "long", day: "numeric" }),
-                  }),
-                }).catch(function() {});
-                setStep("receipt_sent");
-              }} style={{ width: "100%", background: "#ffffff08", border: "1px solid #ffffff20", borderRadius: 16, padding: "16px", color: "white", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", textAlign: "left", display: "flex", alignItems: "center", gap: 14 }}>
-                <span style={{ fontSize: 28 }}>🧾</span>
-                <div>
-                  <p style={{ color: "white", fontWeight: 700, marginBottom: 2 }}>Recibo de pago</p>
-                  <p style={{ color: "#64748b", fontSize: 12, fontWeight: 400 }}>Lo recibirás en tu correo de inmediato</p>
-                </div>
-              </button>
-              <button onClick={function() { setStep("invoice_form"); }} style={{ width: "100%", background: "#3b82f608", border: "1px solid #3b82f630", borderRadius: 16, padding: "16px", color: "white", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", textAlign: "left", display: "flex", alignItems: "center", gap: 14 }}>
-                <span style={{ fontSize: 28 }}>📄</span>
-                <div>
-                  <p style={{ color: "#3b82f6", fontWeight: 700, marginBottom: 2 }}>Factura CFDI</p>
-                  <p style={{ color: "#64748b", fontSize: 12, fontWeight: 400 }}>Ingresa tus datos fiscales y la procesamos</p>
-                </div>
-              </button>
-            </div>
-            <button onClick={function() { setPaymentSuccess(false); setScreen("owner"); setOwnerGoToDashboard(true); }} style={{ background: "none", border: "none", color: "#475569", fontSize: 13, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", textDecoration: "underline" }}>
-              Ir a mi dashboard sin comprobante
-            </button>
-          </div>
-        </div>
-      );
-
-      if (step === "receipt_sent") return (
-        <div style={{ minHeight: "100vh", background: "#0a0f1e", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
-          <div style={{ textAlign: "center", maxWidth: 340 }}>
-            <div style={{ fontSize: 64, marginBottom: 16 }}>📧</div>
-            <h2 style={{ color: "white", fontFamily: "'Syne',sans-serif", fontSize: 22, fontWeight: 800, marginBottom: 8 }}>¡Recibo enviado!</h2>
-            <p style={{ color: "#94a3b8", fontSize: 14, lineHeight: 1.7, marginBottom: 28 }}>
-              Revisa tu correo <strong style={{ color: "white" }}>{email}</strong> — ahí encontrarás tu recibo de pago.
-            </p>
-            <button onClick={function() { setPaymentSuccess(false); setScreen("owner"); setOwnerGoToDashboard(true); }} className="btn-glow" style={{ width: "100%", background: "linear-gradient(135deg,#f59e0b,#d97706)", border: "none", borderRadius: 16, padding: "16px", color: "white", fontSize: 16, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
-              🏠 Ir a mi dashboard
-            </button>
-          </div>
-        </div>
-      );
-
-      if (step === "invoice_form") return (
-        <div style={{ minHeight: "100vh", background: "#0a0f1e", padding: "48px 24px 32px", overflowY: "auto" }}>
-          <button onClick={function() { setStep("choose"); }} style={{ background: "none", border: "none", color: "#3b82f6", fontSize: 14, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", marginBottom: 24, display: "flex", alignItems: "center", gap: 6 }}>← Regresar</button>
-          <h2 style={{ color: "white", fontFamily: "'Syne',sans-serif", fontSize: 22, fontWeight: 800, marginBottom: 4 }}>📄 Datos para factura</h2>
-          <p style={{ color: "#64748b", fontSize: 13, marginBottom: 24 }}>Ingresa tus datos fiscales para generar el CFDI de $500 MXN.</p>
-
-          <label style={lbl}>RFC *</label>
-          <input value={rfc} onChange={function(e) { validateRfc(e.target.value); }} placeholder="Ej. AAMM860612BL1" style={Object.assign({}, inp, rfcError ? { border: "1px solid #ef444460" } : {})} />
-          {rfcError ? <p style={{ color: "#ef4444", fontSize: 11, marginTop: -8, marginBottom: 12, textAlign: "left" }}>{rfcError}</p> : null}
-
-          <label style={lbl}>Razón social / Nombre fiscal *</label>
-          <input value={razonSocial} onChange={function(e) { setRazonSocial(e.target.value); }} placeholder="Como aparece en tu constancia del SAT" style={inp} />
-
-          <label style={lbl}>Uso del CFDI</label>
-          <select value={usoCfdi} onChange={function(e) { setUsoCfdi(e.target.value); }} style={inp}>
-            <option value="G03">G03 — Gastos en general</option>
-            <option value="S01">S01 — Sin efectos fiscales</option>
-            <option value="CP01">CP01 — Pagos</option>
-            <option value="D01">D01 — Honorarios médicos</option>
-          </select>
-
-          <label style={lbl}>Régimen fiscal</label>
-          <select value={regimenFiscal} onChange={function(e) { setRegimenFiscal(e.target.value); }} style={inp}>
-            <option value="612">612 — Personas Físicas con Actividades Empresariales</option>
-            <option value="625">625 — Plataformas Tecnológicas</option>
-            <option value="626">626 — Simplificado de Confianza</option>
-            <option value="601">601 — General de Ley Personas Morales</option>
-          </select>
-
-          <label style={lbl}>Código Postal fiscal</label>
-          <input value={cp} onChange={function(e) { setCp(e.target.value.replace(/\D/g, "").slice(0, 5)); }} placeholder="5 dígitos" maxLength={5} style={inp} />
-
-          <div style={{ background: "#f59e0b10", border: "1px solid #f59e0b30", borderRadius: 12, padding: "12px 16px", marginBottom: 20 }}>
-            <p style={{ color: "#fcd34d", fontSize: 12, fontWeight: 600 }}>⏱️ Tu factura llegará en 24–72 hrs hábiles a <span style={{ color: "white" }}>{email}</span></p>
-          </div>
-
-          <button onClick={sendInvoiceRequest} disabled={sending || !rfc || !!rfcError || !razonSocial.trim()} style={{ width: "100%", background: (sending || !rfc || !!rfcError || !razonSocial.trim()) ? "#ffffff10" : "linear-gradient(135deg,#3b82f6,#6366f1)", border: "none", borderRadius: 16, padding: "16px", color: "white", fontSize: 16, fontWeight: 700, cursor: (sending || !rfc || !!rfcError || !razonSocial.trim()) ? "not-allowed" : "pointer", fontFamily: "'DM Sans',sans-serif", opacity: (sending || !rfc || !!rfcError || !razonSocial.trim()) ? 0.6 : 1 }}>
-            {sending ? "⏳ Enviando solicitud..." : "📤 Enviar solicitud de factura"}
-          </button>
-        </div>
-      );
-
-      if (step === "invoice_sent") return (
-        <div style={{ minHeight: "100vh", background: "#0a0f1e", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
-          <div style={{ textAlign: "center", maxWidth: 340 }}>
-            <div style={{ fontSize: 64, marginBottom: 16 }}>✅</div>
-            <h2 style={{ color: "white", fontFamily: "'Syne',sans-serif", fontSize: 22, fontWeight: 800, marginBottom: 8 }}>¡Solicitud enviada!</h2>
-            <p style={{ color: "#94a3b8", fontSize: 14, lineHeight: 1.7, marginBottom: 12 }}>
-              Recibirás tu factura CFDI en las próximas <strong style={{ color: "white" }}>24–72 horas hábiles</strong> en tu correo.
-            </p>
-            <p style={{ color: "#64748b", fontSize: 13, lineHeight: 1.6, marginBottom: 28 }}>
-              ¿Dudas? Escríbenos a <span style={{ color: "#3b82f6" }}>admin@bajarenta.com</span>
-            </p>
-            <button onClick={function() { setPaymentSuccess(false); setScreen("owner"); setOwnerGoToDashboard(true); }} className="btn-glow" style={{ width: "100%", background: "linear-gradient(135deg,#f59e0b,#d97706)", border: "none", borderRadius: 16, padding: "16px", color: "white", fontSize: 16, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
-              🏠 Ir a mi dashboard
-            </button>
-          </div>
-        </div>
-      );
-
-      return null;
-    };
-    return <PaymentSuccessScreen />;
-  }
+  if (paymentSuccess) return (
+    <div style={{ minHeight: "100vh", background: "#0a0f1e", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+      <div style={{ textAlign: "center", maxWidth: 340 }}>
+        <div style={{ fontSize: 64, marginBottom: 16 }}>🎉</div>
+        <h2 style={{ color: "white", fontFamily: "'Syne',sans-serif", fontSize: 24, fontWeight: 800, marginBottom: 8 }}>¡Pago exitoso!</h2>
+        <p style={{ color: "#94a3b8", fontSize: 14, lineHeight: 1.7, marginBottom: 8 }}>
+          Tu pago de <strong style={{ color: "#10b981" }}>$500 MXN</strong> fue procesado correctamente.
+        </p>
+        <p style={{ color: "#64748b", fontSize: 13, lineHeight: 1.6, marginBottom: 28 }}>
+          Recibirás un recibo por correo. El equipo de Baja Renta revisará tu propiedad en 24–72 horas y recibirás una notificación cuando esté publicada.
+        </p>
+        <button onClick={function() { setPaymentSuccess(false); setScreen("owner"); }} className="btn-glow" style={{
+          width: "100%", background: "linear-gradient(135deg,#f59e0b,#d97706)",
+          border: "none", borderRadius: 16, padding: "16px", color: "white",
+          fontSize: 16, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif",
+        }}>
+          🏠 Ir a mi dashboard
+        </button>
+      </div>
+    </div>
+  );
 
   if (screen === "splash") return <SplashScreen onStart={() => { playSound("click"); setScreen("profile"); }} />;
   if (screen === "profile") return <ProfileSelect onSelect={handleProfileSelect} darkMode={darkMode} />;
@@ -7534,7 +7129,7 @@ function App() {
     />
   );
   if (screen === "settings") return <SettingsScreen onBack={() => setScreen("cards")} onSignOut={() => setScreen("profile")} darkModeProp={darkMode} onToggleTheme={() => setDarkMode(v => !v)} onChangePassword={() => setScreen("changePassword")} onHelp={() => setScreen("help")} currentUser={currentUser} />;
-  if (screen === "changePassword") return <ChangePasswordScreen onBack={() => setScreen("settings")} darkMode={darkMode} currentUser={currentUser} />;
+  if (screen === "changePassword") return <ChangePasswordScreen onBack={() => setScreen("settings")} darkMode={darkMode} />;
   if (screen === "help") return <HelpScreen onBack={() => setScreen("settings")} darkMode={darkMode} />;
   if (screen === "cards") return (
     <PropertyCard
@@ -7555,7 +7150,7 @@ function App() {
       darkMode={darkMode}
     />
   );
-  if (screen === "owner") return <OwnerPanel onBack={() => setScreen("profile")} onPublish={addProperty} listedProperties={listedProperties} darkModeProp={darkMode} onToggleTheme={() => setDarkMode(v => !v)} currentUser={currentUser} onSetUser={setCurrentUser} goToDashboard={ownerGoToDashboard} onDashboardHandled={() => setOwnerGoToDashboard(false)} />;
+  if (screen === "owner") return <OwnerPanel onBack={() => setScreen("profile")} onPublish={addProperty} listedProperties={listedProperties} darkModeProp={darkMode} onToggleTheme={() => setDarkMode(v => !v)} currentUser={currentUser} onSetUser={setCurrentUser} />;
   if (screen === "success") return <SuccessScreen onRestart={restart} />;
   if (screen === "master") return <MasterDashboard onBack={() => setScreen("profile")} publishedProperties={ownerSubmissions} onApproveProperty={approveProperty} />;
   return null;
