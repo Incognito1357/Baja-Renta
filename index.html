@@ -3915,6 +3915,11 @@ function getApplicationDocUrl(path) {
   });
 }
 
+function isUuid(v) {
+  var t = String(v || "");
+  return t.length === 36 && t.charAt(8) === "-" && t.charAt(13) === "-" && t.charAt(18) === "-" && t.charAt(23) === "-";
+}
+
 // PATCH helper. Uses return=representation so an RLS block (0 rows) is detected instead of failing silently.
 function supaPatch(path, body, allowEmpty) {
   var KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ";
@@ -3960,6 +3965,7 @@ function OwnerPropertyDetail({ property, onBack, approvedApplicants, onApprove, 
   var status = property.status || "pendiente";
   var isApproved = status === "aprobada" || status === "approved";
   var applicants = apps;
+  var isDemo = !!property.isMock || !isUuid(property.id);
 
   const errText = function(e) { return String(e && e.message ? e.message : e); };
   const applyLocal = function(applicantId, patch) {
@@ -3978,7 +3984,7 @@ function OwnerPropertyDetail({ property, onBack, approvedApplicants, onApprove, 
     var d = applicant.docs || {};
     var newDocs = { ine: !!d.ine, comprobante: !!d.comprobante, estadoCuenta: !!d.estadoCuenta, paths: d.paths || {}, verified: docFlags };
     applyLocal(applicant.id, { refs: newRefs, docsVerified: docFlags });
-    if (property.isMock) return;
+    if (isDemo || !isUuid(applicant.id)) return;
     supaPatch("applications?id=eq." + applicant.id, { refs: newRefs, docs: newDocs }, false).catch(function(e) {
       alert("No se pudo guardar la verificación: " + errText(e));
     });
@@ -3987,7 +3993,14 @@ function OwnerPropertyDetail({ property, onBack, approvedApplicants, onApprove, 
   const approveSelected = function() {
     var chosen = selectedApp;
     if (!chosen) return;
-    if (property.isMock) { alert("Propiedad de ejemplo: no se guarda en la base de datos."); return; }
+    if (isDemo || !isUuid(chosen.id)) {
+      setApps(function(prev) {
+        return prev.map(function(a) { return Object.assign({}, a, { status: String(a.id) === String(chosen.id) ? "Aprobado" : "Rechazado" }); });
+      });
+      setSelectedApp(null);
+      alert("Propiedad de ejemplo: la aprobación no se guarda en la base de datos.");
+      return;
+    }
     approveApplicantAndRent(property, chosen).then(function() {
       if (chosen.email) {
         sendEmail("application_approved", chosen.email, {
@@ -4005,7 +4018,14 @@ function OwnerPropertyDetail({ property, onBack, approvedApplicants, onApprove, 
   const rejectSelected = function() {
     var chosen = selectedApp;
     if (!chosen) return;
-    if (property.isMock) { alert("Propiedad de ejemplo: no se guarda en la base de datos."); return; }
+    if (isDemo || !isUuid(chosen.id)) {
+      setApps(function(prev) {
+        return prev.map(function(a) { return String(a.id) === String(chosen.id) ? Object.assign({}, a, { status: "Rechazado" }) : a; });
+      });
+      setSelectedApp(null);
+      alert("Propiedad de ejemplo: el rechazo no se guarda en la base de datos.");
+      return;
+    }
     supaPatch("applications?id=eq." + chosen.id, { status: "rejected" }, false).then(function() {
       if (chosen.email) {
         sendEmail("application_rejected", chosen.email, { property_name: name, reason: "" });
@@ -4059,6 +4079,11 @@ function OwnerPropertyDetail({ property, onBack, approvedApplicants, onApprove, 
         )}
         {tab === "solicitudes" && applicants.length === 0 && (
           <p style={{ color: "#64748b", textAlign: "center", padding: 40 }}>Sin solicitudes aun</p>
+        )}
+        {tab === "solicitudes" && isDemo && applicants.length > 0 && (
+          <p style={{ color: "#f59e0b", fontSize: 12, background: "#f59e0b10", border: "1px solid #f59e0b30", borderRadius: 10, padding: "8px 12px", marginBottom: 12 }}>
+            Propiedad de ejemplo: estos solicitantes son datos de demostración y los cambios no se guardan.
+          </p>
         )}
         {tab === "solicitudes" && applicants.map(function(a) {
           var refsArr = Array.isArray(a.refs) ? a.refs : [];
@@ -4443,7 +4468,7 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
       applicants: Array.isArray(sp.applicants) ? sp.applicants : [],
       views: Number(sp.views) || 0,
       owner_email: String(sp.owner_email || ""),
-      isMock: !!sp.isMock,
+      isMock: !!sp.isMock || !isUuid(sp.id),
     };
     return <OwnerPropertyDetail
       property={spSafe}
