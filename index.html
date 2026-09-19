@@ -866,6 +866,7 @@ function LoginScreen({ onBack, onLogin, onMasterLogin, onRegister, darkMode = tr
       }).then(function(r) { return r.json(); }).then(function(res) {
         setLoading(false);
         if (res.access_token) {
+        saveSbSession(res);
           // Request push if not already granted
           if (typeof Notification !== "undefined" && Notification.permission === "default") {
             requestPushPermission(email, function(token) { console.log("login push token:", token); });
@@ -2866,6 +2867,7 @@ function SelfRegisterScreen({ onBack, onComplete, onLogin, darkMode = true }) {
       body: JSON.stringify({ email: loginForm.email, password: loginForm.password }),
     }).then(function(r) { return r.json(); }).then(function(res) {
       if (res.access_token) {
+        saveSbSession(res);
         if (typeof Notification !== "undefined" && Notification.permission === "default") {
           requestPushPermission(loginForm.email, function(token) { console.log("owner login push token:", token); });
         }
@@ -3407,6 +3409,8 @@ function ApplicantDetail({ applicant, onBack, isApproved, isRejected, onApprove,
   const border  = darkMode ? "#ffffff10" : "#e2e8f0";
   const [docTab, setDocTab] = useState("profile");
   const [confirmApprove, setConfirmApprove] = useState(false);
+  const [docUrls, setDocUrls] = useState({});
+  const [docMsg, setDocMsg] = useState({});
   var refsList = Array.isArray(applicant.refs) ? applicant.refs : [];
   var docsObj = applicant.docs || {};
   var docsVer = applicant.docsVerified || null;
@@ -3427,7 +3431,7 @@ function ApplicantDetail({ applicant, onBack, isApproved, isRejected, onApprove,
     { key: "estadoCuenta", label: "Estado de cuenta", icon: "🏦" },
   ];
   const [docVerified, setDocVerified] = useState(
-    docsMap.reduce(function(acc, d) { var n = Object.assign({}, acc); n[d.key] = isApproved ? true : (docsVer ? !!docsVer[d.key] : !!docsObj[d.key]); return n; }, {})
+    docsMap.reduce(function(acc, d) { var n = Object.assign({}, acc); n[d.key] = isApproved ? true : (docsVer ? !!docsVer[d.key] : false); return n; }, {})
   );
   const toggleDoc = (key) => {
     if (isApproved) return;
@@ -3591,7 +3595,6 @@ function ApplicantDetail({ applicant, onBack, isApproved, isRejected, onApprove,
             {[
               { label: "Empleo / Ocupación", val: applicant.job, icon: "💼" },
               { label: "Ingreso mensual", val: "$" + Number(applicant.income).toLocaleString() + " MXN", icon: "💰" },
-              { label: "Edad", val: applicant.age ? applicant.age + " años" : "—", icon: "🎂" },
             ].map((r, i) => (
               <div key={i} style={{ background: cardBg, border: "1px solid " + border, borderRadius: 14, padding: "14px 16px", marginBottom: 10, display: "flex", alignItems: "center", gap: 12 }}>
                 <span style={{ fontSize: 20 }}>{r.icon}</span>
@@ -3606,7 +3609,7 @@ function ApplicantDetail({ applicant, onBack, isApproved, isRejected, onApprove,
             <div style={{ height: 1, background: "#ffffff08", margin: "16px 0" }} />
             <div style={{ display: "flex", gap: 10 }}>
               {(() => {
-                const allDocsVerified = docsMap.every(d => !docsObj[d.key] || docVerified[d.key]) && refVerified.every(Boolean);
+                const allDocsVerified = docsMap.every(d => docVerified[d.key]) && refsList.length > 0 && refVerified.every(Boolean);
                 return (
                   <>
                     {!allDocsVerified && !isApproved && (
@@ -3752,6 +3755,34 @@ function ApplicantDetail({ applicant, onBack, isApproved, isRejected, onApprove,
                   </div>
                   {received && (
                     <div>
+                      {docsObj.paths && docsObj.paths[d.key] && !(docsObj._files && docsObj._files[d.key]) && (
+                        <div style={{ marginBottom: 10 }}>
+                          {docUrls[d.key] ? (
+                            (String(docsObj.paths[d.key]).toLowerCase().indexOf(".pdf") !== -1) ? (
+                              <a href={docUrls[d.key]} target="_blank" rel="noopener noreferrer" style={{ display: "block", background: "#3b82f610", border: "1px solid #3b82f630", borderRadius: 10, padding: "10px 14px", color: "#3b82f6", fontSize: 12, fontWeight: 600, textDecoration: "none" }}>
+                                📄 Abrir PDF
+                              </a>
+                            ) : (
+                              <img src={docUrls[d.key]} alt={d.label} style={{ width: "100%", borderRadius: 10, maxHeight: 240, objectFit: "contain", border: "1px solid #3b82f630" }} />
+                            )
+                          ) : (
+                            <button onClick={() => {
+                              setDocMsg(function(m) { var n = Object.assign({}, m); n[d.key] = ""; return n; });
+                              getApplicationDocUrl(docsObj.paths[d.key]).then(function(url) {
+                                setDocUrls(function(u) { var n = Object.assign({}, u); n[d.key] = url; return n; });
+                              }).catch(function(e) {
+                                setDocMsg(function(m) { var n = Object.assign({}, m); n[d.key] = String(e && e.message ? e.message : e); return n; });
+                              });
+                            }} style={{ width: "100%", background: "#3b82f610", border: "1px solid #3b82f630", borderRadius: 10, padding: "10px", color: "#3b82f6", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
+                              👁 Ver documento
+                            </button>
+                          )}
+                          {docMsg[d.key] ? <p style={{ color: "#ef4444", fontSize: 11, marginTop: 6 }}>{docMsg[d.key]}</p> : null}
+                        </div>
+                      )}
+                      {!(docsObj.paths && docsObj.paths[d.key]) && !(docsObj._files && docsObj._files[d.key]) && (
+                        <p style={{ color: "#64748b", fontSize: 11, marginBottom: 10 }}>El archivo no está disponible para revisión.</p>
+                      )}
                       {/* File preview if available */}
                       {applicant.docs && applicant.docs._files && applicant.docs._files[d.key] && (
                         <div style={{ marginBottom: 10 }}>
@@ -3803,6 +3834,85 @@ function ApplicantDetail({ applicant, onBack, isApproved, isRejected, onApprove,
       </div>
     </div>
   );
+}
+
+// ── Applicant documents (private bucket "application-docs") ─────────────────
+var DOCS_SUPA = "https://uwtclxtywhthwecsqeug.supabase.co";
+var DOCS_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ";
+
+// Keep the signed-in user's session token in memory (needed to upload / read private documents)
+function saveSbSession(res) {
+  window.__sbSession = {
+    token: res.access_token,
+    refresh: res.refresh_token || "",
+    exp: Date.now() + ((res.expires_in || 3600) * 1000),
+  };
+}
+
+function getSbToken() {
+  var ss = window.__sbSession;
+  if (!ss || !ss.token) return Promise.resolve(null);
+  if (Date.now() < ss.exp - 60000) return Promise.resolve(ss.token);
+  if (!ss.refresh) return Promise.resolve(null);
+  return fetch(DOCS_SUPA + "/auth/v1/token?grant_type=refresh_token", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "apikey": DOCS_KEY },
+    body: JSON.stringify({ refresh_token: ss.refresh }),
+  }).then(function(r) { return r.json(); }).then(function(res) {
+    if (res && res.access_token) { saveSbSession(res); return res.access_token; }
+    return null;
+  }).catch(function() { return null; });
+}
+
+function dataUrlToBlob(dataUrl) {
+  var parts = String(dataUrl).split(",");
+  var head = parts[0] || "";
+  var mime = head.substring(head.indexOf(":") + 1, head.indexOf(";")) || "application/octet-stream";
+  var bin = atob(parts[1] || "");
+  var arr = new Uint8Array(bin.length);
+  for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  return new Blob([arr], { type: mime });
+}
+
+// file = { name, type, data (data URL) } as produced by the application form
+function uploadApplicationDoc(appId, docKey, file) {
+  return getSbToken().then(function(token) {
+    if (!token) throw new Error("sin sesión");
+    var nm = String(file.name || "");
+    var dot = nm.lastIndexOf(".");
+    var ext = dot >= 0 ? nm.substring(dot + 1).toLowerCase().replace(/\W/g, "").slice(0, 5) : "";
+    var path = appId + "/" + docKey + "-" + Date.now() + (ext ? "." + ext : "");
+    var blob = dataUrlToBlob(file.data);
+    return fetch(DOCS_SUPA + "/storage/v1/object/application-docs/" + path, {
+      method: "POST",
+      headers: {
+        "apikey": DOCS_KEY,
+        "Authorization": "Bearer " + token,
+        "Content-Type": blob.type || file.type || "application/octet-stream",
+      },
+      body: blob,
+    }).then(function(r) {
+      if (!r.ok) throw new Error("upload " + r.status);
+      return path;
+    });
+  });
+}
+
+// Short-lived link (5 min) to view a stored document; only works for the property owner
+function getApplicationDocUrl(path) {
+  return getSbToken().then(function(token) {
+    if (!token) throw new Error("Vuelve a iniciar sesión para ver los documentos");
+    return fetch(DOCS_SUPA + "/storage/v1/object/sign/application-docs/" + path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": DOCS_KEY, "Authorization": "Bearer " + token },
+      body: JSON.stringify({ expiresIn: 300 }),
+    }).then(function(r) {
+      return r.json().then(function(j) {
+        if (!r.ok || !j || !j.signedURL) throw new Error("No se pudo abrir el documento (sin acceso o ya no existe)");
+        return DOCS_SUPA + "/storage/v1" + j.signedURL;
+      });
+    });
+  });
 }
 
 // PATCH helper. Uses return=representation so an RLS block (0 rows) is detected instead of failing silently.
@@ -3866,7 +3976,7 @@ function OwnerPropertyDetail({ property, onBack, approvedApplicants, onApprove, 
       return { name: r.name || "", phone: r.phone || "", relation: r.relation || "", verified: !!refFlags[i] };
     });
     var d = applicant.docs || {};
-    var newDocs = { ine: !!d.ine, comprobante: !!d.comprobante, estadoCuenta: !!d.estadoCuenta, verified: docFlags };
+    var newDocs = { ine: !!d.ine, comprobante: !!d.comprobante, estadoCuenta: !!d.estadoCuenta, paths: d.paths || {}, verified: docFlags };
     applyLocal(applicant.id, { refs: newRefs, docsVerified: docFlags });
     if (property.isMock) return;
     supaPatch("applications?id=eq." + applicant.id, { refs: newRefs, docs: newDocs }, false).catch(function(e) {
@@ -4250,6 +4360,7 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
                 ine: !!(a.docs && a.docs.ine),
                 comprobante: !!(a.docs && a.docs.comprobante),
                 estadoCuenta: !!(a.docs && a.docs.estadoCuenta),
+                paths: (a.docs && a.docs.paths) || {},
               },
               docsVerified: (a.docs && a.docs.verified) || {},
             };
@@ -6178,6 +6289,7 @@ function MasterLogin({ onBack, onLogin }) {
     }).then(function(r) { return r.json(); }).then(function(res) {
       setLoading(false);
       if (res.access_token) {
+        saveSbSession(res);
         if (typeof Notification !== "undefined" && Notification.permission === "default") {
           requestPushPermission(user, function(token) { console.log("visitor login push token:", token); });
         }
@@ -6975,8 +7087,20 @@ function App() {
   // Owner listed properties with live applicant submissions from visitors
   const [listedProperties, setListedProperties] = useState([]);
   const addApplicant = (propertyId, applicant) => {
-    // Save application to Supabase
-    fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/applications", {
+    // Upload documents to the private bucket first, then save the application
+    var appId = (window.crypto && window.crypto.randomUUID) ? window.crypto.randomUUID() : null;
+    var docFiles = (applicant.docs && applicant.docs._files) || {};
+    var uploads = ["ine", "comprobante", "estadoCuenta"].map(function(k) {
+      if (!appId || !docFiles[k] || !docFiles[k].data) return Promise.resolve(null);
+      return uploadApplicationDoc(appId, k, docFiles[k]).then(function(p) { return [k, p]; }).catch(function(e) {
+        console.log("doc upload error:", k, e);
+        return null;
+      });
+    });
+    Promise.all(uploads).then(function(results) {
+    var docPaths = {};
+    results.forEach(function(x) { if (x) docPaths[x[0]] = x[1]; });
+    return fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/applications", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -6985,6 +7109,7 @@ function App() {
         "Prefer": "return=minimal",
       },
       body: JSON.stringify({
+        id: appId || undefined,
         property_id: typeof propertyId === "string" && propertyId.includes("-") ? propertyId : null,
         property_name: applicant.propertyName || "",
         visitor_name: applicant.name || "",
@@ -7000,10 +7125,12 @@ function App() {
           ine: !!(applicant.docs && applicant.docs.ine),
           comprobante: !!(applicant.docs && applicant.docs.comprobante),
           estadoCuenta: !!(applicant.docs && applicant.docs.estadoCuenta),
+          paths: docPaths,
           verified: { ine: false, comprobante: false, estadoCuenta: false },
         },
         status: "pending",
       }),
+    });
     }).catch(function(e) { console.log("application save error:", e); });
 
     // Also update local state
@@ -7207,7 +7334,7 @@ function App() {
       property={likedProperty}
       onBack={() => setScreen("cards")}
       onRent={() => setScreen("success")}
-      onSubmitApplication={(applicant) => addApplicant(likedProperty.id, applicant)}
+      onSubmitApplication={(applicant) => addApplicant(likedProperty.id, Object.assign({}, applicant, { propertyName: likedProperty.name }))}
       darkMode={darkMode}
     />
   );
