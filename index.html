@@ -820,8 +820,14 @@ function LoginScreen({ onBack, onLogin, onMasterLogin, onRegister, darkMode = tr
   const canLogin = email && password;
   const codeJoined = code.join("");
   const [codeHash, setCodeHash] = useState("");
+  const [mfaStage, setMfaStage] = useState("");
+  const [mfaFactorId, setMfaFactorId] = useState("");
+  const [mfaQr, setMfaQr] = useState("");
+  const [mfaSecret, setMfaSecret] = useState("");
+  const [mfaError, setMfaError] = useState("");
+  const [mfaBusy, setMfaBusy] = useState(false);
   const codeComplete = codeJoined.length === 6;
-  const codeCorrect = codeHash === H_2FA;
+  const codeCorrect = codeComplete && !mfaBusy;
 
   if (showForgot) return <ForgotPasswordScreen onBack={() => setShowForgot(false)} darkMode={darkMode} />;
 
@@ -849,16 +855,8 @@ function LoginScreen({ onBack, onLogin, onMasterLogin, onRegister, darkMode = tr
     if (!canLogin) return;
     setLoading(true);
     setError(false);
-    // Check master first via SHA-256
-    Promise.all([sha256(email), sha256(password)]).then(function(hashes) {
-      var hUser = hashes[0];
-      var hPass = hashes[1];
-      if (hUser === H_USER && hPass === H_PASS && onMasterLogin) {
-        setLoading(false);
-        setStep("verify2fa");
-        return;
-      }
-      // Real Supabase auth for visitors and owners
+    Promise.resolve().then(function() {
+      // Server-side sign-in (Master screens continue to the second-factor step)
       fetch("https://uwtclxtywhthwecsqeug.supabase.co/auth/v1/token?grant_type=password", {
         method: "POST",
         headers: { "Content-Type": "application/json", "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ" },
@@ -867,6 +865,7 @@ function LoginScreen({ onBack, onLogin, onMasterLogin, onRegister, darkMode = tr
         setLoading(false);
         if (res.access_token) {
         saveSbSession(res);
+          if (onMasterLogin) { startMasterMfa(res.access_token); return; }
           // Request push if not already granted
           if (typeof Notification !== "undefined" && Notification.permission === "default") {
             requestPushPermission(email, function(token) { console.log("login push token:", token); });
@@ -882,6 +881,80 @@ function LoginScreen({ onBack, onLogin, onMasterLogin, onRegister, darkMode = tr
     });
   };
 
+  // Master: the server decides (admin allow-list + TOTP). Nothing is decided in the browser.
+  const startMasterMfa = function(token) {
+    setMfaError("");
+    setMfaBusy(true);
+    masterIsAdmin(token).then(function(isAdmin) {
+      if (!isAdmin) {
+        window.__sbSession = null;
+        setMfaBusy(false);
+        setError(true);
+        return;
+      }
+      return authApi("user", token, "GET").then(function(u) {
+        var factors = (u.data && u.data.factors) || [];
+        var verified = factors.filter(function(f) { return f.factor_type === "totp" && f.status === "verified"; })[0];
+        if (verified) {
+          setMfaFactorId(verified.id);
+          setMfaStage("verify");
+          setMfaBusy(false);
+          setStep("verify2fa");
+          return;
+        }
+        // First time: remove abandoned attempts, then enroll an authenticator app
+        var stale = factors.filter(function(f) { return f.status === "unverified"; });
+        return Promise.all(stale.map(function(f) { return authApi("factors/" + f.id, token, "DELETE"); })).then(function() {
+          return authApi("factors", token, "POST", { factor_type: "totp", friendly_name: "Baja Renta Master " + Date.now(), issuer: "Baja Renta" });
+        }).then(function(r) {
+          if (!r.ok || !r.data || !r.data.totp) {
+            window.__sbSession = null;
+            setMfaBusy(false);
+            setError(true);
+            setMfaError("No se pudo activar la verificación en 2 pasos (revisa que TOTP esté habilitado en Supabase Auth).");
+            return;
+          }
+          setMfaFactorId(r.data.id);
+          setMfaQr(r.data.totp.qr_code || "");
+          setMfaSecret(r.data.totp.secret || "");
+          setMfaStage("enroll");
+          setMfaBusy(false);
+          setStep("verify2fa");
+        });
+      });
+    }).catch(function() {
+      window.__sbSession = null;
+      setMfaBusy(false);
+      setError(true);
+    });
+  };
+
+  const verifyMasterCode = function() {
+    if (!codeComplete || mfaBusy) return;
+    var sess = window.__sbSession;
+    if (!sess || !sess.token) { setMfaError("La sesión expiró. Regresa e inicia de nuevo."); return; }
+    setMfaBusy(true);
+    setMfaError("");
+    authApi("factors/" + mfaFactorId + "/challenge", sess.token, "POST", {}).then(function(c) {
+      if (!c.ok || !c.data || !c.data.id) throw new Error("challenge");
+      return authApi("factors/" + mfaFactorId + "/verify", sess.token, "POST", { challenge_id: c.data.id, code: codeJoined });
+    }).then(function(v) {
+      setMfaBusy(false);
+      if (v.ok && v.data && v.data.access_token) {
+        saveSbSession(v.data);
+        if (onMasterLogin) onMasterLogin();
+      } else {
+        setMfaError("Código incorrecto o expirado.");
+        setCode(["", "", "", "", "", ""]);
+        setCodeHash("");
+        if (codeRefs[0].current) codeRefs[0].current.focus();
+      }
+    }).catch(function() {
+      setMfaBusy(false);
+      setMfaError("Error de conexión. Intenta de nuevo.");
+    });
+  };
+
   const handleCodeKey = (i, e) => {
     if (e.key === "Backspace" && !code[i] && i > 0) codeRefs[i - 1].current.focus();
   };
@@ -889,7 +962,7 @@ function LoginScreen({ onBack, onLogin, onMasterLogin, onRegister, darkMode = tr
   if (step === "verify2fa") {
     return (
       <div style={{ minHeight: "100vh", background: bg, padding: "48px 24px", display: "flex", flexDirection: "column", transition: "background .3s" }}>
-        <button onClick={() => setStep("form")} style={{ background: "none", border: "none", color: "#64748b", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontSize: 14, marginBottom: 40, fontFamily: "'DM Sans',sans-serif" }}>
+        <button onClick={() => { window.__sbSession = null; setMfaStage(""); setMfaError(""); setCode(["", "", "", "", "", ""]); setStep("form"); }} style={{ background: "none", border: "none", color: "#64748b", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontSize: 14, marginBottom: 40, fontFamily: "'DM Sans',sans-serif" }}>
           <Icon name="back" size={16} /> Regresar
         </button>
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
@@ -904,11 +977,21 @@ function LoginScreen({ onBack, onLogin, onMasterLogin, onRegister, darkMode = tr
             Verificación en 2 pasos
           </h2>
           <p style={{ color: "#64748b", fontSize: 14, marginBottom: 6, maxWidth: 300, lineHeight: 1.5 }}>
-            Ingresa el código de 6 dígitos enviado al dispositivo de seguridad del administrador
+            {mfaStage === "enroll" ? "Primera vez: escanea el QR con tu app de autenticación (Google Authenticator, Authy…) y escribe el código de 6 dígitos que muestra." : "Ingresa el código de 6 dígitos de tu app de autenticación."}
           </p>
           <div style={{ background: "#8b5cf615", border: "1px solid #8b5cf630", borderRadius: 99, padding: "4px 16px", marginBottom: 32 }}>
             <p style={{ color: "#8b5cf6", fontSize: 12, fontWeight: 600 }}>🛡️ Acceso Panel Maestro</p>
           </div>
+          {mfaStage === "enroll" && mfaQr ? (
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 20 }}>
+              <img src={mfaQr} alt="QR" style={{ width: 176, height: 176, background: "white", borderRadius: 12, padding: 8 }} />
+              {mfaSecret ? (
+                <p style={{ color: "#64748b", fontSize: 11, marginTop: 10, maxWidth: 300, wordBreak: "break-all" }}>
+                  {"¿No puedes escanear? Clave manual: " + mfaSecret}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
           <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
             {code.map((c, i) => (
               <input key={i} ref={codeRefs[i]} value={c}
@@ -925,11 +1008,9 @@ function LoginScreen({ onBack, onLogin, onMasterLogin, onRegister, darkMode = tr
                 }} />
             ))}
           </div>
-          {codeComplete && !codeCorrect && (
-            <p style={{ color: "#ef4444", fontSize: 13, marginBottom: 12 }}>⚠️ Código incorrecto. Intenta de nuevo.</p>
-          )}
+          {mfaError ? <p style={{ color: "#ef4444", fontSize: 13, marginBottom: 12, maxWidth: 300 }}>{"⚠️ " + mfaError}</p> : null}
           <button
-            onClick={() => { if (codeCorrect && onMasterLogin) onMasterLogin(); }}
+            onClick={verifyMasterCode}
             style={{
               width: "100%", maxWidth: 320, marginBottom: 16,
               background: codeCorrect ? "linear-gradient(135deg, #8b5cf6, #6d28d9)" : "#ffffff10",
@@ -941,7 +1022,7 @@ function LoginScreen({ onBack, onLogin, onMasterLogin, onRegister, darkMode = tr
             🛡️ Verificar y acceder al panel
           </button>
           <button onClick={() => setCode(Array(6).fill(""))} style={{ background: "none", border: "none", color: "#64748b", fontSize: 13, cursor: "pointer", textDecoration: "underline", fontFamily: "'DM Sans',sans-serif" }}>
-            Reenviar código
+            Borrar código
           </button>
         </div>
       </div>
@@ -3838,6 +3919,7 @@ function ApplicantDetail({ applicant, onBack, isApproved, isRejected, onApprove,
 
 // ── Applicant documents (private bucket "application-docs") ─────────────────
 var DOCS_SUPA = "https://uwtclxtywhthwecsqeug.supabase.co";
+var MASTER_ACCOUNT_EMAIL = "miguelayalamartinez@gmail.com";
 var DOCS_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ";
 
 // Keep the signed-in user's session token in memory (needed to upload / read private documents)
@@ -3875,7 +3957,7 @@ function dataUrlToBlob(dataUrl) {
 }
 
 // file = { name, type, data (data URL) } as produced by the application form
-function uploadApplicationDoc(appId, docKey, file) {
+function uploadPrivateDoc(bucket, appId, docKey, file) {
   return getSbToken().then(function(token) {
     if (!token) throw new Error("sin sesión");
     var nm = String(file.name || "");
@@ -3883,7 +3965,7 @@ function uploadApplicationDoc(appId, docKey, file) {
     var ext = dot >= 0 ? nm.substring(dot + 1).toLowerCase().replace(/\W/g, "").slice(0, 5) : "";
     var path = appId + "/" + docKey + "-" + Date.now() + (ext ? "." + ext : "");
     var blob = dataUrlToBlob(file.data);
-    return fetch(DOCS_SUPA + "/storage/v1/object/application-docs/" + path, {
+    return fetch(DOCS_SUPA + "/storage/v1/object/" + bucket + "/" + path, {
       method: "POST",
       headers: {
         "apikey": DOCS_KEY,
@@ -3899,10 +3981,10 @@ function uploadApplicationDoc(appId, docKey, file) {
 }
 
 // Short-lived link (5 min) to view a stored document; only works for the property owner
-function getApplicationDocUrl(path) {
+function getPrivateDocUrl(bucket, path) {
   return getSbToken().then(function(token) {
     if (!token) throw new Error("Vuelve a iniciar sesión para ver los documentos");
-    return fetch(DOCS_SUPA + "/storage/v1/object/sign/application-docs/" + path, {
+    return fetch(DOCS_SUPA + "/storage/v1/object/sign/" + bucket + "/" + path, {
       method: "POST",
       headers: { "Content-Type": "application/json", "apikey": DOCS_KEY, "Authorization": "Bearer " + token },
       body: JSON.stringify({ expiresIn: 300 }),
@@ -3915,23 +3997,55 @@ function getApplicationDocUrl(path) {
   });
 }
 
+function uploadApplicationDoc(appId, docKey, file) {
+  return uploadPrivateDoc("application-docs", appId, docKey, file);
+}
+function getApplicationDocUrl(path) {
+  return getPrivateDocUrl("application-docs", path);
+}
+
 function isUuid(v) {
   var t = String(v || "");
   return t.length === 36 && t.charAt(8) === "-" && t.charAt(13) === "-" && t.charAt(18) === "-" && t.charAt(23) === "-";
 }
 
+// ── Master login: Supabase password + admin check + TOTP second factor (all verified by the server) ──
+function authApi(path, token, method, body) {
+  return fetch(DOCS_SUPA + "/auth/v1/" + path, {
+    method: method,
+    headers: { "Content-Type": "application/json", "apikey": DOCS_KEY, "Authorization": "Bearer " + token },
+    body: body ? JSON.stringify(body) : undefined,
+  }).then(function(r) {
+    return r.text().then(function(t) {
+      var j = {};
+      try { j = t ? JSON.parse(t) : {}; } catch (e) { j = {}; }
+      return { ok: r.ok, status: r.status, data: j };
+    });
+  });
+}
+
+function masterIsAdmin(token) {
+  return fetch(DOCS_SUPA + "/rest/v1/rpc/is_app_admin", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "apikey": DOCS_KEY, "Authorization": "Bearer " + token },
+    body: "{}",
+  }).then(function(r) { return r.json(); }).then(function(j) { return j === true; }).catch(function() { return false; });
+}
+
 // PATCH helper. Uses return=representation so an RLS block (0 rows) is detected instead of failing silently.
 function supaPatch(path, body, allowEmpty) {
   var KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ";
-  return fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/" + path, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      "apikey": KEY,
-      "Authorization": "Bearer " + KEY,
-      "Prefer": "return=representation",
-    },
-    body: JSON.stringify(body),
+  return getSbToken().then(function(tok) {
+    return fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/" + path, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": KEY,
+        "Authorization": "Bearer " + (tok || KEY),
+        "Prefer": "return=representation",
+      },
+      body: JSON.stringify(body),
+    });
   }).then(function(r) {
     return r.json().then(function(rows) {
       if (!r.ok) throw new Error((rows && rows.message) || "Error al actualizar");
@@ -4740,7 +4854,25 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
       owner_email: currentUser && currentUser.email ? currentUser.email : null,
     };
 
-    fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties", {
+    var propId = (window.crypto && window.crypto.randomUUID) ? window.crypto.randomUUID() : null;
+    Promise.all(["escritura", "ine", "domicilio", "predial"].map(function(k) {
+      var f = uploadedDocs[k];
+      if (!f) return Promise.resolve(null);
+      var entry = { name: f.name || "", type: f.type || "", path: "", verified: false };
+      if (!propId || !f.data) return Promise.resolve([k, entry]);
+      return uploadPrivateDoc("property-legal-docs", propId, k, f).then(function(pth) {
+        entry.path = pth;
+        return [k, entry];
+      }).catch(function(e) {
+        console.log("legal doc upload error:", k, e);
+        return [k, entry];
+      });
+    })).then(function(results) {
+      var legal = {};
+      results.forEach(function(x) { if (x) legal[x[0]] = x[1]; });
+      supaData.legal_docs = legal;
+      if (propId) supaData.id = propId;
+    return fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -4749,6 +4881,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
         "Prefer": "return=representation",
       },
       body: JSON.stringify(supaData),
+    });
     }).then(function(r) { return r.json(); }).then(function(res) {
       console.log("Property saved to Supabase:", res);
     }).catch(function(e) { console.log("Supabase save error:", e); });
@@ -6221,9 +6354,6 @@ async function sha256(str) {
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,"0")).join("");
 }
-const H_USER = "9102717ca1df3bf76b1a7609670221a94c80e5380465328bd563663433d847de";
-const H_PASS = "8fd2fc02cd9301dcde43441500417e81c3faae139e827cdbc216af4da3b6f065";
-const H_2FA  = "df8c65d86a74b308aca7f124bb17e9a6cfbeaff79e832c1b06892d9d9c5fcbb6";
 
 // Pre-encoded document placeholder SVG
 const MOCK_DOC_IMG = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iJTIzMGQxZjNjIi8+PHJlY3QgeD0iNDAiIHk9IjMwIiB3aWR0aD0iMzIwIiBoZWlnaHQ9IjI0MCIgcng9IjgiIGZpbGw9IiUyMzBhMTYyOCIgc3Ryb2tlPSIlMjMzYjgyZjYiIHN0cm9rZS13aWR0aD0iMS41Ii8+PHJlY3QgeD0iNjAiIHk9IjU1IiB3aWR0aD0iMTgwIiBoZWlnaHQ9IjEyIiByeD0iNCIgZmlsbD0iJTIzMWUzYTVmIi8+PHJlY3QgeD0iNjAiIHk9IjgwIiB3aWR0aD0iMjgwIiBoZWlnaHQ9IjgiIHJ4PSI0IiBmaWxsPSIlMjMxZTNhNWYiLz48cmVjdCB4PSI2MCIgeT0iMTAwIiB3aWR0aD0iMjQwIiBoZWlnaHQ9IjgiIHJ4PSI0IiBmaWxsPSIlMjMxZTNhNWYiLz48cmVjdCB4PSI2MCIgeT0iMTIwIiB3aWR0aD0iMjYwIiBoZWlnaHQ9IjgiIHJ4PSI0IiBmaWxsPSIlMjMxZTNhNWYiLz48dGV4dCB4PSIyMDAiIHk9IjIzMCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjExIiBmaWxsPSIlMjM2NDc0OGIiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkRvY3VtZW50byBPZmljaWFsPC90ZXh0Pjwvc3ZnPg==";
@@ -6423,6 +6553,8 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
   const [properties, setProperties] = useState(buildList);
   const [filter, setFilter] = useState("todas");
   const [selected, setSelected] = useState(null);
+  const [legalDocUrls, setLegalDocUrls] = useState({});
+  const [legalDocMsg, setLegalDocMsg] = useState({});
   const [masterTab, setMasterTab] = useState("owners"); // owners | visitors
   const [visitorSearch, setVisitorSearch] = useState("");
   const [visitors, setVisitors] = useState([
@@ -6492,6 +6624,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
           img: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80",
           images: ["https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80"],
           submitted: p.created_at ? p.created_at.slice(0, 10) : "—",
+          _uploadedDocs: (p.legal_docs && typeof p.legal_docs === "object") ? p.legal_docs : {},
           _mode: p.management_mode || "self",
           isNew: true,
           isSupa: true,
@@ -6514,16 +6647,9 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
   const updatePropertyStatus = function(id, status, prop) {
     // Update in Supabase (only real properties, not mocks)
     if (prop && !prop.isMock) {
-      fetch(SUPA_URL + "?id=eq." + id, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          "apikey": ANON_KEY,
-          "Authorization": "Bearer " + ANON_KEY,
-          "Prefer": "return=minimal",
-        },
-        body: JSON.stringify({ status: status === "aprobada" ? "approved" : status === "rechazada" ? "rejected" : "pending" }),
-      }).catch(function(e) { console.log("Supabase update error:", e); });
+      if (isUuid(id)) supaPatch("properties?id=eq." + id, { status: status === "aprobada" ? "approved" : status === "rechazada" ? "rejected" : "pending" }, false).catch(function(e) {
+        alert("No se pudo guardar el cambio en la base de datos: " + String(e && e.message ? e.message : e));
+      });
     }
     // Send email to owner
     if (prop && prop.ownerEmail) {
@@ -6545,6 +6671,49 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
     if (status === "aprobada" && onApproveProperty) {
       onApproveProperty(id);
     }
+  };
+
+  // Master opens a stored document (short-lived link)
+  const openLegalDoc = function(p, key) {
+    var k = p.id + ":" + key;
+    setLegalDocMsg(function(m) { var n = Object.assign({}, m); n[k] = ""; return n; });
+    getSbToken().then(function(tok) {
+      if (!tok) { throw new Error("Tu sesión expiró. Sal del panel y vuelve a entrar."); }
+      return getPrivateDocUrl("property-legal-docs", p._uploadedDocs[key].path);
+    }).then(function(url) {
+      setLegalDocUrls(function(u) { var n = Object.assign({}, u); n[k] = url; return n; });
+    }).catch(function(e) {
+      setLegalDocMsg(function(m) { var n = Object.assign({}, m); n[k] = String(e && e.message ? e.message : e); return n; });
+    });
+  };
+
+  // Master approves / un-approves one legal document (saved in the database)
+  const toggleLegalDoc = function(p, key) {
+    var cur = p._uploadedDocs || {};
+    var next = {};
+    ["escritura", "ine", "domicilio", "predial"].forEach(function(k) {
+      if (cur[k]) {
+        next[k] = { name: cur[k].name || "", type: cur[k].type || "", path: cur[k].path || "", verified: k === key ? !cur[k].verified : !!cur[k].verified };
+      }
+    });
+    supaPatch("properties?id=eq." + p.id, { legal_docs: next }, false).then(function() {
+      setProperties(function(prev) {
+        return prev.map(function(x) { return x.id === p.id ? Object.assign({}, x, { _uploadedDocs: next }) : x; });
+      });
+    }).catch(function(e) {
+      alert("No se pudo guardar la aprobación del documento: " + String(e && e.message ? e.message : e));
+    });
+  };
+
+  // Approving a property with documents still pending asks for confirmation
+  const approveWithDocsCheck = function(p) {
+    if (p.isSupa) {
+      var docs = p._uploadedDocs || {};
+      var pending = ["escritura", "ine", "domicilio", "predial"].filter(function(k) { return !(docs[k] && docs[k].verified); });
+      if (pending.length > 0 && !window.confirm("Faltan " + pending.length + " de 4 documentos por aprobar. ¿Aprobar la propiedad de todos modos?")) return;
+    }
+    toggleStatus(p.id);
+    setSelected(null);
   };
 
   const toggleStatus = function(id) {
@@ -6703,21 +6872,53 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
                           </div>
                         </div>
                         <span style={{ background: uploaded ? "#10b98120" : "#ffffff10", border: "1px solid " + uploaded ? "#10b98140" : "#ffffff15", borderRadius: 99, padding: "3px 10px", color: uploaded ? "#10b981" : "#475569", fontSize: 10, fontWeight: 700 }}>
-                          {uploaded ? "✓ Recibido" : "✗ No subido"}
+                          {uploaded ? (uploaded.verified ? "✓ Aprobado" : "✓ Recibido") : "✗ No subido"}
                         </span>
                       </div>
-                      {uploaded && isImg && (
+                      {uploaded && isImg && uploaded.data && (
                         <img src={uploaded.data} alt={uploaded.name} style={{ width: "100%", maxHeight: 180, objectFit: "contain", borderRadius: 8, background: "#000000a0" }} />
                       )}
-                      {uploaded && isPdf && (
+                      {uploaded && isPdf && uploaded.data && (
                         <a href={uploaded.data} download={uploaded.name} style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#3b82f615", border: "1px solid #3b82f630", borderRadius: 8, padding: "6px 12px", color: "#3b82f6", fontSize: 12, fontWeight: 600, textDecoration: "none", marginTop: 8 }}>
                           📥 Descargar PDF
                         </a>
+                      )}
+                      {p.isSupa && uploaded && (
+                        <div style={{ marginTop: 10 }}>
+                          {uploaded.path ? (
+                            <div>
+                              {legalDocUrls[p.id + ":" + doc.key] ? (
+                                isPdf ? (
+                                  <a href={legalDocUrls[p.id + ":" + doc.key]} target="_blank" rel="noopener noreferrer" style={{ display: "block", background: "#3b82f615", border: "1px solid #3b82f630", borderRadius: 10, padding: "10px 14px", color: "#3b82f6", fontSize: 12, fontWeight: 600, textDecoration: "none", marginBottom: 8 }}>
+                                    📄 Abrir PDF
+                                  </a>
+                                ) : (
+                                  <img src={legalDocUrls[p.id + ":" + doc.key]} alt={doc.label} style={{ width: "100%", maxHeight: 240, objectFit: "contain", borderRadius: 8, background: "#000000a0", marginBottom: 8 }} />
+                                )
+                              ) : (
+                                <button onClick={() => openLegalDoc(p, doc.key)} style={{ width: "100%", background: "#3b82f610", border: "1px solid #3b82f630", borderRadius: 10, padding: "10px", color: "#3b82f6", fontSize: 13, fontWeight: 600, cursor: "pointer", marginBottom: 8, fontFamily: "'DM Sans',sans-serif" }}>
+                                  👁 Ver documento
+                                </button>
+                              )}
+                              {legalDocMsg[p.id + ":" + doc.key] ? <p style={{ color: "#ef4444", fontSize: 11, marginBottom: 8 }}>{legalDocMsg[p.id + ":" + doc.key]}</p> : null}
+                              <button onClick={() => toggleLegalDoc(p, doc.key)} style={{ width: "100%", background: uploaded.verified ? "#f59e0b15" : "#10b98115", border: uploaded.verified ? "1px solid #f59e0b40" : "1px solid #10b98140", borderRadius: 10, padding: "10px", color: uploaded.verified ? "#f59e0b" : "#10b981", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
+                                {uploaded.verified ? "↩ Quitar aprobación" : "✓ Aprobar documento"}
+                              </button>
+                            </div>
+                          ) : (
+                            <p style={{ color: "#ef4444", fontSize: 11 }}>El archivo no se pudo subir. Pide al propietario que lo envíe de nuevo.</p>
+                          )}
+                        </div>
                       )}
                     </div>
                   );
                 })}
               </div>
+              {p.isSupa && p._uploadedDocs && Object.values(p._uploadedDocs).some(Boolean) && (
+                <p style={{ color: "#64748b", fontSize: 12, marginBottom: 16 }}>
+                  {Object.values(p._uploadedDocs).filter(function(d) { return d && d.verified; }).length + " de 4 documentos aprobados"}
+                </p>
+              )}
               {p._uploadedDocs && !Object.values(p._uploadedDocs).some(Boolean) && (
                 <div style={{ background: "#ef444410", border: "1px solid #ef444430", borderRadius: 12, padding: "10px 14px", marginBottom: 16 }}>
                   <p style={{ color: "#ef4444", fontSize: 12 }}>⚠️ El propietario no subió documentos legales todavía</p>
@@ -6752,7 +6953,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
                 <Icon name="x" size={18} color="#ef4444" />
                 <p style={{ color: "#ef4444", fontSize: 14, fontWeight: 700 }}>Propiedad rechazada</p>
               </div>
-              <button onClick={() => { toggleStatus(p.id); setSelected(null); }} style={{
+              <button onClick={() => approveWithDocsCheck(p)} style={{
                 width: "100%", background: "linear-gradient(135deg, #10b981, #059669)",
                 border: "none", borderRadius: 14, padding: "14px", color: "white",
                 fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif",
@@ -6762,7 +6963,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
             </div>
           ) : (
             <div style={{ display: "flex", gap: 12 }}>
-              <button onClick={() => { toggleStatus(p.id); setSelected(null); }} style={{
+              <button onClick={() => approveWithDocsCheck(p)} style={{
                 flex: 1, background: "linear-gradient(135deg, #10b981, #059669)",
                 border: "none", borderRadius: 16, padding: "18px", color: "white",
                 fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif",
@@ -7365,7 +7566,7 @@ function App() {
   );
   if (screen === "owner") return <OwnerPanel onBack={() => setScreen("profile")} onPublish={addProperty} listedProperties={listedProperties} darkModeProp={darkMode} onToggleTheme={() => setDarkMode(v => !v)} currentUser={currentUser} onSetUser={setCurrentUser} />;
   if (screen === "success") return <SuccessScreen onRestart={restart} />;
-  if (screen === "master") return <MasterDashboard onBack={() => setScreen("profile")} publishedProperties={ownerSubmissions} onApproveProperty={approveProperty} />;
+  if (screen === "master") return <MasterDashboard onBack={() => { window.__sbSession = null; setScreen("profile"); }} publishedProperties={ownerSubmissions} onApproveProperty={approveProperty} />;
   return null;
 }
 
