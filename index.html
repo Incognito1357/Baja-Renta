@@ -4040,6 +4040,16 @@ function masterIsAdmin(token) {
   }).then(function(r) { return r.json(); }).then(function(j) { return j === true; }).catch(function() { return false; });
 }
 
+// Like sendEmail, but tells the caller whether the e-mail was accepted
+function sendEmailChecked(type, to, data) {
+  if (!to || String(to).indexOf("@") === -1) return Promise.resolve(false);
+  return fetch(DOCS_SUPA + "/functions/v1/send-email", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "apikey": DOCS_KEY, "Authorization": "Bearer " + DOCS_KEY },
+    body: JSON.stringify({ type: type, to: to, data: data || {} }),
+  }).then(function(r) { return r.ok; }).catch(function() { return false; });
+}
+
 // PATCH helper. Uses return=representation so an RLS block (0 rows) is detected instead of failing silently.
 function supaPatch(path, body, allowEmpty) {
   var KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ";
@@ -7244,6 +7254,11 @@ function App() {
   const [profile, setProfile] = useState(null);
   const [currentUser, setCurrentUser] = useState({ name: "", email: "", phone: "" });
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [payInfo, setPayInfo] = useState(null);
+  const [payStep, setPayStep] = useState("choose");
+  const [payBusy, setPayBusy] = useState(false);
+  const [payMsg, setPayMsg] = useState("");
+  const [inv, setInv] = useState({ rfc: "", razon: "", regimen: "612", uso: "G03", cp: "" });
   const [publishedProperties, setPublishedProperties] = useState([...PROPERTIES]);
 
   // Load approved properties from Supabase — show them FIRST
@@ -7299,9 +7314,44 @@ function App() {
     try {
       var params = new URLSearchParams(window.location.search);
       if (params.get("payment") === "success") {
+        var sid = params.get("session_id") || "";
+        var pid = params.get("property_id") || "";
         setPaymentSuccess(true);
+        setPayInfo({
+          session_id: sid,
+          property_id: pid,
+          owner_email: "",
+          property_name: "",
+          folio: sid ? "BR-" + new Date().getFullYear() + "-" + String(sid).slice(-5).toUpperCase() : "",
+          paid: sid ? null : false,
+        });
         // Clean URL
         window.history.replaceState({}, "", window.location.pathname);
+        if (sid) {
+          // The server checks the payment with Stripe (and publishes the property)
+          fetch(DOCS_SUPA + "/functions/v1/confirm-payment", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "apikey": DOCS_KEY, "Authorization": "Bearer " + DOCS_KEY },
+            body: JSON.stringify({ session_id: sid }),
+          }).then(function(r) { return r.json(); }).then(function(res) {
+            var okPaid = !!(res && res.paid === true);
+            var realId = (res && res.property_id) || pid;
+            setPayInfo(function(prev) {
+              return Object.assign({}, prev, { paid: okPaid, owner_email: (res && res.owner_email) || prev.owner_email, property_id: realId });
+            });
+            if (okPaid && isUuid(realId)) {
+              fetch(DOCS_SUPA + "/rest/v1/properties?id=eq." + realId + "&select=name", {
+                headers: { "apikey": DOCS_KEY, "Authorization": "Bearer " + DOCS_KEY },
+              }).then(function(r) { return r.json(); }).then(function(rows) {
+                if (Array.isArray(rows) && rows[0] && rows[0].name) {
+                  setPayInfo(function(prev) { return Object.assign({}, prev, { property_name: rows[0].name }); });
+                }
+              }).catch(function() {});
+            }
+          }).catch(function() {
+            setPayInfo(function(prev) { return Object.assign({}, prev, { paid: false }); });
+          });
+        }
       }
     } catch(e) {}
   }, []);
@@ -7511,27 +7561,180 @@ function App() {
     setFilters({}); setCardIdx(0); setLikedProperty(null);
   };
 
-  if (paymentSuccess) return (
-    <div style={{ minHeight: "100vh", background: "#0a0f1e", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
-      <div style={{ textAlign: "center", maxWidth: 340 }}>
-        <div style={{ fontSize: 64, marginBottom: 16 }}>🎉</div>
-        <h2 style={{ color: "white", fontFamily: "'Syne',sans-serif", fontSize: 24, fontWeight: 800, marginBottom: 8 }}>¡Pago exitoso!</h2>
-        <p style={{ color: "#94a3b8", fontSize: 14, lineHeight: 1.7, marginBottom: 8 }}>
-          Tu pago de <strong style={{ color: "#10b981" }}>$500 MXN</strong> fue procesado correctamente.
-        </p>
-        <p style={{ color: "#64748b", fontSize: 13, lineHeight: 1.6, marginBottom: 28 }}>
-          Recibirás un recibo por correo. El equipo de Baja Renta revisará tu propiedad en 24–72 horas y recibirás una notificación cuando esté publicada.
-        </p>
-        <button onClick={function() { setPaymentSuccess(false); setScreen("owner"); }} className="btn-glow" style={{
-          width: "100%", background: "linear-gradient(135deg,#f59e0b,#d97706)",
-          border: "none", borderRadius: 16, padding: "16px", color: "white",
-          fontSize: 16, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif",
-        }}>
-          🏠 Ir a mi dashboard
-        </button>
+  if (paymentSuccess) {
+    var pi = payInfo || {};
+    var payTo = pi.owner_email || (currentUser && currentUser.email) || "";
+    var inputSt = { width: "100%", background: "#ffffff08", border: "1px solid #ffffff15", borderRadius: 12, padding: "12px 14px", color: "white", fontSize: 14, outline: "none", fontFamily: "'DM Sans',sans-serif", boxSizing: "border-box", marginBottom: 10 };
+    var labelSt = { display: "block", color: "#94a3b8", fontSize: 12, fontWeight: 600, textAlign: "left", marginBottom: 4 };
+    var bigBtn = function(bg, brd) {
+      return { width: "100%", background: bg, border: brd, borderRadius: 16, padding: "16px", color: "white", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", marginBottom: 12 };
+    };
+    var goDashboard = function() { setPaymentSuccess(false); setPayStep("choose"); setScreen("owner"); };
+    var payDate = new Date().toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" });
+
+    const sendReceipt = function() {
+      if (payBusy) return;
+      if (!payTo) { setPayMsg("No encontramos tu correo. Inicia sesión y vuelve a intentarlo."); return; }
+      setPayBusy(true);
+      setPayMsg("");
+      sendEmailChecked("payment_receipt", payTo, {
+        folio: pi.folio || "—",
+        property_name: pi.property_name || "Propiedad",
+        payment_method: "Tarjeta",
+        date: payDate,
+      }).then(function(ok) {
+        setPayBusy(false);
+        if (ok) setPayStep("receipt_sent");
+        else setPayMsg("No se pudo enviar el recibo. Intenta de nuevo.");
+      });
+    };
+
+    const submitInvoice = function() {
+      if (payBusy) return;
+      var rfc = String(inv.rfc || "").trim().toUpperCase();
+      var razon = String(inv.razon || "").trim();
+      var cp = String(inv.cp || "").trim();
+      if (rfc.length !== 12 && rfc.length !== 13) { setPayMsg("El RFC debe tener 12 o 13 caracteres."); return; }
+      if (!razon) { setPayMsg("Escribe tu nombre o razón social tal como está en tu constancia fiscal."); return; }
+      if (cp.length !== 5 || isNaN(Number(cp))) { setPayMsg("El código postal debe tener 5 dígitos."); return; }
+      setPayBusy(true);
+      setPayMsg("");
+      fetch(DOCS_SUPA + "/rest/v1/invoice_requests", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "apikey": DOCS_KEY, "Authorization": "Bearer " + DOCS_KEY, "Prefer": "return=minimal" },
+        body: JSON.stringify({
+          property_id: pi.property_id || null,
+          owner_email: payTo,
+          owner_name: (currentUser && currentUser.name) || razon,
+          rfc: rfc,
+          razon_social: razon,
+          uso_cfdi: inv.uso || "G03",
+          regimen_fiscal: inv.regimen || "612",
+          cp: cp,
+          amount: 500,
+          stripe_session_id: pi.session_id || null,
+          status: "pending",
+        }),
+      }).then(function(r) {
+        if (!r.ok) throw new Error("save");
+        sendEmailChecked("invoice_request", "administracion@bajarenta.com", {
+          folio: pi.folio || "",
+          property_name: pi.property_name || "",
+          owner_email: payTo,
+          rfc: rfc,
+          razon_social: razon,
+          regimen_fiscal: inv.regimen || "612",
+          uso_cfdi: inv.uso || "G03",
+          cp: cp,
+          monto: "$500.00 MXN",
+        });
+        setPayBusy(false);
+        setPayStep("invoice_sent");
+      }).catch(function() {
+        setPayBusy(false);
+        setPayMsg("No se pudo registrar la solicitud. Intenta de nuevo.");
+      });
+    };
+
+    return (
+      <div style={{ minHeight: "100vh", background: "#0a0f1e", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+        <div style={{ textAlign: "center", width: "100%", maxWidth: 360 }}>
+          {pi.paid === null && (
+            <div>
+              <div style={{ fontSize: 48, marginBottom: 16 }}>⏳</div>
+              <h2 style={{ color: "white", fontFamily: "'Syne',sans-serif", fontSize: 22, fontWeight: 800, marginBottom: 8 }}>Confirmando tu pago…</h2>
+            </div>
+          )}
+          {pi.paid === false && (
+            <div>
+              <div style={{ fontSize: 48, marginBottom: 16 }}>⚠️</div>
+              <h2 style={{ color: "white", fontFamily: "'Syne',sans-serif", fontSize: 22, fontWeight: 800, marginBottom: 8 }}>No pudimos confirmar tu pago</h2>
+              <p style={{ color: "#94a3b8", fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>
+                Si ya pagaste, espera un momento y revisa tu dashboard. Si el cargo aparece en tu tarjeta, escríbenos a administracion@bajarenta.com.
+              </p>
+              <button onClick={goDashboard} className="btn-glow" style={bigBtn("linear-gradient(135deg,#f59e0b,#d97706)", "none")}>🏠 Ir a mi dashboard</button>
+            </div>
+          )}
+          {pi.paid === true && payStep === "choose" && (
+            <div>
+              <div style={{ fontSize: 64, marginBottom: 16 }}>🎉</div>
+              <h2 style={{ color: "white", fontFamily: "'Syne',sans-serif", fontSize: 24, fontWeight: 800, marginBottom: 8 }}>¡Pago exitoso!</h2>
+              <p style={{ color: "#94a3b8", fontSize: 14, lineHeight: 1.7, marginBottom: 4 }}>
+                Tu pago de <strong style={{ color: "#10b981" }}>$500 MXN</strong> fue procesado correctamente.
+              </p>
+              {pi.folio ? <p style={{ color: "#64748b", fontSize: 12, marginBottom: 20 }}>{"Folio " + pi.folio}</p> : null}
+              <p style={{ color: "#e2e8f0", fontSize: 14, fontWeight: 600, marginBottom: 14 }}>¿Cómo quieres tu comprobante?</p>
+              <button onClick={sendReceipt} disabled={payBusy} style={bigBtn("linear-gradient(135deg,#3b82f6,#1d4ed8)", "none")}>
+                {payBusy ? "Enviando…" : "🧾 Recibo por correo"}
+              </button>
+              <button onClick={function() { setPayMsg(""); setPayStep("invoice_form"); }} style={bigBtn("#ffffff08", "1px solid #ffffff20")}>
+                📄 Solicitar factura (CFDI)
+              </button>
+              {payMsg ? <p style={{ color: "#ef4444", fontSize: 13, marginBottom: 12 }}>{payMsg}</p> : null}
+              <p style={{ color: "#64748b", fontSize: 12, lineHeight: 1.6, marginBottom: 20 }}>
+                El equipo de Baja Renta revisará tu propiedad en 24–72 horas y recibirás una notificación cuando esté publicada.
+              </p>
+              <button onClick={goDashboard} style={{ background: "none", border: "none", color: "#f59e0b", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
+                🏠 Ir a mi dashboard
+              </button>
+            </div>
+          )}
+          {pi.paid === true && payStep === "receipt_sent" && (
+            <div>
+              <div style={{ fontSize: 56, marginBottom: 16 }}>🧾</div>
+              <h2 style={{ color: "white", fontFamily: "'Syne',sans-serif", fontSize: 22, fontWeight: 800, marginBottom: 8 }}>Recibo enviado</h2>
+              <p style={{ color: "#94a3b8", fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>{"Lo enviamos a " + payTo + "."}</p>
+              <button onClick={function() { setPayMsg(""); setPayStep("invoice_form"); }} style={bigBtn("#ffffff08", "1px solid #ffffff20")}>📄 También quiero factura</button>
+              <button onClick={goDashboard} className="btn-glow" style={bigBtn("linear-gradient(135deg,#f59e0b,#d97706)", "none")}>🏠 Ir a mi dashboard</button>
+            </div>
+          )}
+          {pi.paid === true && payStep === "invoice_form" && (
+            <div style={{ textAlign: "left" }}>
+              <h2 style={{ color: "white", fontFamily: "'Syne',sans-serif", fontSize: 22, fontWeight: 800, marginBottom: 4, textAlign: "center" }}>Datos para tu factura</h2>
+              <p style={{ color: "#64748b", fontSize: 12, lineHeight: 1.5, marginBottom: 16, textAlign: "center" }}>Escríbelos como aparecen en tu constancia de situación fiscal.</p>
+              <label style={labelSt}>RFC</label>
+              <input value={inv.rfc} onChange={function(e) { setInv(Object.assign({}, inv, { rfc: e.target.value.toUpperCase() })); }} maxLength={13} placeholder="12 o 13 caracteres" style={inputSt} />
+              <label style={labelSt}>Nombre o razón social</label>
+              <input value={inv.razon} onChange={function(e) { setInv(Object.assign({}, inv, { razon: e.target.value })); }} placeholder="Como en tu constancia fiscal" style={inputSt} />
+              <label style={labelSt}>Régimen fiscal</label>
+              <select value={inv.regimen} onChange={function(e) { setInv(Object.assign({}, inv, { regimen: e.target.value })); }} style={inputSt}>
+                <option value="612" style={{ color: "black" }}>612 · Personas físicas con actividad empresarial y profesional</option>
+                <option value="606" style={{ color: "black" }}>606 · Arrendamiento</option>
+                <option value="605" style={{ color: "black" }}>605 · Sueldos y salarios</option>
+                <option value="626" style={{ color: "black" }}>626 · Régimen Simplificado de Confianza</option>
+                <option value="601" style={{ color: "black" }}>601 · General de ley personas morales</option>
+                <option value="616" style={{ color: "black" }}>616 · Sin obligaciones fiscales</option>
+              </select>
+              <label style={labelSt}>Uso del CFDI</label>
+              <select value={inv.uso} onChange={function(e) { setInv(Object.assign({}, inv, { uso: e.target.value })); }} style={inputSt}>
+                <option value="G03" style={{ color: "black" }}>G03 · Gastos en general</option>
+                <option value="G01" style={{ color: "black" }}>G01 · Adquisición de mercancías</option>
+                <option value="P01" style={{ color: "black" }}>P01 · Por definir</option>
+                <option value="S01" style={{ color: "black" }}>S01 · Sin efectos fiscales</option>
+              </select>
+              <label style={labelSt}>Código postal fiscal</label>
+              <input value={inv.cp} onChange={function(e) { setInv(Object.assign({}, inv, { cp: e.target.value })); }} maxLength={5} inputMode="numeric" placeholder="5 dígitos" style={inputSt} />
+              {payMsg ? <p style={{ color: "#ef4444", fontSize: 13, marginBottom: 12 }}>{payMsg}</p> : null}
+              <button onClick={submitInvoice} disabled={payBusy} style={bigBtn("linear-gradient(135deg,#10b981,#059669)", "none")}>
+                {payBusy ? "Enviando…" : "Enviar solicitud de factura"}
+              </button>
+              <button onClick={function() { setPayMsg(""); setPayStep("choose"); }} style={{ background: "none", border: "none", color: "#64748b", fontSize: 13, cursor: "pointer", width: "100%", fontFamily: "'DM Sans',sans-serif" }}>
+                ← Volver
+              </button>
+            </div>
+          )}
+          {pi.paid === true && payStep === "invoice_sent" && (
+            <div>
+              <div style={{ fontSize: 56, marginBottom: 16 }}>📄</div>
+              <h2 style={{ color: "white", fontFamily: "'Syne',sans-serif", fontSize: 22, fontWeight: 800, marginBottom: 8 }}>Solicitud de factura registrada</h2>
+              <p style={{ color: "#94a3b8", fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>El equipo de Baja Renta procesará tu factura con los datos que enviaste.</p>
+              <button onClick={goDashboard} className="btn-glow" style={bigBtn("linear-gradient(135deg,#f59e0b,#d97706)", "none")}>🏠 Ir a mi dashboard</button>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 
   if (screen === "splash") return <SplashScreen onStart={() => { playSound("click"); setScreen("profile"); }} />;
   if (screen === "profile") return <ProfileSelect onSelect={handleProfileSelect} darkMode={darkMode} />;
