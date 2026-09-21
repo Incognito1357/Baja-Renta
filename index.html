@@ -4238,13 +4238,15 @@ function OwnerPropertyDetail({ property, onBack, approvedApplicants, onApprove, 
       {isApproved && (
         <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, padding: "16px 20px 32px", background: "linear-gradient(to top, #0a0f1e, transparent)" }}>
           <button onClick={function() {
+            if (isDemo) { alert("Propiedad de ejemplo: el pago solo aplica a propiedades reales."); return; }
+            if (!property.owner_email) { alert("No se encontró el correo del propietario de esta propiedad."); return; }
             fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/create-checkout", {
               method: "POST",
               headers: { "Content-Type": "application/json", "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ" },
               body: JSON.stringify({ property_name: name, owner_email: property.owner_email || "", property_id: String(property.id || "") }),
             }).then(function(r) { return r.json(); }).then(function(res) {
               if (res.url) window.open(res.url, "_blank");
-              else alert("Error al crear sesion de pago.");
+              else alert("Error al crear sesion de pago." + (res && res.error ? "\n" + res.error : ""));
             }).catch(function() { alert("Error de conexion."); });
           }} style={{ width: "100%", background: "linear-gradient(135deg, #10b981, #059669)", border: "none", borderRadius: 16, padding: 16, color: "white", fontSize: 15, fontWeight: 700, cursor: "pointer" }}>
             Pagar $500 MXN y publicar
@@ -4518,6 +4520,7 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
             img: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80",
             images: ["https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80"],
             bedrooms: p.bedrooms, bathrooms: p.bathrooms, _mode: p.management_mode || "self",
+            owner_email: p.owner_email || "",
             views: 0, applicants: applicants, isMock: false,
           };
         });
