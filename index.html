@@ -805,7 +805,7 @@ function ForgotPasswordScreen({ onBack, darkMode = true, accentColor = "#3b82f6"
   );
 }
 
-function LoginScreen({ onBack, onLogin, onMasterLogin, onRegister, darkMode = true }) {
+function LoginScreen({ onBack, onLogin, onMasterLogin, masterOnly, onRegister, darkMode = true }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
@@ -865,12 +865,26 @@ function LoginScreen({ onBack, onLogin, onMasterLogin, onRegister, darkMode = tr
         setLoading(false);
         if (res.access_token) {
         saveSbSession(res);
-          if (onMasterLogin) { startMasterMfa(res.access_token); return; }
-          // Request push if not already granted
-          if (typeof Notification !== "undefined" && Notification.permission === "default") {
-            requestPushPermission(email, function(token) { console.log("login push token:", token); });
+          var finishLogin = function() {
+            // Request push if not already granted
+            if (typeof Notification !== "undefined" && Notification.permission === "default") {
+              requestPushPermission(email, function(token) { console.log("login push token:", token); });
+            }
+            onLogin({ email: email, name: email, phone: "" });
+          };
+          if (onMasterLogin) {
+            // Only an administrator account continues to the Master second-factor step;
+            // everyone else logs in as usual (unless this is the Master-only screen).
+            setLoading(true);
+            masterIsAdmin(res.access_token).then(function(isAdmin) {
+              setLoading(false);
+              if (isAdmin) { startMasterMfa(res.access_token); }
+              else if (masterOnly) { window.__sbSession = null; setError(true); }
+              else { finishLogin(); }
+            });
+            return;
           }
-          onLogin({ email: email, name: email, phone: "" });
+          finishLogin();
         } else {
           setError(true);
         }
@@ -885,13 +899,7 @@ function LoginScreen({ onBack, onLogin, onMasterLogin, onRegister, darkMode = tr
   const startMasterMfa = function(token) {
     setMfaError("");
     setMfaBusy(true);
-    masterIsAdmin(token).then(function(isAdmin) {
-      if (!isAdmin) {
-        window.__sbSession = null;
-        setMfaBusy(false);
-        setError(true);
-        return;
-      }
+    Promise.resolve().then(function() {
       return authApi("user", token, "GET").then(function(u) {
         var factors = (u.data && u.data.factors) || [];
         var verified = factors.filter(function(f) { return f.factor_type === "totp" && f.status === "verified"; })[0];
@@ -7524,7 +7532,7 @@ function App() {
 
   if (screen === "splash") return <SplashScreen onStart={() => { playSound("click"); setScreen("profile"); }} />;
   if (screen === "profile") return <ProfileSelect onSelect={handleProfileSelect} darkMode={darkMode} />;
-  if (screen === "masterLogin") return <LoginScreen onBack={() => setScreen("profile")} onLogin={() => setScreen("profile")} onMasterLogin={() => setScreen("master")} onRegister={() => setScreen("profile")} darkMode={darkMode} />;
+  if (screen === "masterLogin") return <LoginScreen masterOnly onBack={() => setScreen("profile")} onLogin={() => setScreen("profile")} onMasterLogin={() => setScreen("master")} onRegister={() => setScreen("profile")} darkMode={darkMode} />;
   if (screen === "login") return <LoginScreen onBack={() => setScreen("profile")} onLogin={() => setScreen("cards")} onMasterLogin={() => setScreen("master")} onRegister={() => setScreen("visitorRegister")} darkMode={darkMode} />;
   if (screen === "visitorRegister") return <VisitorRegister onBack={() => setScreen("profile")} onComplete={(userData) => { if (userData) setCurrentUser(userData); setScreen("filter"); }} onLogin={() => setScreen("login")} darkMode={darkMode} />;
   if (screen === "guestFilter") return <GuestFilter onBack={() => setScreen("profile")} onContinue={(f) => { setFilters(f); setScreen("catalog"); }} />;
