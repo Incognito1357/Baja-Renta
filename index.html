@@ -4488,6 +4488,7 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
     var url = isMiguel
       ? "https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties?select=*&order=created_at.desc"
       : "https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties?owner_email=eq." + encodeURIComponent(email) + "&select=*&order=created_at.desc";
+    var load = function() {
     fetch(url, {
       headers: {
         "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
@@ -4526,7 +4527,7 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
           }) : [];
           return {
             id: p.id, name: p.name, city: p.city, price: p.price, deposit: p.deposit,
-            status: p.status === "approved" ? "aprobada" : p.status === "rejected" ? "rechazada" : p.status === "rented" ? "Rentado" : "pendiente",
+            status: p.status === "approved" ? "aprobada" : p.status === "rejected" ? "rechazada" : p.status === "rented" ? "Rentado" : p.status === "published" ? "Publicada" : "pendiente",
             img: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80",
             images: ["https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80"],
             bedrooms: p.bedrooms, bathrooms: p.bathrooms, _mode: p.management_mode || "self",
@@ -4539,6 +4540,10 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
         setSupaProperties(props);
       });
     }).catch(function(e) { console.log("owner dashboard fetch error:", e); });
+    };
+    load();
+    var timer = setInterval(load, 30000);
+    return function() { clearInterval(timer); };
   }, [currentUser && currentUser.email]);
 
   const myProperties = isMiguel ? MOCK_LISTED.concat(supaProperties) : supaProperties;
@@ -4619,8 +4624,8 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
     return <OwnerSettingsScreen onBack={() => setShowSettings(false)} onSignOut={onBack} darkModeProp={darkMode} onToggleTheme={onToggleTheme} currentUser={currentUser} />;
   }
 
-  const statusColor = (s) => s === "Rentado" ? "#6366f1" : s === "Activo" ? "#10b981" : "#f59e0b";
-  const statusBg   = (s) => s === "Rentado" ? "#6366f115" : s === "Activo" ? "#10b98115" : "#f59e0b15";
+  const statusColor = (s) => s === "Rentado" ? "#6366f1" : (s === "Activo" || s === "Publicada" || s === "aprobada") ? "#10b981" : s === "rechazada" ? "#ef4444" : "#f59e0b";
+  const statusBg   = (s) => s === "Rentado" ? "#6366f115" : (s === "Activo" || s === "Publicada" || s === "aprobada") ? "#10b98115" : s === "rechazada" ? "#ef444415" : "#f59e0b15";
   const getRentedStatus = (p) => {
     const isRented = (p.applicants || []).some(a => allApprovedApplicants[p.id + "-" + a.id] === true);
     return isRented ? "Rentado" : p.status;
@@ -4702,7 +4707,7 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
                 <p style={{ fontFamily: "'DM Sans',sans-serif", color: text, fontSize: 14, fontWeight: 700, lineHeight: 1.2 }}>{safeP.name}</p>
                 <span style={{ background: statusBg(st), border: "1px solid " + statusColor(st) + "30", borderRadius: 99, padding: "2px 8px", color: statusColor(st), fontSize: 10, fontWeight: 700, flexShrink: 0, marginLeft: 6 }}>
-                  {st === "Rentado" ? "🏠 Rentado" : st}
+                  {st === "Rentado" ? "🏠 Rentado" : st === "Publicada" ? "🌐 Publicada" : st}
                 </span>
               </div>
               <p style={{ color: textSub, fontSize: 12, marginBottom: 8 }}>{safeP.city}</p>
@@ -6641,7 +6646,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
           kitchen: p.kitchen,
           laundry: p.laundry,
           patio: p.patio,
-          status: p.status === "pending" ? "pendiente" : p.status === "approved" ? "aprobada" : p.status === "rejected" ? "rechazada" : p.status === "rented" ? "rentada" : "pendiente",
+          status: p.status === "pending" ? "pendiente" : p.status === "approved" ? "aprobada" : p.status === "rejected" ? "rechazada" : p.status === "rented" ? "rentada" : p.status === "published" ? "publicada" : "pendiente",
           img: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80",
           images: ["https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&q=80"],
           submitted: p.created_at ? p.created_at.slice(0, 10) : "—",
@@ -6726,6 +6731,19 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
     });
   };
 
+  // Take a published property out of the catalog (it becomes "rejected")
+  const retirePublished = function(p) {
+    if (!window.confirm("¿Retirar esta propiedad del catálogo? Quedará como rechazada.")) return;
+    supaPatch("properties?id=eq." + p.id, { status: "rejected" }, false).then(function() {
+      setProperties(function(prev) {
+        return prev.map(function(x) { return x.id === p.id ? Object.assign({}, x, { status: "rechazada" }) : x; });
+      });
+      setSelected(null);
+    }).catch(function(e) {
+      alert("No se pudo retirar la propiedad: " + String(e && e.message ? e.message : e));
+    });
+  };
+
   // Approving a property with documents still pending asks for confirmation
   const approveWithDocsCheck = function(p) {
     if (p.isSupa) {
@@ -6742,7 +6760,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
     const isNewProp = _foundProp ? _foundProp.isNew : false;
     setProperties(function(prev) { return prev.map(function(p) {
       if (p.id !== id) return p;
-      if (p.status === "rentada") return p;
+      if (p.status === "rentada" || p.status === "publicada") return p;
       const newStatus = p.status === "pendiente" ? "aprobada" : "pendiente";
       updatePropertyStatus(id, newStatus, p);
       return Object.assign({}, p, { status: newStatus });
@@ -6752,14 +6770,14 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
   const rejectStatus = function(id) {
     setProperties(function(prev) { return prev.map(function(p) {
       if (p.id !== id) return p;
-      if (p.status === "rentada") return p;
+      if (p.status === "rentada" || p.status === "publicada") return p;
       updatePropertyStatus(id, "rechazada", p);
       return Object.assign({}, p, { status: "rechazada" });
     }); });
   };
   const filtered = filter === "todas" ? properties : properties.filter(p => p.status === filter);
   const pendingCount = properties.filter(p => p.status === "pendiente").length;
-  const approvedCount = properties.filter(p => p.status === "aprobada").length;
+  const approvedCount = properties.filter(p => p.status === "aprobada" || p.status === "publicada").length;
   const rejectedCount = properties.filter(p => p.status === "rechazada").length;
 
   if (selected) {
@@ -6774,8 +6792,8 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
           <button onClick={() => setSelected(null)} style={{ position: "absolute", top: 16, left: 16, background: "#000000a0", backdropFilter: "blur(8px)", border: "none", borderRadius: 99, width: 38, height: 38, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <Icon name="back" size={16} color="white" />
           </button>
-          <span style={{ position: "absolute", top: 16, right: 16, background: p.status === "aprobada" ? "#10b981" : p.status === "rechazada" ? "#ef4444" : p.status === "rentada" ? "#6366f1" : "#f59e0b", borderRadius: 99, padding: "5px 14px", color: "white", fontSize: 12, fontWeight: 700 }}>
-            {p.status === "aprobada" ? "✓ Aprobada" : p.status === "rechazada" ? "✗ Rechazada" : p.status === "rentada" ? "🏠 Rentada" : "⚠️ Pendiente"}
+          <span style={{ position: "absolute", top: 16, right: 16, background: p.status === "aprobada" ? "#10b981" : p.status === "rechazada" ? "#ef4444" : p.status === "rentada" ? "#6366f1" : p.status === "publicada" ? "#14b8a6" : "#f59e0b", borderRadius: 99, padding: "5px 14px", color: "white", fontSize: 12, fontWeight: 700 }}>
+            {p.status === "aprobada" ? "✓ Aprobada" : p.status === "rechazada" ? "✗ Rechazada" : p.status === "rentada" ? "🏠 Rentada" : p.status === "publicada" ? "🌐 Publicada" : "⚠️ Pendiente"}
           </span>
         </div>
 
@@ -6950,7 +6968,16 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
 
           {/* Approve / Reject */}
           <div style={{ height: 1, background: "#ffffff06", marginBottom: 16 }} />
-          {p.status === "rentada" ? (
+          {p.status === "publicada" ? (
+            <div>
+              <div style={{ background: "#14b8a615", border: "1px solid #14b8a630", borderRadius: 14, padding: "12px 16px", marginBottom: 12 }}>
+                <p style={{ color: "#14b8a6", fontSize: 14, fontWeight: 700 }}>🌐 Publicada: pagada y visible en el catálogo</p>
+              </div>
+              <button onClick={() => retirePublished(p)} style={{ width: "100%", background: "#ef444415", border: "1px solid #ef444430", borderRadius: 14, padding: 14, color: "#ef4444", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
+                Retirar del catálogo
+              </button>
+            </div>
+          ) : p.status === "rentada" ? (
             <div style={{ background: "#6366f115", border: "1px solid #6366f130", borderRadius: 14, padding: "12px 16px" }}>
               <p style={{ color: "#6366f1", fontSize: 14, fontWeight: 700 }}>🏠 Propiedad rentada (fuera del catálogo)</p>
             </div>
@@ -7162,7 +7189,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
         <div>
           {/* Filter tabs */}
           <div style={{ display: "flex", padding: "0 24px", borderBottom: "1px solid #ffffff10", overflowX: "auto" }}>
-            {[["todas","Todas"],["pendiente","Pendientes"],["aprobada","Aprobadas"],["rechazada","Rechazadas"]].map(function(pair) { var key = pair[0], label = pair[1]; return  (
+            {[["todas","Todas"],["pendiente","Pendientes"],["aprobada","Aprobadas"],["publicada","Publicadas"],["rechazada","Rechazadas"]].map(function(pair) { var key = pair[0], label = pair[1]; return  (
               <button key={key} onClick={() => setFilter(key)} style={{
                 flex: 1, minWidth: 70, padding: "12px 0", background: "none", border: "none",
                 borderBottom: "2px solid " + filter === key ? "#8b5cf6" : "transparent",
@@ -7186,13 +7213,13 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 3 }}>
                 <p style={{ fontFamily: "'Syne',sans-serif", color: "white", fontSize: 14, fontWeight: 700, lineHeight: 1.2, flex: 1, marginRight: 8 }}>{p.name}</p>
                 <span style={{
-                  background: p.status === "aprobada" ? "#10b98115" : p.status === "rechazada" ? "#ef444415" : "#f59e0b15",
+                  background: p.status === "aprobada" ? "#10b98115" : p.status === "rechazada" ? "#ef444415" : p.status === "publicada" ? "#14b8a615" : "#f59e0b15",
                   border: "1px solid " + p.status === "aprobada" ? "#10b98140" : p.status === "rechazada" ? "#ef444440" : "#f59e0b40",
                   borderRadius: 99, padding: "2px 8px",
-                  color: p.status === "aprobada" ? "#10b981" : p.status === "rechazada" ? "#ef4444" : "#f59e0b",
+                  color: p.status === "aprobada" ? "#10b981" : p.status === "rechazada" ? "#ef4444" : p.status === "publicada" ? "#14b8a6" : "#f59e0b",
                   fontSize: 10, fontWeight: 700, flexShrink: 0,
                 }}>
-                  {p.status === "aprobada" ? "Aprobada" : p.status === "rechazada" ? "Rechazada" : p.status === "rentada" ? "Rentada" : "Pendiente"}
+                  {p.status === "aprobada" ? "Aprobada" : p.status === "rechazada" ? "Rechazada" : p.status === "rentada" ? "Rentada" : p.status === "publicada" ? "Publicada" : "Pendiente"}
                 </span>
               </div>
               <p style={{ color: "#64748b", fontSize: 12, marginBottom: 4 }}>👤 {p.owner}</p>
@@ -7263,13 +7290,16 @@ function App() {
 
   // Load approved properties from Supabase — show them FIRST
   useEffect(function() {
-    fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties?status=eq.approved&select=*&order=created_at.desc", {
+    fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties?status=in.(approved,published)&select=*&order=created_at.desc", {
       headers: {
         "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
         "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
       },
     }).then(function(r) { return r.json(); }).then(function(data) {
-      if (!Array.isArray(data) || data.length === 0) return;
+      if (!Array.isArray(data)) return;
+      // published listings last 90 days from payment
+      data = data.filter(function(p) { return p.status !== "published" || !p.expires_at || new Date(p.expires_at) > new Date(); });
+      if (data.length === 0) return;
       var supaApproved = data.map(function(p) {
         return {
           id: p.id,
