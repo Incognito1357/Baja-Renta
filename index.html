@@ -568,14 +568,14 @@ function ProfileSelect({ onSelect, darkMode = true }) {
 function ForgotPasswordScreen({ onBack, darkMode = true, accentColor = "#3b82f6" }) {
   const [step, setStep] = useState("email"); // email | code | newpass | success
   const [email, setEmail] = useState("");
-  const [code, setCode] = useState(["", "", "", ""]);
+  const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [newPass, setNewPass] = useState("");
   const [confirm, setConfirm] = useState("");
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState("");
-  const ref0 = useRef(); const ref1 = useRef(); const ref2 = useRef(); const ref3 = useRef();
-  const codeRefs = [ref0, ref1, ref2, ref3];
+  const ref0 = useRef(); const ref1 = useRef(); const ref2 = useRef(); const ref3 = useRef(); const ref4 = useRef(); const ref5 = useRef();
+  const codeRefs = [ref0, ref1, ref2, ref3, ref4, ref5];
 
   const accentGrad = accentColor === "#f59e0b"
     ? "linear-gradient(135deg, #f59e0b, #d97706)"
@@ -659,7 +659,7 @@ function ForgotPasswordScreen({ onBack, darkMode = true, accentColor = "#3b82f6"
           <>
             <div style={{ background: cardBg, border: "1px solid " + border, borderRadius: 20, padding: "24px", marginBottom: 24 }}>
               <p style={{ color: text, fontSize: 14, lineHeight: 1.7, marginBottom: 16 }}>
-                Te enviaremos un código de 4 dígitos para restablecer tu contraseña.
+                Te enviaremos un código de 6 dígitos para restablecer tu contraseña.
               </p>
               <div style={{ position: "relative" }}>
                 <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 16 }}>📧</span>
@@ -695,7 +695,7 @@ function ForgotPasswordScreen({ onBack, darkMode = true, accentColor = "#3b82f6"
               <div style={{ fontSize: 40, marginBottom: 12 }}>📬</div>
               <p style={{ color: text, fontSize: 15, fontWeight: 700, marginBottom: 6 }}>Código enviado</p>
               <p style={{ color: textSub, fontSize: 13, lineHeight: 1.6, marginBottom: 20 }}>
-                Se envió un código de 4 dígitos a<br/>
+                Se envió un código de 6 dígitos a<br/>
                 <span style={{ color: accentColor, fontWeight: 700 }}>{email}</span>
               </p>
               {/* Code inputs */}
@@ -709,7 +709,7 @@ function ForgotPasswordScreen({ onBack, darkMode = true, accentColor = "#3b82f6"
               </div>
               {error && <p style={{ color: "#ef4444", fontSize: 12 }}>{error}</p>}
               <p style={{ color: textSub, fontSize: 11, marginTop: 8 }}>{"¿No llegó? Revisa spam o "}<span onClick={() => {
-                setCode(Array(4).fill(""));
+                setCode(Array(6).fill(""));
                 fetch(SUPABASE_FUNCTIONS_URL + "/send-otp", {
                   method: "POST",
                   headers: { "Content-Type": "application/json", "Authorization": "Bearer " + ANON_KEY },
@@ -718,7 +718,7 @@ function ForgotPasswordScreen({ onBack, darkMode = true, accentColor = "#3b82f6"
               }} style={{ color: accentColor, cursor: "pointer", textDecoration: "underline" }}>reenviar</span></p>
             </div>
             <button onClick={() => {
-              if (codeStr.length !== 4) return;
+              if (codeStr.length !== 6) return;
               fetch(SUPABASE_FUNCTIONS_URL + "/verify-otp", {
                 method: "POST",
                 headers: { "Content-Type": "application/json", "Authorization": "Bearer " + ANON_KEY },
@@ -2895,9 +2895,9 @@ function SelfRegisterScreen({ onBack, onComplete, onLogin, darkMode = true }) {
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "", confirmPassword: "", rfc: "", dob: "" });
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
   const [loginError, setLoginError] = useState(false);
-  const [code, setCode] = useState(["", "", "", ""]);
-  const ref0 = useRef(); const ref1 = useRef(); const ref2 = useRef(); const ref3 = useRef();
-  const codeRefs = [ref0, ref1, ref2, ref3];
+  const [code, setCode] = useState(["", "", "", "", "", ""]);
+  const ref0 = useRef(); const ref1 = useRef(); const ref2 = useRef(); const ref3 = useRef(); const ref4 = useRef(); const ref5 = useRef();
+  const codeRefs = [ref0, ref1, ref2, ref3, ref4, ref5];
   var setF = function(k, v) { setForm(function(f) { var n = Object.assign({}, f); n[k] = v; return n; }); };
   var setL = function(k, v) { setLoginForm(function(f) { var n = Object.assign({}, f); n[k] = v; return n; }); };
   const getAge = (dob) => {
@@ -3100,7 +3100,7 @@ function SelfRegisterScreen({ onBack, onComplete, onLogin, darkMode = true }) {
             </svg>
           </div>
           <h2 style={{ fontFamily: "'Syne',sans-serif", color: text, fontSize: 24, fontWeight: 800, marginBottom: 8 }}>Verifica tu correo</h2>
-          <p style={{ color: textSub, fontSize: 14, marginBottom: 6, maxWidth: 300 }}>Enviamos un código de 4 dígitos a</p>
+          <p style={{ color: textSub, fontSize: 14, marginBottom: 6, maxWidth: 300 }}>Enviamos un código de 6 dígitos a</p>
           <p style={{ color: "#f59e0b", fontSize: 14, fontWeight: 600, marginBottom: 36 }}>{form.email}</p>
           <div style={{ display: "flex", gap: 12, marginBottom: 32 }}>
             {code.map((c, i) => (
@@ -5827,9 +5827,9 @@ function VisitorRegister({ onBack, onComplete, onLogin, darkMode = true }) {
   const [showConfirmPass, setShowConfirmPass] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "", confirmPassword: "", dob: "" });
-  const [code, setCode] = useState(["", "", "", ""]);
-  const ref0 = useRef(); const ref1 = useRef(); const ref2 = useRef(); const ref3 = useRef();
-  const codeRefs = [ref0, ref1, ref2, ref3];
+  const [code, setCode] = useState(["", "", "", "", "", ""]);
+  const ref0 = useRef(); const ref1 = useRef(); const ref2 = useRef(); const ref3 = useRef(); const ref4 = useRef(); const ref5 = useRef();
+  const codeRefs = [ref0, ref1, ref2, ref3, ref4, ref5];
   var setF = function(k, v) { setForm(function(f) { var n = Object.assign({}, f); n[k] = v; return n; }); };
   const getAge = (dob) => {
     if (!dob) return null;
@@ -5902,7 +5902,7 @@ function VisitorRegister({ onBack, onComplete, onLogin, darkMode = true }) {
             </svg>
           </div>
           <h2 style={{ fontFamily: "'DM Sans',sans-serif", color: text, fontSize: 22, fontWeight: 700, marginBottom: 8, transition: "color .3s" }}>Verifica tu correo</h2>
-          <p style={{ color: textSub, fontSize: 14, marginBottom: 6, maxWidth: 300 }}>Enviamos un código de 4 dígitos a</p>
+          <p style={{ color: textSub, fontSize: 14, marginBottom: 6, maxWidth: 300 }}>Enviamos un código de 6 dígitos a</p>
           <p style={{ color: "#3b82f6", fontSize: 14, fontWeight: 600, marginBottom: 36 }}>{form.email}</p>
           <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
             {code.map((c, i) => (
