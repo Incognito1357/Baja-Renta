@@ -599,7 +599,7 @@ function ForgotPasswordScreen({ onBack, darkMode = true, accentColor = "#3b82f6"
     const v = val.replace(/\D/g, "").slice(-1);
     const next = [...code]; next[i] = v;
     setCode(next);
-    if (v && i < 3 && codeRefs[i + 1].current) codeRefs[i + 1].current.focus();
+    if (v && i < codeRefs.length - 1 && codeRefs[i + 1].current) codeRefs[i + 1].current.focus();
   };
   const handleCodeKey = (i, e) => {
     if (e.key === "Backspace" && !code[i] && i > 0) { if (codeRefs[i - 1].current) codeRefs[i - 1].current.focus(); }
@@ -2941,7 +2941,7 @@ function SelfRegisterScreen({ onBack, onComplete, onLogin, darkMode = true }) {
   const handleCodeInput = (i, val) => {
     if (!/^\d?$/.test(val)) return;
     const next = [...code]; next[i] = val; setCode(next);
-    if (val && i < 3) codeRefs[i + 1].current.focus();
+    if (val && i < codeRefs.length - 1) codeRefs[i + 1].current.focus();
   };
   const handleCodeKey = (i, e) => {
     if (e.key === "Backspace" && !code[i] && i > 0) codeRefs[i - 1].current.focus();
@@ -3140,7 +3140,7 @@ function SelfRegisterScreen({ onBack, onComplete, onLogin, darkMode = true }) {
                   onComplete({ name: form.name, email: form.email, phone: form.phone || '' });
                 });
               }
-              else { setOtpError("Código incorrecto o expirado. Intenta de nuevo."); setCode(["","","",""]); }
+              else { setOtpError("Código incorrecto o expirado. Intenta de nuevo."); setCode(["","","","","",""]); }
             }).catch(function() {
               setOtpLoading(false);
               setOtpError("Error de conexión. Intenta de nuevo.");
@@ -3158,7 +3158,7 @@ function SelfRegisterScreen({ onBack, onComplete, onLogin, darkMode = true }) {
             <p style={{ color: "#ef4444", fontSize: 13, marginBottom: 8 }}>{otpError}</p>
           )}
           <button onClick={function() {
-            setCode(["","","",""]);
+            setCode(["","","","","",""]);
             setOtpError("");
             fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/send-otp", {
               method: "POST",
@@ -5880,7 +5880,7 @@ function VisitorRegister({ onBack, onComplete, onLogin, darkMode = true }) {
   const handleCodeInput = (i, val) => {
     if (!/^\d?$/.test(val)) return;
     const next = [...code]; next[i] = val; setCode(next);
-    if (val && i < 3) codeRefs[i + 1].current.focus();
+    if (val && i < codeRefs.length - 1) codeRefs[i + 1].current.focus();
   };
   const handleCodeKey = (i, e) => {
     if (e.key === "Backspace" && !code[i] && i > 0) codeRefs[i - 1].current.focus();
@@ -5945,7 +5945,7 @@ function VisitorRegister({ onBack, onComplete, onLogin, darkMode = true }) {
                   onComplete({ name: form.name, email: form.email, phone: form.phone });
                 });
               }
-              else { setOtpError("Código incorrecto o expirado. Intenta de nuevo."); setCode(["","","",""]); }
+              else { setOtpError("Código incorrecto o expirado. Intenta de nuevo."); setCode(["","","","","",""]); }
             }).catch(function() {
               setOtpLoading(false);
               setOtpError("Error de conexión. Intenta de nuevo.");
@@ -5960,7 +5960,7 @@ function VisitorRegister({ onBack, onComplete, onLogin, darkMode = true }) {
             {otpLoading ? "Verificando..." : "Verificar y continuar →"}
           </button>
           <button onClick={function() {
-            setCode(["","","",""]);
+            setCode(["","","","","",""]);
             setOtpError("");
             fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/send-otp", {
               method: "POST",
