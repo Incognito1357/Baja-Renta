@@ -928,7 +928,9 @@ function LoginScreen({ onBack, onLogin, onMasterLogin, masterOnly, onRegister, d
             return;
           }
           setMfaFactorId(r.data.id);
-          setMfaQr(r.data.totp.qr_code || "");
+          var qr = r.data.totp.qr_code || "";
+          if (qr && qr.indexOf("data:") !== 0) qr = "data:image/svg+xml;utf8," + encodeURIComponent(qr);
+          setMfaQr(qr);
           setMfaSecret(r.data.totp.secret || "");
           setMfaStage("enroll");
           setMfaBusy(false);
