@@ -826,6 +826,11 @@ function LoginScreen({ onBack, onLogin, onMasterLogin, masterOnly, onRegister, d
   const [mfaSecret, setMfaSecret] = useState("");
   const [mfaError, setMfaError] = useState("");
   const [mfaBusy, setMfaBusy] = useState(false);
+  const [recoveryCodes, setRecoveryCodes] = useState(null);
+  const [showRecoveryForm, setShowRecoveryForm] = useState(false);
+  const [recoveryInput, setRecoveryInput] = useState("");
+  const [recoveryBusy, setRecoveryBusy] = useState(false);
+  const [recoveryMsg, setRecoveryMsg] = useState("");
   const codeComplete = codeJoined.length === 6;
   const codeCorrect = codeComplete && !mfaBusy;
 
@@ -950,7 +955,18 @@ function LoginScreen({ onBack, onLogin, onMasterLogin, masterOnly, onRegister, d
       setMfaBusy(false);
       if (v.ok && v.data && v.data.access_token) {
         saveSbSession(v.data);
-        if (onMasterLogin) onMasterLogin();
+        if (mfaStage === "enroll") {
+          fetch(DOCS_SUPA + "/functions/v1/master-recovery", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "apikey": DOCS_KEY, "Authorization": "Bearer " + v.data.access_token },
+            body: JSON.stringify({ action: "generate" }),
+          }).then(function(r) { return r.json(); }).then(function(res) {
+            if (res && Array.isArray(res.codes)) setRecoveryCodes(res.codes);
+            else if (onMasterLogin) onMasterLogin();
+          }).catch(function() { if (onMasterLogin) onMasterLogin(); });
+        } else if (onMasterLogin) {
+          onMasterLogin();
+        }
       } else {
         setMfaError("Código incorrecto o expirado.");
         setCode(["", "", "", "", "", ""]);
@@ -966,6 +982,56 @@ function LoginScreen({ onBack, onLogin, onMasterLogin, masterOnly, onRegister, d
   const handleCodeKey = (i, e) => {
     if (e.key === "Backspace" && !code[i] && i > 0) codeRefs[i - 1].current.focus();
   };
+
+  const redeemRecoveryCode = function() {
+    var sess = window.__sbSession;
+    if (!sess || !sess.token) { setRecoveryMsg("La sesión expiró. Regresa e inicia de nuevo."); return; }
+    if (!recoveryInput.trim()) return;
+    setRecoveryBusy(true);
+    setRecoveryMsg("");
+    fetch(DOCS_SUPA + "/functions/v1/master-recovery", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": DOCS_KEY, "Authorization": "Bearer " + sess.token },
+      body: JSON.stringify({ action: "redeem", code: recoveryInput }),
+    }).then(function(r) { return r.json().then(function(j) { return { ok: r.ok, data: j }; }); }).then(function(res) {
+      setRecoveryBusy(false);
+      if (res.ok && res.data && res.data.success) {
+        setShowRecoveryForm(false);
+        setRecoveryInput("");
+        setMfaError("");
+        setCode(["", "", "", "", "", ""]);
+        startMasterMfa(sess.token);
+      } else {
+        setRecoveryMsg((res.data && res.data.error) || "Código de respaldo inválido o ya usado.");
+      }
+    }).catch(function() {
+      setRecoveryBusy(false);
+      setRecoveryMsg("Error de conexión. Intenta de nuevo.");
+    });
+  };
+
+  if (recoveryCodes) {
+    return (
+      <div style={{ minHeight: "100vh", background: bg, padding: "48px 24px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
+        <div style={{ fontSize: 40, marginBottom: 12 }}>🔑</div>
+        <h2 style={{ fontFamily: "'DM Sans',sans-serif", color: text, fontSize: 20, fontWeight: 700, marginBottom: 8 }}>Guarda tus códigos de respaldo</h2>
+        <p style={{ color: "#64748b", fontSize: 13, lineHeight: 1.6, marginBottom: 20, maxWidth: 340 }}>
+          Si pierdes el dispositivo con tu app de autenticación, usa uno de estos códigos para recuperar el acceso. Cada uno funciona una sola vez. Guárdalos en un lugar seguro; no se van a volver a mostrar.
+        </p>
+        <div style={{ background: "#ffffff08", border: "1px solid #ffffff15", borderRadius: 16, padding: "20px 24px", marginBottom: 24, display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px 20px" }}>
+          {recoveryCodes.map(function(c, i) {
+            return <span key={i} style={{ color: text, fontSize: 15, fontWeight: 700, fontFamily: "monospace", letterSpacing: 1 }}>{c}</span>;
+          })}
+        </div>
+        <button onClick={function() { setRecoveryCodes(null); if (onMasterLogin) onMasterLogin(); }} className="btn-glow" style={{
+          width: "100%", maxWidth: 320, background: "linear-gradient(135deg, #8b5cf6, #6d28d9)", border: "none",
+          borderRadius: 16, padding: "18px", color: "white", fontSize: 16, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif",
+        }}>
+          Ya los guardé, continuar
+        </button>
+      </div>
+    );
+  }
 
   if (step === "verify2fa") {
     return (
@@ -1017,6 +1083,25 @@ function LoginScreen({ onBack, onLogin, onMasterLogin, masterOnly, onRegister, d
             ))}
           </div>
           {mfaError ? <p style={{ color: "#ef4444", fontSize: 13, marginBottom: 12, maxWidth: 300 }}>{"⚠️ " + mfaError}</p> : null}
+          {mfaStage === "verify" && !showRecoveryForm ? (
+            <button onClick={function() { setShowRecoveryForm(true); setRecoveryMsg(""); }} style={{ background: "none", border: "none", color: "#8b5cf6", fontSize: 13, cursor: "pointer", marginBottom: 16, fontFamily: "'DM Sans',sans-serif" }}>
+              ¿Perdiste tu dispositivo? Usa un código de respaldo
+            </button>
+          ) : null}
+          {showRecoveryForm ? (
+            <div style={{ width: "100%", maxWidth: 320, background: "#ffffff08", border: "1px solid #ffffff15", borderRadius: 16, padding: 16, marginBottom: 16, textAlign: "left" }}>
+              <p style={{ color: "#94a3b8", fontSize: 12, marginBottom: 8 }}>Escribe uno de tus códigos de respaldo (formato XXXX-XXXXX):</p>
+              <input value={recoveryInput} onChange={function(e) { setRecoveryInput(e.target.value.toUpperCase()); }} placeholder="XXXX-XXXXX" style={{ width: "100%", boxSizing: "border-box", background: "#ffffff08", border: "1px solid #ffffff15", borderRadius: 10, padding: "10px 12px", color: "white", fontSize: 14, outline: "none", fontFamily: "monospace", marginBottom: 10 }} />
+              {recoveryMsg ? <p style={{ color: "#ef4444", fontSize: 12, marginBottom: 10 }}>{recoveryMsg}</p> : null}
+              <div style={{ display: "flex", gap: 8 }}>
+                <button onClick={function() { setShowRecoveryForm(false); setRecoveryInput(""); setRecoveryMsg(""); }} style={{ flex: 1, background: "#ffffff08", border: "1px solid #ffffff15", borderRadius: 10, padding: 10, color: "#94a3b8", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>Cancelar</button>
+                <button onClick={redeemRecoveryCode} disabled={recoveryBusy} style={{ flex: 1, background: "linear-gradient(135deg,#8b5cf6,#6d28d9)", border: "none", borderRadius: 10, padding: 10, color: "white", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", opacity: recoveryBusy ? 0.6 : 1 }}>
+                  {recoveryBusy ? "Verificando…" : "Usar código"}
+                </button>
+              </div>
+              <p style={{ color: "#64748b", fontSize: 11, marginTop: 10, lineHeight: 1.5 }}>Al usarlo se borra tu app de autenticación actual y tendrás que configurar una nueva.</p>
+            </div>
+          ) : null}
           <button
             onClick={verifyMasterCode}
             style={{
