@@ -6668,7 +6668,10 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
   const [selected, setSelected] = useState(null);
   const [legalDocUrls, setLegalDocUrls] = useState({});
   const [legalDocMsg, setLegalDocMsg] = useState({});
-  const [masterTab, setMasterTab] = useState("owners"); // owners | visitors
+  const [masterTab, setMasterTab] = useState("owners");
+  const [invoices, setInvoices] = useState([]);
+  const [invoicesLoading, setInvoicesLoading] = useState(false);
+  const [invoiceBusyId, setInvoiceBusyId] = useState(null); // owners | visitors
   const [visitorSearch, setVisitorSearch] = useState("");
   const [visitors, setVisitors] = useState([
     { id: 1, name: "Carlos Mendoza", email: "carlos.mendoza@gmail.com", phone: "664-123-4567", city: "Tijuana", status: "verificado", joined: "12/03/2026", solicitudes: 2 },
@@ -6801,6 +6804,36 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
   };
 
   // Master approves / un-approves one legal document (saved in the database)
+  // Loads (and reloads) the fiscal invoice requests. Only visible while the tab is open.
+  const loadInvoices = function() {
+    var sess = window.__sbSession;
+    if (!sess || !sess.token) return;
+    setInvoicesLoading(true);
+    fetch(DOCS_SUPA + "/rest/v1/invoice_requests?select=*&order=created_at.desc", {
+      headers: { "apikey": DOCS_KEY, "Authorization": "Bearer " + sess.token },
+    }).then(function(r) { return r.json(); }).then(function(rows) {
+      setInvoicesLoading(false);
+      if (Array.isArray(rows)) setInvoices(rows);
+    }).catch(function() { setInvoicesLoading(false); });
+  };
+
+  useEffect(function() {
+    if (masterTab === "invoices") loadInvoices();
+  }, [masterTab]);
+
+  const markInvoiced = function(inv) {
+    setInvoiceBusyId(inv.id);
+    supaPatch("invoice_requests?id=eq." + inv.id, { status: "invoiced", invoiced_at: new Date().toISOString() }, false).then(function() {
+      setInvoices(function(prev) {
+        return prev.map(function(x) { return x.id === inv.id ? Object.assign({}, x, { status: "invoiced", invoiced_at: new Date().toISOString() }) : x; });
+      });
+      setInvoiceBusyId(null);
+    }).catch(function(e) {
+      setInvoiceBusyId(null);
+      alert("No se pudo actualizar: " + String(e && e.message ? e.message : e));
+    });
+  };
+
   const toggleLegalDoc = function(p, key) {
     var cur = p._uploadedDocs || {};
     var next = {};
@@ -7175,6 +7208,13 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
           fontSize: 13, fontWeight: masterTab === "visitors" ? 700 : 400,
           cursor: "pointer", fontFamily: "'DM Sans',sans-serif", transition: "all .2s",
         }}>{"👤 Visitantes"}</button>
+        <button onClick={() => setMasterTab("invoices")} style={{
+          flex: 1, padding: "14px 0", background: "none", border: "none",
+          borderBottom: masterTab === "invoices" ? "2px solid #8b5cf6" : "2px solid transparent",
+          color: masterTab === "invoices" ? "#8b5cf6" : "#64748b",
+          fontSize: 13, fontWeight: masterTab === "invoices" ? 700 : 400,
+          cursor: "pointer", fontFamily: "'DM Sans',sans-serif", transition: "all .2s",
+        }}>{"📄 Facturas"}</button>
       </div>
 
       {/* VISITANTES PANEL */}
@@ -7268,6 +7308,53 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
               Cancelar
             </button>
           </div>
+        </div>
+      )}
+
+
+      {/* FACTURAS PANEL */}
+      {masterTab === "invoices" && (
+        <div style={{ padding: "20px 24px" }}>
+          {invoicesLoading && <p style={{ color: "#64748b", textAlign: "center", padding: 40 }}>Cargando...</p>}
+          {!invoicesLoading && invoices.length === 0 && (
+            <p style={{ color: "#64748b", textAlign: "center", padding: 40 }}>No hay solicitudes de factura.</p>
+          )}
+          {invoices.map(function(inv) {
+            var regimenMap = { "601": "General de ley personas morales", "605": "Sueldos y salarios", "606": "Arrendamiento", "612": "Personas físicas con actividad empresarial y profesional", "616": "Sin obligaciones fiscales", "626": "Régimen Simplificado de Confianza" };
+            var usoMap = { "G01": "Adquisición de mercancías", "G03": "Gastos en general", "P01": "Por definir", "S01": "Sin efectos fiscales" };
+            var isDone = inv.status === "invoiced";
+            return (
+              <div key={inv.id} style={{ background: "#ffffff06", border: "1px solid " + (isDone ? "#10b98120" : "#f59e0b20"), borderRadius: 20, padding: 18, marginBottom: 14 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
+                  <div>
+                    <p style={{ color: "white", fontSize: 14, fontWeight: 700 }}>{inv.razon_social || "Sin nombre"}</p>
+                    <p style={{ color: "#64748b", fontSize: 12 }}>{inv.owner_email || ""}</p>
+                  </div>
+                  <span style={{
+                    background: isDone ? "#10b98115" : "#f59e0b15", color: isDone ? "#10b981" : "#f59e0b",
+                    fontSize: 10, fontWeight: 700, padding: "4px 10px", borderRadius: 99, whiteSpace: "nowrap",
+                  }}>{isDone ? "✓ Facturada" : "⏳ Pendiente"}</span>
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 12px", marginBottom: 12 }}>
+                  <p style={{ color: "#64748b", fontSize: 11 }}>{"RFC: " + (inv.rfc || "—")}</p>
+                  <p style={{ color: "#64748b", fontSize: 11 }}>{"CP fiscal: " + (inv.cp || "—")}</p>
+                  <p style={{ color: "#64748b", fontSize: 11 }}>{"Régimen: " + (regimenMap[inv.regimen_fiscal] || inv.regimen_fiscal || "—")}</p>
+                  <p style={{ color: "#64748b", fontSize: 11 }}>{"Uso CFDI: " + (usoMap[inv.uso_cfdi] || inv.uso_cfdi || "—")}</p>
+                  <p style={{ color: "#64748b", fontSize: 11 }}>{"Monto: $" + (inv.amount || 500) + " MXN"}</p>
+                  <p style={{ color: "#64748b", fontSize: 11 }}>{"Fecha: " + new Date(inv.created_at).toLocaleDateString("es-MX")}</p>
+                </div>
+                {!isDone && (
+                  <button onClick={function() { markInvoiced(inv); }} disabled={invoiceBusyId === inv.id} style={{
+                    width: "100%", background: "linear-gradient(135deg,#10b981,#059669)", border: "none", borderRadius: 12,
+                    padding: 12, color: "white", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif",
+                    opacity: invoiceBusyId === inv.id ? 0.6 : 1,
+                  }}>
+                    {invoiceBusyId === inv.id ? "Guardando..." : "✓ Marcar como facturada"}
+                  </button>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
 
