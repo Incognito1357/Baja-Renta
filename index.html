@@ -3219,12 +3219,15 @@ function SelfRegisterScreen({ onBack, onComplete, onLogin, darkMode = true }) {
                   method: "POST",
                   headers: { "Content-Type": "application/json", "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ" },
                   body: JSON.stringify({ email: form.email, password: form.password, role: "owner", full_name: form.name, phone: form.phone || null, rfc: form.rfc || null, date_of_birth: form.dob || null }),
-                }).then(function() {
+                }).then(function(r) { return r.json().then(function(j) { return { ok: r.ok, data: j }; }); }).then(function(reg) {
+                  if (!reg.ok) {
+                    setOtpError((reg.data && reg.data.message) || "No se pudo crear la cuenta. Intenta de nuevo.");
+                    return;
+                  }
                   sendEmail('welcome_owner', form.email, { name: form.name, email: form.email });
                   setShowPushPrompt(true);
                 }).catch(function() {
-                  sendEmail('welcome_owner', form.email, { name: form.name, email: form.email });
-                  onComplete({ name: form.name, email: form.email, phone: form.phone || '' });
+                  setOtpError("Error de conexión. Intenta de nuevo.");
                 });
               }
               else { setOtpError("Código incorrecto o expirado. Intenta de nuevo."); setCode(["","","","","",""]); }
@@ -6024,12 +6027,15 @@ function VisitorRegister({ onBack, onComplete, onLogin, darkMode = true }) {
                   method: "POST",
                   headers: { "Content-Type": "application/json", "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ" },
                   body: JSON.stringify({ email: form.email, password: form.password, role: "visitor", full_name: form.name, phone: form.phone || null, date_of_birth: form.dob || null }),
-                }).then(function() {
+                }).then(function(r) { return r.json().then(function(j) { return { ok: r.ok, data: j }; }); }).then(function(reg) {
+                  if (!reg.ok) {
+                    setOtpError((reg.data && reg.data.message) || "No se pudo crear la cuenta. Intenta de nuevo.");
+                    return;
+                  }
                   sendEmail('welcome_visitor', form.email, { name: form.name, email: form.email });
                   setShowPushPrompt(true);
                 }).catch(function() {
-                  sendEmail('welcome_visitor', form.email, { name: form.name, email: form.email });
-                  onComplete({ name: form.name, email: form.email, phone: form.phone });
+                  setOtpError("Error de conexión. Intenta de nuevo.");
                 });
               }
               else { setOtpError("Código incorrecto o expirado. Intenta de nuevo."); setCode(["","","","","",""]); }
