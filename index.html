@@ -6823,9 +6823,9 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
 
   const markInvoiced = function(inv) {
     setInvoiceBusyId(inv.id);
-    supaPatch("invoice_requests?id=eq." + inv.id, { status: "invoiced", invoiced_at: new Date().toISOString() }, false).then(function() {
+    supaPatch("invoice_requests?id=eq." + inv.id, { status: "sent", invoiced_at: new Date().toISOString() }, false).then(function() {
       setInvoices(function(prev) {
-        return prev.map(function(x) { return x.id === inv.id ? Object.assign({}, x, { status: "invoiced", invoiced_at: new Date().toISOString() }) : x; });
+        return prev.map(function(x) { return x.id === inv.id ? Object.assign({}, x, { status: "sent", invoiced_at: new Date().toISOString() }) : x; });
       });
       setInvoiceBusyId(null);
     }).catch(function(e) {
@@ -7322,7 +7322,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
           {invoices.map(function(inv) {
             var regimenMap = { "601": "General de ley personas morales", "605": "Sueldos y salarios", "606": "Arrendamiento", "612": "Personas físicas con actividad empresarial y profesional", "616": "Sin obligaciones fiscales", "626": "Régimen Simplificado de Confianza" };
             var usoMap = { "G01": "Adquisición de mercancías", "G03": "Gastos en general", "P01": "Por definir", "S01": "Sin efectos fiscales" };
-            var isDone = inv.status === "invoiced";
+            var isDone = inv.status === "sent";
             return (
               <div key={inv.id} style={{ background: "#ffffff06", border: "1px solid " + (isDone ? "#10b98120" : "#f59e0b20"), borderRadius: 20, padding: 18, marginBottom: 14 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
