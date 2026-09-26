@@ -5916,7 +5916,7 @@ function VisitorRegister({ onBack, onComplete, onLogin, darkMode = true }) {
   const [showPass, setShowPass] = useState(false);
   const [showConfirmPass, setShowConfirmPass] = useState(false);
   const [agreed, setAgreed] = useState(false);
-  const [form, setForm] = useState({ name: "", email: "", phone: "", password: "", confirmPassword: "", dob: "" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", city: "", password: "", confirmPassword: "", dob: "" });
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const ref0 = useRef(); const ref1 = useRef(); const ref2 = useRef(); const ref3 = useRef(); const ref4 = useRef(); const ref5 = useRef();
   const codeRefs = [ref0, ref1, ref2, ref3, ref4, ref5];
@@ -5934,7 +5934,7 @@ function VisitorRegister({ onBack, onComplete, onLogin, darkMode = true }) {
   const isAdult = age !== null && age >= 18;
   const [showMinorPopup, setShowMinorPopup] = useState(false);
   const passwordsMatch = form.password && form.confirmPassword && form.password === form.confirmPassword;
-  const allFilled = form.name && form.email && form.phone && form.password && form.confirmPassword && passwordsMatch && form.dob && isAdult && agreed;
+  const allFilled = form.name && form.email && form.phone && form.city && form.password && form.confirmPassword && passwordsMatch && form.dob && isAdult && agreed;
   const codeComplete = code.every(c => c !== "");
   const [otpError, setOtpError] = useState("");
   const [otpLoading, setOtpLoading] = useState(false);
@@ -6026,7 +6026,7 @@ function VisitorRegister({ onBack, onComplete, onLogin, darkMode = true }) {
                 fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/register-user", {
                   method: "POST",
                   headers: { "Content-Type": "application/json", "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ" },
-                  body: JSON.stringify({ email: form.email, password: form.password, role: "visitor", full_name: form.name, phone: form.phone || null, date_of_birth: form.dob || null }),
+                  body: JSON.stringify({ email: form.email, password: form.password, role: "visitor", full_name: form.name, phone: form.phone || null, city: form.city || null, date_of_birth: form.dob || null }),
                 }).then(function(r) { return r.json().then(function(j) { return { ok: r.ok, data: j }; }); }).then(function(reg) {
                   if (!reg.ok) {
                     setOtpError((reg.data && reg.data.message) || "No se pudo crear la cuenta. Intenta de nuevo.");
@@ -6122,6 +6122,7 @@ function VisitorRegister({ onBack, onComplete, onLogin, darkMode = true }) {
         { key: "name",  ph: "Nombre completo",     type: "text",  icon: "👤" },
         { key: "email", ph: "Correo electrónico",  type: "email", icon: "✉️" },
         { key: "phone", ph: "Teléfono / WhatsApp", type: "tel",   icon: "📱" },
+        { key: "city",  ph: "Ciudad",              type: "text",  icon: "📍" },
       ].map(f => (
         <div key={f.key} style={{ position: "relative", marginBottom: 12 }}>
           <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 16 }}>{f.icon}</span>
@@ -6679,17 +6680,54 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
   const [invoicesLoading, setInvoicesLoading] = useState(false);
   const [invoiceBusyId, setInvoiceBusyId] = useState(null); // owners | visitors
   const [visitorSearch, setVisitorSearch] = useState("");
-  const [visitors, setVisitors] = useState([
-    { id: 1, name: "Carlos Mendoza", email: "carlos.mendoza@gmail.com", phone: "664-123-4567", city: "Tijuana", status: "verificado", joined: "12/03/2026", solicitudes: 2 },
-    { id: 2, name: "Ana Sofia Ruiz", email: "ana.ruiz@hotmail.com", phone: "664-987-6543", city: "Ensenada", status: "pendiente", joined: "05/04/2026", solicitudes: 1 },
-    { id: 3, name: "Jorge Hernandez", email: "jorge.h@gmail.com", phone: "646-555-0011", city: "Rosarito", status: "verificado", joined: "20/01/2026", solicitudes: 3 },
-    { id: 4, name: "Lucia Flores", email: "lucia.flores@outlook.com", phone: "664-222-3344", city: "Tijuana", status: "verificado", joined: "08/05/2026", solicitudes: 0 },
-    { id: 5, name: "Roberto Castillo", email: "rcastillo@yahoo.com", phone: "646-777-8899", city: "Ensenada", status: "inactivo", joined: "15/02/2026", solicitudes: 1 },
-    { id: 6, name: "Maria Gonzalez", email: "mgonzalez@gmail.com", phone: "664-444-5566", city: "Tecate", status: "verificado", joined: "30/04/2026", solicitudes: 4 },
-  ]);
+  const [visitors, setVisitors] = useState([]);
+  const [visitorsLoading, setVisitorsLoading] = useState(false);
+  const [visitorsError, setVisitorsError] = useState("");
   const [confirmDeleteVisitor, setConfirmDeleteVisitor] = useState(null);
+  const [deleteVisitorBusy, setDeleteVisitorBusy] = useState(false);
 
-  const MOCK_VISITORS = visitors;
+  const loadVisitors = function() {
+    var sess = window.__sbSession;
+    if (!sess || !sess.token) { setVisitorsError("Tu sesión expiró. Sal del panel y vuelve a entrar."); return; }
+    setVisitorsLoading(true);
+    setVisitorsError("");
+    fetch(DOCS_SUPA + "/functions/v1/manage-visitors", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": DOCS_KEY, "Authorization": "Bearer " + sess.token },
+      body: JSON.stringify({ action: "list" }),
+    }).then(function(r) { return r.json().then(function(j) { return { ok: r.ok, data: j }; }); }).then(function(res) {
+      setVisitorsLoading(false);
+      if (res.ok && res.data && Array.isArray(res.data.visitors)) setVisitors(res.data.visitors);
+      else setVisitorsError((res.data && res.data.error) || "No se pudo cargar la lista de visitantes.");
+    }).catch(function() {
+      setVisitorsLoading(false);
+      setVisitorsError("Error de conexión. Intenta de nuevo.");
+    });
+  };
+
+  useEffect(function() {
+    if (masterTab === "visitors") loadVisitors();
+  }, [masterTab]);
+
+  const deleteVisitor = function(v) {
+    setDeleteVisitorBusy(true);
+    fetch(DOCS_SUPA + "/functions/v1/manage-visitors", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": DOCS_KEY, "Authorization": "Bearer " + window.__sbSession.token },
+      body: JSON.stringify({ action: "delete", user_id: v.id }),
+    }).then(function(r) { return r.json().then(function(j) { return { ok: r.ok, data: j }; }); }).then(function(res) {
+      setDeleteVisitorBusy(false);
+      if (res.ok) {
+        setVisitors(function(prev) { return prev.filter(function(x) { return x.id !== v.id; }); });
+        setConfirmDeleteVisitor(null);
+      } else {
+        alert((res.data && res.data.error) || "No se pudo eliminar la cuenta.");
+      }
+    }).catch(function() {
+      setDeleteVisitorBusy(false);
+      alert("Error de conexión. Intenta de nuevo.");
+    });
+  };
 
   const filteredVisitors = visitorSearch.trim()
     ? visitors.filter(v => {
@@ -7239,12 +7277,21 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
           </div>
 
           <p style={{ color: "#64748b", fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", marginBottom: 12 }}>
-            {filteredVisitors.length} de {MOCK_VISITORS.length} visitantes
+            {filteredVisitors.length} de {visitors.length} visitantes
           </p>
 
-          {filteredVisitors.length === 0 && (
+          {visitorsLoading && (
+            <p style={{ color: "#64748b", textAlign: "center", padding: 40 }}>Cargando...</p>
+          )}
+          {!visitorsLoading && visitorsError && (
+            <div style={{ background: "#ef444410", border: "1px solid #ef444430", borderRadius: 16, padding: "16px", textAlign: "center", marginBottom: 12 }}>
+              <p style={{ color: "#ef4444", fontSize: 13, marginBottom: 8 }}>{visitorsError}</p>
+              <button onClick={loadVisitors} style={{ background: "none", border: "1px solid #ef444440", borderRadius: 10, padding: "6px 14px", color: "#ef4444", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>Reintentar</button>
+            </div>
+          )}
+          {!visitorsLoading && !visitorsError && filteredVisitors.length === 0 && (
             <div style={{ background: "#ffffff06", border: "1px solid #ffffff10", borderRadius: 16, padding: "32px", textAlign: "center" }}>
-              <p style={{ color: "#64748b", fontSize: 13 }}>Sin resultados</p>
+              <p style={{ color: "#64748b", fontSize: 13 }}>{visitors.length === 0 ? "Aún no hay visitantes registrados" : "Sin resultados"}</p>
             </div>
           )}
 
@@ -7282,7 +7329,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
                   </div>
                   <div style={{ background: "#ffffff05", borderRadius: 8, padding: "7px 10px" }}>
                     <p style={{ color: "#475569", fontSize: 9, fontWeight: 700, marginBottom: 2 }}>REGISTRO</p>
-                    <p style={{ color: "#cbd5e1", fontSize: 12 }}>{v.joined}</p>
+                    <p style={{ color: "#cbd5e1", fontSize: 12 }}>{v.joined ? new Date(v.joined).toLocaleDateString("es-MX") : "—"}</p>
                   </div>
                   <div style={{ background: "#ffffff05", borderRadius: 8, padding: "7px 10px" }}>
                     <p style={{ color: "#475569", fontSize: 9, fontWeight: 700, marginBottom: 2 }}>SOLICITUDES</p>
@@ -7307,7 +7354,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
             <h3 style={{ color: "white", fontSize: 16, fontWeight: 700, textAlign: "center", marginBottom: 6, fontFamily: "'DM Sans',sans-serif" }}>Eliminar visitante</h3>
             <p style={{ color: "#94a3b8", fontSize: 13, textAlign: "center", lineHeight: 1.6, marginBottom: 6 }}>{confirmDeleteVisitor.name}</p>
             <p style={{ color: "#64748b", fontSize: 12, textAlign: "center", lineHeight: 1.6, marginBottom: 24 }}>Esta accion eliminara permanentemente el perfil y todos sus datos.</p>
-            <button onClick={() => { setVisitors(prev => prev.filter(x => x.id !== confirmDeleteVisitor.id)); setConfirmDeleteVisitor(null); }} style={{ width: "100%", background: "#ef4444", border: "none", borderRadius: 14, padding: "15px", color: "white", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", marginBottom: 10 }}>
+            <button disabled={deleteVisitorBusy} onClick={() => deleteVisitor(confirmDeleteVisitor)} style={{ width: "100%", opacity: deleteVisitorBusy ? 0.6 : 1, background: "#ef4444", border: "none", borderRadius: 14, padding: "15px", color: "white", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", marginBottom: 10 }}>
               Eliminar perfil
             </button>
             <button onClick={() => setConfirmDeleteVisitor(null)} style={{ width: "100%", background: "transparent", border: "1px solid #ffffff15", borderRadius: 14, padding: "13px", color: "#64748b", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
