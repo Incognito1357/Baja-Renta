@@ -263,17 +263,15 @@ var requestPushPermission = function(email, onToken) {
       fbMessaging.getToken({ vapidKey: "BBZuQqMYZZCKnQ5E_8Hu62PQn8Dn9xev_pCwcVXlQ71pkLhge732dy6OFWa0Og6NGbeSnCe9_q5sK48UVvcfbnA" }).then(function(token) {
         if (token) {
           console.log("FCM Token:", token);
-          // Save token to Supabase
-          if (email) {
-            fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/push_tokens", {
+          window.__lastPushToken = token;
+          // The token is tied to the caller's own verified session, never to an e-mail
+          // supplied by the client, so nobody can register a device under someone else's address.
+          var sess = window.__sbSession;
+          if (sess && sess.token) {
+            fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/save-push-token", {
               method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
-                "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
-                "Prefer": "resolution=merge-duplicates",
-              },
-              body: JSON.stringify({ user_email: email, token: token, platform: "web" }),
+              headers: { "Content-Type": "application/json", "Authorization": "Bearer " + sess.token },
+              body: JSON.stringify({ token: token, platform: "web" }),
             }).catch(function(e) { console.log("Save token error:", e); });
           }
           if (onToken) onToken(token);
@@ -287,9 +285,32 @@ var sendPush = function(token, title, body) {
   if (!token) return;
   fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/send-push", {
     method: "POST",
-    headers: { "Content-Type": "application/json", "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ" },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ token: token, title: title, body: body }),
   }).catch(function(e) { console.log("send-push error:", e); });
+};
+
+// Push a notification to every device on file for someone else's account (owner, visitor, master).
+var notifyUser = function(email, title, body, data) {
+  if (!email || !title) return;
+  fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/send-push", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: email, title: title, body: body || "", data: data || {} }),
+  }).catch(function(e) { console.log("notifyUser error:", e); });
+};
+
+// Turns push off for THIS device: forgets its token so future notifications skip it.
+// (Revoking the browser-level permission itself is up to the person, in their browser/site settings.)
+var disablePushForThisDevice = function() {
+  var sess = window.__sbSession;
+  var token = window.__lastPushToken;
+  if (!sess || !sess.token || !token) return Promise.resolve();
+  return fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/save-push-token", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Authorization": "Bearer " + sess.token },
+    body: JSON.stringify({ action: "remove", token: token }),
+  }).catch(function(e) { console.log("disablePushForThisDevice error:", e); });
 };
 
 // ── COMPONENTS ────────────────────────────────────────────────────────────────
@@ -1856,7 +1877,32 @@ function ChangePasswordScreen({ onBack, darkMode = true }) {
 }
 
 function SettingsScreen({ onBack, onSignOut, darkModeProp, onToggleTheme, onChangePassword, onHelp, currentUser = {} }) {
-  const [notifications, setNotifications] = useState(true);
+  const [notifications, setNotifications] = useState(function() { return typeof Notification !== "undefined" && Notification.permission === "granted"; });
+  // Turning push ON asks the browser for permission and registers this device; turning it OFF
+  // forgets this device's token so it stops receiving notifications.
+  // If the browser already granted permission from an earlier attempt, make sure this device
+  // actually has a token saved on the server — the switch showing "on" doesn't guarantee that.
+  useEffect(function() {
+    if (typeof Notification !== "undefined" && Notification.permission === "granted" && currentUser.email) {
+      requestPushPermission(currentUser.email, function() {});
+    }
+  }, []);
+
+  const togglePush = function() {
+    if (notifications) {
+      setNotifications(false);
+      disablePushForThisDevice();
+    } else {
+      setNotifications(true);
+      if (typeof Notification !== "undefined" && Notification.permission === "denied") {
+        setNotifications(false);
+        alert("Las notificaciones están bloqueadas en tu navegador. Actívalas desde la configuración del sitio y vuelve a intentarlo.");
+        return;
+      }
+      requestPushPermission(currentUser.email, function() {});
+    }
+  };
+
   const [emails, setEmails] = useState(false);
   const [activeTooltip, setActiveTooltip] = useState(null);
   const darkMode = darkModeProp !== undefined ? darkModeProp : true;
@@ -1923,7 +1969,7 @@ function SettingsScreen({ onBack, onSignOut, darkModeProp, onToggleTheme, onChan
         <div style={{ background: "#ffffff06", border: "1px solid " + border, borderRadius: 16, marginBottom: 20, transition: "background .3s, border-color .3s" }}>
           {[
             {
-              label: "Notificaciones push", icon: "🔔", val: notifications, set: setNotifications,
+              label: "Notificaciones push", icon: "🔔", val: notifications, set: togglePush,
               tooltip: "Recibe alertas en tu dispositivo cuando una propiedad que te gustó cambie de estado, cuando el propietario apruebe o rechace tu solicitud, y cuando tengas mensajes nuevos.",
             },
             {
@@ -2448,6 +2494,7 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
               city: property.city,
               price: "$" + (property.price || "").toLocaleString(),
             });
+            notifyUser(appForm.email, "Solicitud enviada", "Tu solicitud para " + property.name + " fue enviada al propietario.");
             // Notify owner - new application (if owner email available)
             if (property.ownerEmail) {
               sendEmail("new_application", property.ownerEmail, {
@@ -2457,6 +2504,7 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
                 applicant_phone: appForm.phone,
                 income: appForm.income,
               });
+              notifyUser(property.ownerEmail, "Nueva solicitud recibida", (appForm.name || "Alguien") + " quiere rentar " + property.name + ".");
             }
           }} className="btn-glow" style={{
             width: "100%", background: appReady ? "linear-gradient(135deg, #3b82f6, #6366f1)" : "#ffffff10",
@@ -3225,7 +3273,7 @@ function SelfRegisterScreen({ onBack, onComplete, onLogin, darkMode = true }) {
                     return;
                   }
                   sendEmail('welcome_owner', form.email, { name: form.name, email: form.email });
-                  setShowPushPrompt(true);
+                  return signInAfterRegister(form.email, form.password).then(function() { setShowPushPrompt(true); });
                 }).catch(function() {
                   setOtpError("Error de conexión. Intenta de nuevo.");
                 });
@@ -4029,6 +4077,18 @@ function saveSbSession(res) {
   };
 }
 
+// Right after creating an account we still have the password the person just typed, so sign
+// them in to get a session. Never rejects: if it fails, registration still completes.
+function signInAfterRegister(email, password) {
+  return fetch(DOCS_SUPA + "/auth/v1/token?grant_type=password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "apikey": DOCS_KEY },
+    body: JSON.stringify({ email: email, password: password }),
+  }).then(function(r) { return r.json(); }).then(function(res) {
+    if (res && res.access_token) saveSbSession(res);
+  }).catch(function() {});
+}
+
 function getSbToken() {
   var ss = window.__sbSession;
   if (!ss || !ss.token) return Promise.resolve(null);
@@ -4230,6 +4290,7 @@ function OwnerPropertyDetail({ property, onBack, approvedApplicants, onApprove, 
           city: city,
           price: price ? "$" + price.toLocaleString() : "",
         });
+        notifyUser(chosen.email, "¡Tu solicitud fue aprobada!", "El propietario de " + name + " aprobó tu solicitud. Pronto se pondrá en contacto contigo.");
       }
       if (onApprove) onApprove(property.id, chosen.id);
     }).catch(function(e) {
@@ -4251,6 +4312,7 @@ function OwnerPropertyDetail({ property, onBack, approvedApplicants, onApprove, 
     supaPatch("applications?id=eq." + chosen.id, { status: "rejected" }, false).then(function() {
       if (chosen.email) {
         sendEmail("application_rejected", chosen.email, { property_name: name, reason: "" });
+        notifyUser(chosen.email, "Solicitud no aprobada", "El propietario de " + name + " no pudo aprobar tu solicitud esta vez.");
       }
       applyLocal(chosen.id, { status: "Rechazado" });
       setSelectedApp(null);
@@ -4360,7 +4422,32 @@ function OwnerPropertyDetail({ property, onBack, approvedApplicants, onApprove, 
 
 function OwnerSettingsScreen({ onBack, onSignOut, darkModeProp, onToggleTheme, currentUser = {} }) {
   const darkMode = darkModeProp !== undefined ? darkModeProp : true;
-  const [notifications, setNotifications] = useState(true);
+  const [notifications, setNotifications] = useState(function() { return typeof Notification !== "undefined" && Notification.permission === "granted"; });
+  // Turning push ON asks the browser for permission and registers this device; turning it OFF
+  // forgets this device's token so it stops receiving notifications.
+  // If the browser already granted permission from an earlier attempt, make sure this device
+  // actually has a token saved on the server — the switch showing "on" doesn't guarantee that.
+  useEffect(function() {
+    if (typeof Notification !== "undefined" && Notification.permission === "granted" && currentUser.email) {
+      requestPushPermission(currentUser.email, function() {});
+    }
+  }, []);
+
+  const togglePush = function() {
+    if (notifications) {
+      setNotifications(false);
+      disablePushForThisDevice();
+    } else {
+      setNotifications(true);
+      if (typeof Notification !== "undefined" && Notification.permission === "denied") {
+        setNotifications(false);
+        alert("Las notificaciones están bloqueadas en tu navegador. Actívalas desde la configuración del sitio y vuelve a intentarlo.");
+        return;
+      }
+      requestPushPermission(currentUser.email, function() {});
+    }
+  };
+
   const [emails, setEmails] = useState(false);
   const [activeTooltip, setActiveTooltip] = useState(null);
   const [showChangePass, setShowChangePass] = useState(false);
@@ -4388,7 +4475,7 @@ function OwnerSettingsScreen({ onBack, onSignOut, darkModeProp, onToggleTheme, c
     {
       title: "Notificaciones",
       toggles: [
-        { label: "Notificaciones push", icon: "🔔", val: notifications, set: setNotifications, tooltip: "Recibe alertas en tu dispositivo cuando un inquilino envíe una solicitud para tu propiedad, cuando el equipo de Baja Renta apruebe o rechace tu publicación, y cuando haya actualizaciones en el proceso de gestión." },
+        { label: "Notificaciones push", icon: "🔔", val: notifications, set: togglePush, tooltip: "Recibe alertas en tu dispositivo cuando un inquilino envíe una solicitud para tu propiedad, cuando el equipo de Baja Renta apruebe o rechace tu publicación, y cuando haya actualizaciones en el proceso de gestión." },
         { label: "Correo electrónico", icon: "✉️", val: emails, set: setEmails, tooltip: "Te enviaremos correos a tu dirección registrada cuando recibas nuevas solicitudes de renta, cuando tu propiedad sea aprobada por el equipo de Baja Renta, y para recordatorios de documentos pendientes." },
         { label: darkMode ? "Modo oscuro" : "Modo claro", icon: darkMode ? "🌙" : "☀️", val: darkMode, set: function() { if (onToggleTheme) onToggleTheme(); }, tooltip: null, noLabel: true },
       ],
@@ -5011,6 +5098,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
       price: "$" + (newProp.price || "").toLocaleString(),
       mode: mode,
     });
+    notifyUser("miguelayalamartinez@gmail.com", "Nueva propiedad por revisar", newProp.name + " (" + (newProp.city || "") + ") espera tu aprobación.");
     setSubmitted(true);
   };
 
@@ -6033,7 +6121,7 @@ function VisitorRegister({ onBack, onComplete, onLogin, darkMode = true }) {
                     return;
                   }
                   sendEmail('welcome_visitor', form.email, { name: form.name, email: form.email });
-                  setShowPushPrompt(true);
+                  return signInAfterRegister(form.email, form.password).then(function() { setShowPushPrompt(true); });
                 }).catch(function() {
                   setOtpError("Error de conexión. Intenta de nuevo.");
                 });
@@ -6964,11 +7052,13 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
           price: prop.price ? "$" + prop.price.toLocaleString() : "",
           mode: prop.mode || "self",
         });
+        notifyUser(prop.ownerEmail, "Tu propiedad fue aprobada", prop.name + " ya fue aprobada. Entra a Baja Renta para pagar y publicarla.");
       } else if (status === "rechazada") {
         sendEmail("application_rejected", prop.ownerEmail, {
           property_name: prop.name,
           reason: "El equipo de Baja Renta ha revisado tu propiedad y no cumple con los requisitos actuales de publicación.",
         });
+        notifyUser(prop.ownerEmail, "Tu propiedad no fue aprobada", prop.name + " no cumple con los requisitos actuales de publicación.");
       }
     }
     // Notify master via email when property approved
