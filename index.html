@@ -4661,15 +4661,14 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
 
   useEffect(function() {
     if (!currentUser || !currentUser.email) return;
-    var email = currentUser.email;
-    var url = isMiguel
-      ? "https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties?select=*&order=created_at.desc"
-      : "https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties?owner_email=eq." + encodeURIComponent(email) + "&select=*&order=created_at.desc";
+    var url = "https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties?select=*&order=created_at.desc";
     var load = function() {
+    getSbToken().then(function(tok) {
+    var authHeader = "Bearer " + (tok || DOCS_KEY);
     fetch(url, {
       headers: {
-        "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
-        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+        "apikey": DOCS_KEY,
+        "Authorization": authHeader,
       },
     }).then(function(r) { return r.json(); }).then(function(data) {
       if (!Array.isArray(data)) return;
@@ -4677,8 +4676,8 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
       var propPromises = data.map(function(p) {
         return fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/applications?property_id=eq." + p.id + "&select=*", {
           headers: {
-            "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
-            "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+            "apikey": DOCS_KEY,
+            "Authorization": authHeader,
           },
         }).then(function(r) { return r.json(); }).then(function(apps) {
           var applicants = Array.isArray(apps) ? apps.map(function(a) {
@@ -4717,6 +4716,7 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
         setSupaProperties(props);
       });
     }).catch(function(e) { console.log("owner dashboard fetch error:", e); });
+    });
     };
     load();
     var timer = setInterval(load, 30000);
@@ -4938,16 +4938,18 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
   useEffect(function() {
     if (!currentUser || !currentUser.email) return;
     var email = currentUser.email;
+    getSbToken().then(function(tok) {
     fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties?status=eq.approved&owner_email=eq." + encodeURIComponent(email) + "&select=id,name,status", {
       headers: {
-        "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
-        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+        "apikey": DOCS_KEY,
+        "Authorization": "Bearer " + (tok || DOCS_KEY),
       },
     }).then(function(r) { return r.json(); }).then(function(data) {
       if (Array.isArray(data) && data.length > 0) {
         setMasterApproved(true);
       }
     }).catch(function(e) { console.log("approval check error:", e); });
+    });
   }, [currentUser && currentUser.email]);
   const [showThankYou, setShowThankYou] = useState(false);
   const [managed_agreed, setManaged_agreed] = useState(false);
@@ -6976,10 +6978,11 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
   // Fetch properties from Supabase on mount
   useEffect(function() {
     setFetchStatus("cargando...");
+    getSbToken().then(function(tok) {
     fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties?select=*&order=created_at.desc", {
       headers: {
-        "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
-        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
+        "apikey": DOCS_KEY,
+        "Authorization": "Bearer " + (tok || DOCS_KEY),
       },
     }).then(function(r) { return r.json(); }).then(function(data) {
       if (!Array.isArray(data)) {
@@ -7030,6 +7033,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
     }).catch(function(e) {
       setFetchStatus("❌ Error conexión: " + e.message);
       console.log("Supabase fetch error:", e);
+    });
     });
   }, []);
 
@@ -7751,7 +7755,7 @@ function App() {
 
   // Load approved properties from Supabase — show them FIRST
   useEffect(function() {
-    fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties?status=in.(approved,published)&select=*&order=created_at.desc", {
+    fetch("https://uwtclxtywhthwecsqeug.supabase.co/rest/v1/properties?status=eq.published&select=*&order=created_at.desc", {
       headers: {
         "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
         "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
