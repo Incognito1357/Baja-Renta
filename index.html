@@ -1505,7 +1505,7 @@ function HelpScreen({ onBack, darkMode = true }) {
         },
         {
           q: "¿Cuánto cuesta publicar en Baja Renta?",
-          a: "La tarifa de publicación es de $500 MXN únicos. Si eliges que Baja Renta gestione tu propiedad, el costo se incluye en el plan de gestión. Consulta nuestros planes para más detalles.",
+          a: "La tarifa de publicación es de $580 MXN (incluye IVA). Si eliges que Baja Renta gestione tu propiedad, el costo se incluye en el plan de gestión. Consulta nuestros planes para más detalles.",
         },
         {
           q: "¿Cómo reviso y apruebo solicitudes de candidatos?",
@@ -4411,7 +4411,7 @@ function OwnerPropertyDetail({ property, onBack, approvedApplicants, onApprove, 
               else alert("Error al crear sesion de pago." + (res && res.error ? "\n" + res.error : ""));
             }).catch(function() { alert("Error de conexion."); });
           }} style={{ width: "100%", background: "linear-gradient(135deg, #10b981, #059669)", border: "none", borderRadius: 16, padding: 16, color: "white", fontSize: 15, fontWeight: 700, cursor: "pointer" }}>
-            Pagar $500 MXN y publicar
+            Pagar $580 MXN y publicar
           </button>
         </div>
       )}
@@ -5469,7 +5469,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
             fontFamily: "'DM Sans',sans-serif", transition: "all .3s",
             display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
           }}>
-            <Icon name="card" size={18} color="white" /> {"Pagar $500 y publicar"}
+            <Icon name="card" size={18} color="white" /> {"Pagar $580 y publicar"}
           </button>
           <p style={{ color: textSubOP, fontSize: 11, textAlign: "center", marginTop: 10 }}>🔐 Pago seguro · SSL 256-bit</p>
         </div>
@@ -5838,7 +5838,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
               fontSize: 16, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", transition: "all .3s",
               display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
             }}>
-              <Icon name="arrow" size={18} color="white" /> {"💳 Pagar $500 MXN y publicar"}
+              <Icon name="arrow" size={18} color="white" /> {"💳 Pagar $580 MXN y publicar"}
             </button>
           ) : (
             <div>
@@ -5855,7 +5855,7 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
                 fontSize: 16, fontWeight: 700, cursor: "not-allowed", fontFamily: "'DM Sans',sans-serif",
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: 0.5,
               }}>
-                {"🔒 Continuar al pago · $500 MXN"}
+                {"🔒 Continuar al pago · $580 MXN"}
               </button>
               <div style={{ marginTop: 12, background: "#3b82f610", border: "1px solid #3b82f630", borderRadius: 12, padding: "12px 16px" }}>
                 <p style={{ color: "#3b82f6", fontSize: 12, fontWeight: 600, marginBottom: 4 }}>📧 ¿Qué sigue?</p>
@@ -8106,7 +8106,7 @@ function App() {
           uso_cfdi: inv.uso || "G03",
           regimen_fiscal: inv.regimen || "612",
           cp: cp,
-          amount: 500,
+          amount: 580,
           stripe_session_id: pi.session_id || null,
           status: "pending",
         }),
@@ -8121,7 +8121,7 @@ function App() {
           regimen_fiscal: inv.regimen || "612",
           uso_cfdi: inv.uso || "G03",
           cp: cp,
-          monto: "$500.00 MXN",
+          monto: "$580.00 MXN",
         });
         setPayBusy(false);
         setPayStep("invoice_sent");
@@ -8155,7 +8155,7 @@ function App() {
               <div style={{ fontSize: 64, marginBottom: 16 }}>🎉</div>
               <h2 style={{ color: "white", fontFamily: "'Syne',sans-serif", fontSize: 24, fontWeight: 800, marginBottom: 8 }}>¡Pago exitoso!</h2>
               <p style={{ color: "#94a3b8", fontSize: 14, lineHeight: 1.7, marginBottom: 4 }}>
-                Tu pago de <strong style={{ color: "#10b981" }}>$500 MXN</strong> fue procesado correctamente.
+                Tu pago de <strong style={{ color: "#10b981" }}>$580 MXN</strong> fue procesado correctamente.
               </p>
               {pi.folio ? <p style={{ color: "#64748b", fontSize: 12, marginBottom: 20 }}>{"Folio " + pi.folio}</p> : null}
               <p style={{ color: "#e2e8f0", fontSize: 14, fontWeight: 600, marginBottom: 14 }}>¿Cómo quieres tu comprobante?</p>
