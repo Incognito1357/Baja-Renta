@@ -5081,14 +5081,14 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
-        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3dGNseHR5d2h0aHdlY3NxZXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNTE1NDQsImV4cCI6MjA5NjYyNzU0NH0.wQ-I3d1P_FaPe4kq2mV_Nm_j7hE7PUOdx_VKVxl7PQQ",
-        "Prefer": "return=representation",
+        "apikey": DOCS_KEY,
+        "Authorization": "Bearer " + DOCS_KEY,
       },
       body: JSON.stringify(supaData),
     });
-    }).then(function(r) { return r.json(); }).then(function(res) {
-      console.log("Property saved to Supabase:", res);
+    }).then(function(r) {
+      if (!r.ok) return r.text().then(function(t) { console.log("Supabase save error:", r.status, t); });
+      console.log("Property saved to Supabase");
     }).catch(function(e) { console.log("Supabase save error:", e); });
 
     if (onPublish) onPublish(newProp);
