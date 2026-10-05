@@ -192,7 +192,7 @@ const PROPERTIES = [
 const FILTER_STEPS = [
   { key: "type", label: "¿Qué tipo de inmueble buscas?", options: ["Apartamento", "Casa", "Estudio", "Penthouse", "Cualquiera"] },
   { key: "city", label: "¿En qué ciudad?", options: ["Tijuana", "Rosarito", "Ensenada", "Mexicali", "Cualquiera"] },
-  { key: "priceRange", label: "Rango de precio mensual", isPrice: true },
+  { key: "priceRange", label: "Rango de precio mensual (USD)", isPrice: true },
   { key: "pool", label: "¿Necesitas alberca?", options: ["Sí", "No", "Me da igual"] },
   { key: "petFriendly", label: "¿Tienes mascotas?", options: ["Sí, necesito Pet Friendly", "No tengo mascotas", "Me da igual"] },
   { key: "parking", label: "¿Qué tipo de estacionamiento?", options: ["Privado", "Público", "Me da igual"] },
@@ -2078,7 +2078,7 @@ function SettingsScreen({ onBack, onSignOut, darkModeProp, onToggleTheme, onChan
                 Para eliminar tu cuenta envía un correo a:
               </p>
               <div style={{ background: darkMode ? "#ffffff08" : "#f1f5f9", border: "1px solid " + darkMode ? "#3b82f630" : "#bfdbfe", borderRadius: 12, padding: "12px 16px", marginBottom: 16, textAlign: "center" }}>
-                <p style={{ color: "#3b82f6", fontSize: 14, fontWeight: 700 }}>servicio@bajarenta.com</p>
+                <p style={{ color: "#3b82f6", fontSize: 14, fontWeight: 700 }}>bajarenta3@gmail.com</p>
               </div>
               <p style={{ color: "#64748b", fontSize: 12, textAlign: "center", lineHeight: 1.7, marginBottom: 24 }}>
                 Incluye tu nombre y correo registrado. Tu cuenta será eliminada dentro de los próximos <span style={{ color: darkMode ? "white" : "#0f172a", fontWeight: 700 }}>15 días hábiles</span> a partir de tu solicitud.
@@ -2239,7 +2239,7 @@ function PropertyCard({ property, onLike, onDislike, onSettings, onFilter, darkM
             <p style={{ fontFamily: "'DM Sans',sans-serif", color: "#3b82f6", fontSize: 18, fontWeight: 700 }}>
               {"$" + property.price.toLocaleString()}
             </p>
-            <p style={{ color: "#64748b", fontSize: 11 }}>/mes</p>
+            <p style={{ color: "#64748b", fontSize: 11 }}>USD/mes</p>
           </div>
         </div>
 
@@ -2718,7 +2718,7 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
           fontFamily: "'DM Sans',sans-serif", transition: "all .3s",
           opacity: canPay ? 1 : 0.6, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
         }}>
-          <Icon name="card" size={18} color={canPay ? "white" : "#475569"} /> {"Pagar $" + total.toLocaleString() + " MXN"}
+          <Icon name="card" size={18} color={canPay ? "white" : "#475569"} /> {"Pagar $" + total.toLocaleString() + " USD"}
         </button>
 
         {/* SSL badge */}
@@ -2761,7 +2761,7 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
                 <div style={{ height: 1, background: "#ffffff06", margin: "10px 0" }} />
                 <div style={{ display: "flex", justifyContent: "space-between" }}>
                   <p style={{ color: "#64748b", fontSize: 12 }}>1ra mensualidad</p>
-                  <p style={{ color: "#10b981", fontSize: 13, fontWeight: 700 }}>{"$" + monthly.toLocaleString()} MXN</p>
+                  <p style={{ color: "#10b981", fontSize: 13, fontWeight: 700 }}>{"$" + monthly.toLocaleString()} USD</p>
                 </div>
               </div>
 
@@ -2829,7 +2829,7 @@ function PropertyDetail({ property, onBack, onRent, onSubmitApplication, darkMod
           </div>
           <div style={{ textAlign: "right" }}>
             <p style={{ fontFamily: "'DM Sans',sans-serif", color: "#3b82f6", fontSize: 20, fontWeight: 700 }}>{"$" + monthly.toLocaleString()}</p>
-            <p style={{ color: "#64748b", fontSize: 11 }}>/mes</p>
+            <p style={{ color: "#64748b", fontSize: 11 }}>USD/mes</p>
           </div>
         </div>
 
@@ -4348,7 +4348,7 @@ function OwnerPropertyDetail({ property, onBack, approvedApplicants, onApprove, 
           {isApproved ? "Aprobada" : status}
         </span>
         <p style={{ color: "#3b82f6", fontSize: 22, fontWeight: 700, marginTop: 12 }}>
-          {"$" + price.toLocaleString() + "/mes"}
+          {"$" + price.toLocaleString() + " USD/mes"}
         </p>
       </div>
       <div style={{ padding: 20 }}>
@@ -4628,7 +4628,7 @@ function OwnerSettingsScreen({ onBack, onSignOut, darkModeProp, onToggleTheme, c
                 Para eliminar tu cuenta envía un correo a:
               </p>
               <div style={{ background: darkMode ? "#ffffff08" : "#f1f5f9", border: "1px solid " + darkMode ? "#f59e0b30" : "#fde68a", borderRadius: 12, padding: "12px 16px", marginBottom: 16, textAlign: "center" }}>
-                <p style={{ color: "#f59e0b", fontSize: 14, fontWeight: 700 }}>servicio@bajarenta.com</p>
+                <p style={{ color: "#f59e0b", fontSize: 14, fontWeight: 700 }}>bajarenta3@gmail.com</p>
               </div>
               <p style={{ color: "#64748b", fontSize: 12, textAlign: "center", lineHeight: 1.7, marginBottom: 24 }}>
                 Incluye tu nombre y correo registrado. Tu cuenta será eliminada dentro de los próximos <span style={{ color: darkMode ? "white" : "#0f172a", fontWeight: 700 }}>15 días hábiles</span> a partir de tu solicitud.
@@ -4889,7 +4889,7 @@ function OwnerDashboard({ onPublish, onBack, darkModeProp, onToggleTheme, curren
               </div>
               <p style={{ color: textSub, fontSize: 12, marginBottom: 8 }}>{safeP.city}</p>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <p style={{ fontFamily: "'DM Sans',sans-serif", color: "#3b82f6", fontSize: 14, fontWeight: 700 }}>{"$" + safeP.price.toLocaleString()}<span style={{ color: textSub, fontSize: 10 }}>/mes</span></p>
+                <p style={{ fontFamily: "'DM Sans',sans-serif", color: "#3b82f6", fontSize: 14, fontWeight: 700 }}>{"$" + safeP.price.toLocaleString()}<span style={{ color: textSub, fontSize: 10 }}> USD/mes</span></p>
                 <span style={{ color: textSub, fontSize: 11 }}>👁 {safeP.views}</span>
               </div>
             </div>
@@ -5560,8 +5560,8 @@ function OwnerPanel({ onBack, onPublish, listedProperties: listedProps, darkMode
 
       {[
         { ph: "Dirección completa", key: "address" },
-        { ph: "Precio mensual (MXN)", key: "price" },
-        { ph: "Depósito requerido (MXN)", key: "deposit" },
+        { ph: "Precio mensual (USD)", key: "price" },
+        { ph: "Depósito requerido (USD)", key: "deposit" },
       ].map((f, i) => (
         <input key={i} placeholder={f.ph} value={propForm[f.key]} onChange={e => setPF(f.key, e.target.value)} style={{
           display: "block", width: "100%", background: cardBgOP,
@@ -5890,7 +5890,7 @@ function GuestPropertyDetail({ p, onBack, onRegister }) {
           {/* Header: close + price + address */}
           <div style={{ padding: "48px 20px 16px", display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
             <div>
-              <p style={{ fontFamily: "'DM Sans',sans-serif", color: "#3b82f6", fontSize: 24, fontWeight: 700, lineHeight: 1 }}>{"$" + p.price.toLocaleString()}<span style={{ color: "#64748b", fontSize: 12, fontWeight: 400 }}>/mes</span></p>
+              <p style={{ fontFamily: "'DM Sans',sans-serif", color: "#3b82f6", fontSize: 24, fontWeight: 700, lineHeight: 1 }}>{"$" + p.price.toLocaleString()}<span style={{ color: "#64748b", fontSize: 12, fontWeight: 400 }}> USD/mes</span></p>
               <p style={{ color: "#64748b", fontSize: 12, marginTop: 4, display: "flex", alignItems: "center", gap: 4 }}>
                 <Icon name="map" size={11} color="#94a3b8" /> {p.address}
               </p>
@@ -5965,7 +5965,7 @@ function GuestPropertyDetail({ p, onBack, onRegister }) {
           </div>
           <div style={{ textAlign: "right" }}>
             <p style={{ fontFamily: "'DM Sans',sans-serif", color: "#3b82f6", fontSize: 22, fontWeight: 700 }}>{"$" + p.price.toLocaleString()}</p>
-            <p style={{ color: "#64748b", fontSize: 11 }}>/mes</p>
+            <p style={{ color: "#64748b", fontSize: 11 }}>USD/mes</p>
           </div>
         </div>
         <div style={{ background: "#ffffff06", border: "1px solid #ffffff15", borderRadius: 16, padding: 18, marginBottom: 20 }}>
@@ -5975,7 +5975,7 @@ function GuestPropertyDetail({ p, onBack, onRegister }) {
               <p style={{ fontFamily: "'DM Sans',sans-serif", color: "#f59e0b", fontSize: 18, fontWeight: 700 }}>{"$" + p.deposit.toLocaleString()}</p>
             </div>
             <div style={{ textAlign: "right" }}>
-              <p style={{ color: "#64748b", fontSize: 12 }}>Renta mensual</p>
+              <p style={{ color: "#64748b", fontSize: 12 }}>Renta mensual (USD)</p>
               <p style={{ fontFamily: "'DM Sans',sans-serif", color: "#3b82f6", fontSize: 18, fontWeight: 700 }}>{"$" + p.price.toLocaleString()}</p>
             </div>
           </div>
@@ -6580,7 +6580,7 @@ function PropertyAssistantWidget({ onSelectProperty }) {
                               <img src={img} alt={p.name} style={{ width: 52, height: 52, borderRadius: 10, objectFit: "cover", flexShrink: 0 }} />
                               <div style={{ minWidth: 0 }}>
                                 <p style={{ color: "white", fontSize: 13, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.name}</p>
-                                <p style={{ color: "#64748b", fontSize: 11 }}>{(p.city || "") + " · $" + (p.price || 0) + " MXN/mes"}</p>
+                                <p style={{ color: "#64748b", fontSize: 11 }}>{(p.city || "") + " · $" + (p.price || 0) + " USD/mes"}</p>
                               </div>
                             </button>
                           );
@@ -6686,7 +6686,7 @@ function GuestCatalog({ onBack, filters = {}, onRegister, properties: propList }
               </p>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <p style={{ fontFamily: "'DM Sans',sans-serif", color: "#3b82f6", fontSize: 16, fontWeight: 700 }}>
-                  {"$" + p.price.toLocaleString()}<span style={{ color: "#64748b", fontSize: 10, fontWeight: 400 }}>/mes</span>
+                  {"$" + p.price.toLocaleString()}<span style={{ color: "#64748b", fontSize: 10, fontWeight: 400 }}> USD/mes</span>
                 </p>
                 <div style={{ display: "flex", gap: 6 }}>
                   <span style={{ color: "#64748b", fontSize: 11 }}>🛏️ {p.bedrooms}</span>
@@ -7216,8 +7216,8 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 16 }}>
             {[
               { label: "Tipo", val: p.type, icon: "🏠" },
-              { label: "Precio mensual", val: "$" + (p.price||0).toLocaleString() + " MXN", icon: "💰" },
-              { label: "Depósito", val: p.deposit ? "$" + p.deposit.toLocaleString() + " MXN" : "—", icon: "🏦" },
+              { label: "Precio mensual", val: "$" + (p.price||0).toLocaleString() + " USD", icon: "💰" },
+              { label: "Depósito", val: p.deposit ? "$" + p.deposit.toLocaleString() + " USD" : "—", icon: "🏦" },
               { label: "Recámaras", val: p.bedrooms || "—", icon: "🛏️" },
               { label: "Baños", val: p.bathrooms || "—", icon: "🚿" },
               { label: "Pisos", val: p.floors || "—", icon: "🏢" },
@@ -7690,7 +7690,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
               <p style={{ color: "#64748b", fontSize: 12, marginBottom: 4 }}>👤 {p.owner}</p>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
                 <p style={{ fontFamily: "'Syne',sans-serif", color: "#8b5cf6", fontSize: 14, fontWeight: 700 }}>
-                  {"$" + p.price.toLocaleString()}<span style={{ color: "#64748b", fontSize: 10, fontWeight: 400 }}>/mes</span>
+                  {"$" + p.price.toLocaleString()}<span style={{ color: "#64748b", fontSize: 10, fontWeight: 400 }}> USD/mes</span>
                 </p>
                 <span style={{ color: "#64748b", fontSize: 11 }}>{p.city}</span>
               </div>
