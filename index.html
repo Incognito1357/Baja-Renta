@@ -896,7 +896,19 @@ function LoginScreen({ onBack, onLogin, onMasterLogin, masterOnly, onRegister, d
             if (typeof Notification !== "undefined" && Notification.permission === "default") {
               requestPushPermission(email, function(token) { console.log("login push token:", token); });
             }
-            onLogin({ email: email, name: email, phone: "" });
+            var userId = res.user && res.user.id;
+            if (userId) {
+              fetch(DOCS_SUPA + "/rest/v1/profiles?id=eq." + userId + "&select=full_name,phone", {
+                headers: { "apikey": DOCS_KEY, "Authorization": "Bearer " + res.access_token },
+              }).then(function(r) { return r.json(); }).then(function(rows) {
+                var prof = Array.isArray(rows) && rows[0] ? rows[0] : {};
+                onLogin({ email: email, name: prof.full_name || email, phone: prof.phone || "" });
+              }).catch(function() {
+                onLogin({ email: email, name: email, phone: "" });
+              });
+            } else {
+              onLogin({ email: email, name: email, phone: "" });
+            }
           };
           if (onMasterLogin) {
             // Only an administrator account continues to the Master second-factor step;
@@ -3095,7 +3107,20 @@ function SelfRegisterScreen({ onBack, onComplete, onLogin, darkMode = true }) {
         if (typeof Notification !== "undefined" && Notification.permission === "default") {
           requestPushPermission(loginForm.email, function(token) { console.log("owner login push token:", token); });
         }
-        onComplete({ name: loginForm.email, email: loginForm.email, phone: "" });
+        var loggedEmail = loginForm.email;
+        var userId = res.user && res.user.id;
+        if (userId) {
+          fetch(DOCS_SUPA + "/rest/v1/profiles?id=eq." + userId + "&select=full_name,phone", {
+            headers: { "apikey": DOCS_KEY, "Authorization": "Bearer " + res.access_token },
+          }).then(function(r) { return r.json(); }).then(function(rows) {
+            var prof = Array.isArray(rows) && rows[0] ? rows[0] : {};
+            onComplete({ name: prof.full_name || loggedEmail, email: loggedEmail, phone: prof.phone || "" });
+          }).catch(function() {
+            onComplete({ name: loggedEmail, email: loggedEmail, phone: "" });
+          });
+        } else {
+          onComplete({ name: loggedEmail, email: loggedEmail, phone: "" });
+        }
       } else {
         setLoginError(true);
       }
