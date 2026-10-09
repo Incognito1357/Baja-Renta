@@ -8262,7 +8262,7 @@ function App() {
   if (screen === "splash") return <SplashScreen onStart={() => { playSound("click"); setScreen("profile"); }} />;
   if (screen === "profile") return <ProfileSelect onSelect={handleProfileSelect} darkMode={darkMode} />;
   if (screen === "masterLogin") return <LoginScreen masterOnly onBack={() => setScreen("profile")} onLogin={() => setScreen("profile")} onMasterLogin={() => setScreen("master")} onRegister={() => setScreen("profile")} darkMode={darkMode} />;
-  if (screen === "login") return <LoginScreen onBack={() => setScreen("profile")} onLogin={() => setScreen("cards")} onMasterLogin={() => setScreen("master")} onRegister={() => setScreen("visitorRegister")} darkMode={darkMode} />;
+  if (screen === "login") return <LoginScreen onBack={() => setScreen("profile")} onLogin={(userData) => { if (userData) setCurrentUser(userData); setScreen("cards"); }} onMasterLogin={() => setScreen("master")} onRegister={() => setScreen("visitorRegister")} darkMode={darkMode} />;
   if (screen === "visitorRegister") return <VisitorRegister onBack={() => setScreen("profile")} onComplete={(userData) => { if (userData) setCurrentUser(userData); setScreen("filter"); }} onLogin={() => setScreen("login")} darkMode={darkMode} />;
   if (screen === "guestFilter") return <GuestFilter onBack={() => setScreen("profile")} onContinue={(f) => { setFilters(f); setScreen("catalog"); }} />;
   if (screen === "catalog") return <GuestCatalog filters={filters} properties={publishedProperties} onBack={() => setScreen("guestFilter")} onRegister={() => setScreen("visitorRegister")} />;
