@@ -42,8 +42,8 @@ const PROPERTIES = [
     type: "Apartamento",
     state: "Baja California",
     city: "Tijuana",
-    price: 14500,
-    deposit: 29000,
+    price: 1000,
+    deposit: 1000,
     pool: true,
     petFriendly: true,
     parking: "Privado",
@@ -72,8 +72,8 @@ const PROPERTIES = [
     type: "Casa",
     state: "Baja California",
     city: "Tijuana",
-    price: 22000,
-    deposit: 44000,
+    price: 1000,
+    deposit: 1000,
     pool: false,
     petFriendly: true,
     parking: "Privado",
@@ -102,8 +102,8 @@ const PROPERTIES = [
     type: "Estudio",
     state: "Baja California",
     city: "Rosarito",
-    price: 9500,
-    deposit: 19000,
+    price: 1000,
+    deposit: 1000,
     pool: true,
     petFriendly: false,
     parking: "Público",
@@ -132,8 +132,8 @@ const PROPERTIES = [
     type: "Penthouse",
     state: "Baja California",
     city: "Ensenada",
-    price: 38000,
-    deposit: 76000,
+    price: 1000,
+    deposit: 1000,
     pool: true,
     petFriendly: false,
     parking: "Privado",
@@ -162,8 +162,8 @@ const PROPERTIES = [
     type: "Casa",
     state: "Baja California",
     city: "Mexicali",
-    price: 16000,
-    deposit: 32000,
+    price: 1000,
+    deposit: 1000,
     pool: true,
     petFriendly: true,
     parking: "Privado",
@@ -6651,7 +6651,7 @@ function PropertyAssistantWidget({ onSelectProperty }) {
 
 function GuestCatalog({ onBack, filters = {}, onRegister, properties: propList }) {
   const [selected, setSelected] = useState(null);
-  const catalogProps = propList && propList.length > 0 ? propList : PROPERTIES;
+  const catalogProps = (propList || []).concat(PROPERTIES);
 
   if (selected) {
     return <GuestPropertyDetail p={selected} onBack={() => setSelected(null)} onRegister={onRegister} />;
@@ -7078,7 +7078,7 @@ function MasterDashboard({ onBack, publishedProperties = [], onApproveProperty }
     // Send email to owner
     if (prop && prop.ownerEmail) {
       if (status === "aprobada") {
-        sendEmail("property_published", prop.ownerEmail, {
+        sendEmail("property_approved", prop.ownerEmail, {
           property_name: prop.name,
           city: prop.city || "",
           price: prop.price ? "$" + prop.price.toLocaleString() : "",
@@ -7863,11 +7863,21 @@ function App() {
               return Object.assign({}, prev, { paid: okPaid, owner_email: (res && res.owner_email) || prev.owner_email, property_id: realId });
             });
             if (okPaid && isUuid(realId)) {
-              fetch(DOCS_SUPA + "/rest/v1/properties?id=eq." + realId + "&select=name", {
+              fetch(DOCS_SUPA + "/rest/v1/properties?id=eq." + realId + "&select=name,city,price,management_mode", {
                 headers: { "apikey": DOCS_KEY, "Authorization": "Bearer " + DOCS_KEY },
               }).then(function(r) { return r.json(); }).then(function(rows) {
-                if (Array.isArray(rows) && rows[0] && rows[0].name) {
-                  setPayInfo(function(prev) { return Object.assign({}, prev, { property_name: rows[0].name }); });
+                var row = Array.isArray(rows) && rows[0] ? rows[0] : null;
+                if (row && row.name) {
+                  setPayInfo(function(prev) { return Object.assign({}, prev, { property_name: row.name }); });
+                }
+                var ownerEmailForMail = (res && res.owner_email) || "";
+                if (row && ownerEmailForMail) {
+                  sendEmail("property_published", ownerEmailForMail, {
+                    property_name: row.name || "",
+                    city: row.city || "",
+                    price: row.price ? "$" + row.price.toLocaleString() : "",
+                    mode: row.management_mode || "self",
+                  });
                 }
               }).catch(function() {});
             }
