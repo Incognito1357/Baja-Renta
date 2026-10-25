@@ -237,6 +237,27 @@ var sendEmail = function(type, to, data) {
 
 // ── FIREBASE PUSH NOTIFICATIONS ────────────────────────────────────────────────
 var fbMessaging = null;
+var showPushToast = function(title, body) {
+  try {
+    var old = document.getElementById("br-push-toast");
+    if (old && old.parentNode) old.parentNode.removeChild(old);
+    var box = document.createElement("div");
+    box.id = "br-push-toast";
+    box.style.cssText = "position:fixed;top:12px;left:12px;right:12px;max-width:420px;margin:0 auto;z-index:99999;background:#0d1f3c;color:#fff;border:1px solid #3b82f650;border-radius:16px;padding:14px 16px;box-shadow:0 8px 30px rgba(0,0,0,.45);font-family:'DM Sans',sans-serif;cursor:pointer;";
+    var t = document.createElement("div");
+    t.style.cssText = "font-size:14px;font-weight:700;margin-bottom:2px;";
+    t.textContent = title || "Baja Renta";
+    var b = document.createElement("div");
+    b.style.cssText = "font-size:13px;color:#94a3b8;line-height:1.4;";
+    b.textContent = body || "";
+    box.appendChild(t);
+    box.appendChild(b);
+    box.onclick = function() { if (box.parentNode) box.parentNode.removeChild(box); };
+    document.body.appendChild(box);
+    setTimeout(function() { if (box.parentNode) box.parentNode.removeChild(box); }, 7000);
+  } catch (e) { console.log("push toast error:", e); }
+};
+
 var initFirebase = function() {
   try {
     if (typeof firebase === "undefined") return;
@@ -251,6 +272,11 @@ var initFirebase = function() {
     };
     if (!firebase.apps || !firebase.apps.length) firebase.initializeApp(firebaseConfig);
     fbMessaging = firebase.messaging();
+    // A push that arrives while the page is open is not shown by the browser; show it in the app.
+    fbMessaging.onMessage(function(payload) {
+      var n = (payload && payload.notification) || {};
+      showPushToast(n.title, n.body);
+    });
   } catch(e) { console.log("Firebase init error:", e); }
 };
 
