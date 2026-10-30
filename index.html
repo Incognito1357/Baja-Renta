@@ -280,31 +280,59 @@ var initFirebase = function() {
   } catch(e) { console.log("Firebase init error:", e); }
 };
 
-var requestPushPermission = function(email, onToken) {
+var PUSH_VAPID_KEY = "BBZuQqMYZZCKnQ5E_8Hu62PQn8Dn9xev_pCwcVXlQ71pkLhge732dy6OFWa0Og6NGbeSnCe9_q5sK48UVvcfbnA";
+
+var pushSupported = function() {
+  return typeof Notification !== "undefined" && typeof navigator !== "undefined" && "serviceWorker" in navigator;
+};
+
+// The person's explicit "off" choice is remembered on this device, per account.
+var pushIsOff = function(email) {
+  try { return window.localStorage.getItem("br_push_off:" + String(email || "").toLowerCase()) === "1"; } catch (e) { return false; }
+};
+var pushSetOff = function(email, off) {
   try {
+    var k = "br_push_off:" + String(email || "").toLowerCase();
+    if (off) window.localStorage.setItem(k, "1"); else window.localStorage.removeItem(k);
+  } catch (e) {}
+};
+
+var pushFailMessage = function(reason) {
+  if (reason === "unsupported") return "Este navegador no permite notificaciones. En iPhone, abre bajarenta.com en Safari, toca Compartir y elige 'Agregar a pantalla de inicio'; luego abre la app desde ese ícono.";
+  if (reason === "denied") return "Las notificaciones están bloqueadas para este sitio. Actívalas en la configuración del navegador y vuelve a intentarlo.";
+  if (reason === "dismissed") return "No se concedió el permiso de notificaciones.";
+  if (reason === "nosession") return "Tu sesión expiró. Cierra sesión, vuelve a entrar e inténtalo de nuevo.";
+  return "No se pudieron activar las notificaciones. Inténtalo de nuevo en unos momentos.";
+};
+
+// onToken runs only once this device is really registered on the server; onFail(reason) otherwise.
+var requestPushPermission = function(email, onToken, onFail) {
+  var fail = function(reason) { if (onFail) onFail(reason); };
+  try {
+    if (!pushSupported()) { fail("unsupported"); return; }
     initFirebase();
-    if (!fbMessaging) return;
+    if (!fbMessaging) { fail("unsupported"); return; }
     Notification.requestPermission().then(function(permission) {
-      if (permission !== "granted") return;
-      fbMessaging.getToken({ vapidKey: "BBZuQqMYZZCKnQ5E_8Hu62PQn8Dn9xev_pCwcVXlQ71pkLhge732dy6OFWa0Og6NGbeSnCe9_q5sK48UVvcfbnA" }).then(function(token) {
-        if (token) {
-          console.log("FCM Token:", token);
-          window.__lastPushToken = token;
-          // The token is tied to the caller's own verified session, never to an e-mail
-          // supplied by the client, so nobody can register a device under someone else's address.
-          var sess = window.__sbSession;
-          if (sess && sess.token) {
-            fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/save-push-token", {
-              method: "POST",
-              headers: { "Content-Type": "application/json", "Authorization": "Bearer " + sess.token },
-              body: JSON.stringify({ token: token, platform: "web" }),
-            }).catch(function(e) { console.log("Save token error:", e); });
-          }
-          if (onToken) onToken(token);
-        }
-      }).catch(function(e) { console.log("Token error:", e); });
-    });
-  } catch(e) { console.log("Push permission error:", e); }
+      if (permission !== "granted") { fail(permission === "denied" ? "denied" : "dismissed"); return; }
+      fbMessaging.getToken({ vapidKey: PUSH_VAPID_KEY }).then(function(token) {
+        if (!token) { fail("error"); return; }
+        console.log("FCM Token:", token);
+        window.__lastPushToken = token;
+        // The token is tied to the caller's own verified session, never to an e-mail
+        // supplied by the client, so nobody can register a device under someone else's address.
+        getSbToken().then(function(tok) {
+          if (!tok) { fail("nosession"); return; }
+          fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/save-push-token", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Authorization": "Bearer " + tok },
+            body: JSON.stringify({ token: token, platform: "web" }),
+          }).then(function(r) {
+            if (r.ok) { if (onToken) onToken(token); } else { fail("error"); }
+          }).catch(function(e) { console.log("Save token error:", e); fail("error"); });
+        });
+      }).catch(function(e) { console.log("Token error:", e); fail("error"); });
+    }).catch(function() { fail("error"); });
+  } catch (e) { console.log("Push permission error:", e); fail("error"); }
 };
 
 var sendPush = function(token, title, body) {
@@ -329,14 +357,27 @@ var notifyUser = function(email, title, body, data) {
 // Turns push off for THIS device: forgets its token so future notifications skip it.
 // (Revoking the browser-level permission itself is up to the person, in their browser/site settings.)
 var disablePushForThisDevice = function() {
-  var sess = window.__sbSession;
-  var token = window.__lastPushToken;
-  if (!sess || !sess.token || !token) return Promise.resolve();
-  return fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/save-push-token", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "Authorization": "Bearer " + sess.token },
-    body: JSON.stringify({ action: "remove", token: token }),
-  }).catch(function(e) { console.log("disablePushForThisDevice error:", e); });
+  var removeToken = function(token) {
+    return getSbToken().then(function(tok) {
+      if (!tok || !token) return;
+      return fetch("https://uwtclxtywhthwecsqeug.supabase.co/functions/v1/save-push-token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + tok },
+        body: JSON.stringify({ action: "remove", token: token }),
+      });
+    }).catch(function(e) { console.log("disablePushForThisDevice error:", e); });
+  };
+  if (window.__lastPushToken) return removeToken(window.__lastPushToken);
+  // The token isn't in memory (fresh page load): ask Firebase for this device's token, then remove it.
+  try {
+    if (pushSupported() && Notification.permission === "granted") {
+      initFirebase();
+      if (fbMessaging) {
+        return fbMessaging.getToken({ vapidKey: PUSH_VAPID_KEY }).then(function(t) { return removeToken(t); }).catch(function() {});
+      }
+    }
+  } catch (e) {}
+  return Promise.resolve();
 };
 
 // ── COMPONENTS ────────────────────────────────────────────────────────────────
@@ -1915,30 +1956,38 @@ function ChangePasswordScreen({ onBack, darkMode = true }) {
 }
 
 function SettingsScreen({ onBack, onSignOut, darkModeProp, onToggleTheme, onChangePassword, onHelp, currentUser = {} }) {
-  const [notifications, setNotifications] = useState(function() { return typeof Notification !== "undefined" && Notification.permission === "granted"; });
+  const [notifications, setNotifications] = useState(function() { return pushSupported() && Notification.permission === "granted" && !pushIsOff(currentUser.email); });
   // Turning push ON asks the browser for permission and registers this device; turning it OFF
   // forgets this device's token so it stops receiving notifications.
   // If the browser already granted permission from an earlier attempt, make sure this device
   // actually has a token saved on the server — the switch showing "on" doesn't guarantee that.
   useEffect(function() {
-    if (typeof Notification !== "undefined" && Notification.permission === "granted" && currentUser.email) {
+    if (pushSupported() && Notification.permission === "granted" && currentUser.email && !pushIsOff(currentUser.email)) {
       requestPushPermission(currentUser.email, function() {});
     }
   }, []);
 
   const togglePush = function() {
+    if (window.__pushBusy) return;
     if (notifications) {
       setNotifications(false);
+      pushSetOff(currentUser.email, true);
       disablePushForThisDevice();
-    } else {
-      setNotifications(true);
-      if (typeof Notification !== "undefined" && Notification.permission === "denied") {
-        setNotifications(false);
-        alert("Las notificaciones están bloqueadas en tu navegador. Actívalas desde la configuración del sitio y vuelve a intentarlo.");
-        return;
-      }
-      requestPushPermission(currentUser.email, function() {});
+      return;
     }
+    // Turning ON: the switch only stays on once this device is really registered.
+    if (!pushSupported()) { alert(pushFailMessage("unsupported")); return; }
+    if (Notification.permission === "denied") { alert(pushFailMessage("denied")); return; }
+    window.__pushBusy = true;
+    requestPushPermission(currentUser.email, function() {
+      window.__pushBusy = false;
+      pushSetOff(currentUser.email, false);
+      setNotifications(true);
+    }, function(reason) {
+      window.__pushBusy = false;
+      setNotifications(false);
+      alert(pushFailMessage(reason));
+    });
   };
 
   const [emails, setEmails] = useState(false);
@@ -4473,30 +4522,38 @@ function OwnerPropertyDetail({ property, onBack, approvedApplicants, onApprove, 
 
 function OwnerSettingsScreen({ onBack, onSignOut, darkModeProp, onToggleTheme, currentUser = {} }) {
   const darkMode = darkModeProp !== undefined ? darkModeProp : true;
-  const [notifications, setNotifications] = useState(function() { return typeof Notification !== "undefined" && Notification.permission === "granted"; });
+  const [notifications, setNotifications] = useState(function() { return pushSupported() && Notification.permission === "granted" && !pushIsOff(currentUser.email); });
   // Turning push ON asks the browser for permission and registers this device; turning it OFF
   // forgets this device's token so it stops receiving notifications.
   // If the browser already granted permission from an earlier attempt, make sure this device
   // actually has a token saved on the server — the switch showing "on" doesn't guarantee that.
   useEffect(function() {
-    if (typeof Notification !== "undefined" && Notification.permission === "granted" && currentUser.email) {
+    if (pushSupported() && Notification.permission === "granted" && currentUser.email && !pushIsOff(currentUser.email)) {
       requestPushPermission(currentUser.email, function() {});
     }
   }, []);
 
   const togglePush = function() {
+    if (window.__pushBusy) return;
     if (notifications) {
       setNotifications(false);
+      pushSetOff(currentUser.email, true);
       disablePushForThisDevice();
-    } else {
-      setNotifications(true);
-      if (typeof Notification !== "undefined" && Notification.permission === "denied") {
-        setNotifications(false);
-        alert("Las notificaciones están bloqueadas en tu navegador. Actívalas desde la configuración del sitio y vuelve a intentarlo.");
-        return;
-      }
-      requestPushPermission(currentUser.email, function() {});
+      return;
     }
+    // Turning ON: the switch only stays on once this device is really registered.
+    if (!pushSupported()) { alert(pushFailMessage("unsupported")); return; }
+    if (Notification.permission === "denied") { alert(pushFailMessage("denied")); return; }
+    window.__pushBusy = true;
+    requestPushPermission(currentUser.email, function() {
+      window.__pushBusy = false;
+      pushSetOff(currentUser.email, false);
+      setNotifications(true);
+    }, function(reason) {
+      window.__pushBusy = false;
+      setNotifications(false);
+      alert(pushFailMessage(reason));
+    });
   };
 
   const [emails, setEmails] = useState(false);
